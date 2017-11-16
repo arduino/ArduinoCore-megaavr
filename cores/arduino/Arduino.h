@@ -20,6 +20,8 @@
 #ifndef Arduino_h
 #define Arduino_h
 
+#include "api/ArduinoAPI.h"
+
 #include <stdlib.h>
 #include <stdbool.h>
 #include <string.h>
@@ -28,8 +30,6 @@
 #include <avr/pgmspace.h>
 #include <avr/io.h>
 #include <avr/interrupt.h>
-
-#include "binary.h"
 
 #ifdef __cplusplus
 extern "C"{
@@ -228,8 +228,7 @@ extern const uint8_t PROGMEM digital_pin_to_timer_PGM[];
 
 #ifdef __cplusplus
 #include "WCharacter.h"
-#include "WString.h"
-#include "HardwareSerial.h"
+#include "UART.h"
 #include "USBAPI.h"
 #if defined(HAVE_HWSERIAL0) && defined(HAVE_CDCSERIAL)
 #error "Targets with both UART0 and CDC serial not supported"
