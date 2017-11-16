@@ -27,6 +27,7 @@
 #include <string.h>
 #include <inttypes.h>
 #include <util/atomic.h>
+#include <avr/io.h>
 #include "Arduino.h"
 
 #include "UART.h"
@@ -35,6 +36,10 @@
 // this next line disables the entire UART.cpp,
 // this is so I can support Attiny series and any other chip without a uart
 #if defined(HAVE_HWSERIAL0) || defined(HAVE_HWSERIAL1) || defined(HAVE_HWSERIAL2) || defined(HAVE_HWSERIAL3)
+
+#ifndef MPCM0
+#define MPCM0 0
+#endif
 
 // SerialEvent functions are weak, so when the user doesn't define them,
 // the linker just sets their address to 0 (which is checked below).

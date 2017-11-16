@@ -21,7 +21,7 @@
 
 #include <stdint.h>
 #include <Arduino.h>
-#include "PluggableUSB.h"
+#include "api/PluggableUSB.h"
 
 #if defined(USBCON)
 
@@ -104,7 +104,7 @@ protected:
   uint8_t getShortName(char* name);
 
 private:
-  uint8_t epType[1];
+  unsigned int epType[1];
 
   HIDSubDescriptor* rootNode;
   uint16_t descriptorSize;

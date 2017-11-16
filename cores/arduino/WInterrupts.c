@@ -67,7 +67,7 @@ static volatile voidFuncPtr intFunc[EXTERNAL_NUM_INTERRUPTS] = {
 };
 // volatile static voidFuncPtr twiIntFunc;
 
-void attachInterrupt(uint8_t interruptNum, void (*userFunc)(void), int mode) {
+void attachInterrupt(uint8_t interruptNum, void (*userFunc)(void), _interruptMode mode) {
   if(interruptNum < EXTERNAL_NUM_INTERRUPTS) {
     intFunc[interruptNum] = userFunc;
     

@@ -24,7 +24,6 @@
 #pragma once
 
 #include <inttypes.h>
-
 #include "api/HardwareSerial.h"
 
 // Define constants and variables for buffering incoming serial data.  We're
