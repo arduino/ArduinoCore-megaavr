@@ -22,6 +22,20 @@
 #include <avr/io.h>
 #include <avr/pgmspace.h>
 
+class USBDevice_
+{
+public:
+	USBDevice_();
+	bool configured();
+
+	void attach();
+	void detach();	// Serial port goes down too...
+	void poll();
+	bool wakeupHost(); // returns false, when wakeup cannot be processed
+};
+
+extern USBDevice_ USBDevice;
+
 //	Standard requests
 #define GET_STATUS			0
 #define CLEAR_FEATURE		1
