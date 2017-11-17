@@ -10,7 +10,8 @@
 //================================================================================
 //	Serial over CDC (Serial1 is the physical port)
 
-struct ring_buffer;
+#define RINGBUFFER_FORCE_SMALL_SIZE
+#include "api/RingBuffer.h"
 
 #ifndef SERIAL_BUFFER_SIZE
 #if ((RAMEND - RAMSTART) < 1023)
@@ -43,9 +44,7 @@ public:
 	using Print::write; // pull in write(str) and write(buf, size) from Print
 	operator bool();
 
-	volatile uint8_t _rx_buffer_head;
-	volatile uint8_t _rx_buffer_tail;
-	unsigned char _rx_buffer[SERIAL_BUFFER_SIZE];
+	//RingBuffer _rx_buffer(SERIAL_BUFFER_SIZE);
 
 	// This method allows processing "SEND_BREAK" requests sent by
 	// the USB host. Those requests indicate that the host wants to

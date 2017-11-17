@@ -83,7 +83,7 @@ void serialEventRun(void)
 }
 
 // macro to guard critical sections when needed for large TX buffer sizes
-#if (SERIAL_TX_BUFFER_SIZE>256)
+#if (SERIAL_TX_BUFFER_SIZE > 256)
 #define TX_BUFFER_ATOMIC ATOMIC_BLOCK(ATOMIC_RESTORESTATE)
 #else
 #define TX_BUFFER_ATOMIC

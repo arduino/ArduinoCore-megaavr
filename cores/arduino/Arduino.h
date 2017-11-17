@@ -139,7 +139,6 @@ extern const uint8_t PROGMEM digital_pin_to_timer_PGM[];
 #endif
 
 #ifdef __cplusplus
-#include "WCharacter.h"
 #include "UART.h"
 #include "USBCore.h"
 #include "CDC.h"

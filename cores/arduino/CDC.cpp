@@ -14,6 +14,8 @@
 ** SOFTWARE.  
 */
 
+#define RINGBUFFER_FORCE_SMALL_SIZE
+
 #include <avr/wdt.h>
 #include <util/atomic.h>
 #include <avr/pgmspace.h>

@@ -120,6 +120,10 @@ HID_& HID();
 
 #define D_HIDREPORT(length) { 9, 0x21, 0x01, 0x01, 0, 1, 0x22, lowByte(length), highByte(length) }
 
+#else
+
+#error "No Native USB support available on this board"
+
 #endif // USBCON
 
 #endif // HID_h
