@@ -131,6 +131,10 @@
 #define USB_VERSION 0x200
 #endif
 
+#define TRANSFER_PGM		0x80
+#define TRANSFER_RELEASE	0x40
+#define TRANSFER_ZERO		0x20
+
 //	Device
 typedef struct {
 	uint8_t len;				// 18
@@ -299,16 +303,15 @@ typedef struct
 #define NEW_LUFA_SIGNATURE 0xDCFB
 #endif
 
+/* This core is PluggableUSB capable */
 #define PLUGGABLE_USB_ENABLED
 
+/* Endpoints number */
 #if defined(EPRST6)
 #define USB_ENDPOINTS 7 // AtMegaxxU4
 #else
 #define USB_ENDPOINTS 5 // AtMegaxxU2
 #endif
-
-#define _EP_BUFFER_TYPE       uint8_t
-#define _EP_BUFFER_NAME       _initEndpoints
 
 #define EP_TYPE_CONTROL          (0x00)
 #define EP_TYPE_BULK_IN          ((1<<EPTYPE1) | (1<<EPDIR))
