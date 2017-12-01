@@ -37,10 +37,6 @@
 // this is so I can support Attiny series and any other chip without a uart
 #if defined(HAVE_HWSERIAL0) || defined(HAVE_HWSERIAL1) || defined(HAVE_HWSERIAL2) || defined(HAVE_HWSERIAL3)
 
-#ifndef MPCM0
-#define MPCM0 0
-#endif
-
 // SerialEvent functions are weak, so when the user doesn't define them,
 // the linker just sets their address to 0 (which is checked below).
 // The Serialx_available is just a wrapper around Serialx.available(),
@@ -105,7 +101,11 @@ void UartClass::_tx_udr_empty_irq(void)
   // actually got written. Other r/w bits are preserved, and zeroes
   // written to the rest.
 
+#ifdef MPCM0
   *_ucsra = ((*_ucsra) & ((1 << U2X0) | (1 << MPCM0))) | (1 << TXC0);
+#else
+  *_ucsra = ((*_ucsra) & ((1 << U2X0) | (1 << TXC0)));
+#endif
 
   if (_tx_buffer_head == _tx_buffer_tail) {
     // Buffer empty, so disable interrupts
@@ -241,7 +241,11 @@ size_t UartClass::write(uint8_t c)
     // be cleared when no bytes are left, causing flush() to hang
     ATOMIC_BLOCK(ATOMIC_RESTORESTATE) {
       *_udr = c;
+#ifdef MPCM0
       *_ucsra = ((*_ucsra) & ((1 << U2X0) | (1 << MPCM0))) | (1 << TXC0);
+#else
+      *_ucsra = ((*_ucsra) & ((1 << U2X0) | (1 << TXC0)));
+#endif
     }
     return 1;
   }
