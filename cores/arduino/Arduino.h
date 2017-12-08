@@ -41,13 +41,15 @@ extern "C"{
 */
 
  // internal from VREF
- // external from VREF pin
 
-#define INTERNAL0V55 0x0
-#define INTERNAL1V1 0x1
-#define INTERNAL2V5 0x2
-#define INTERNAL4V3 0x3
-#define INTERNAL1V5 0x4
+ /* Values shifted to avoid clashing with ADC REFSEL defines
+	Will shift back in analog_reference function
+  */
+#define INTERNAL0V55 (VREF_ADC0REFSEL_0V55_gc >> VREF_ADC0REFSEL_gp)
+#define INTERNAL1V1 (VREF_ADC0REFSEL_1V1_gc >> VREF_ADC0REFSEL_gp)
+#define INTERNAL2V5 (VREF_ADC0REFSEL_2V5_gc >> VREF_ADC0REFSEL_gp)
+#define INTERNAL4V3 (VREF_ADC0REFSEL_4V34_gc >> VREF_ADC0REFSEL_gp)
+#define INTERNAL1V5 (VREF_ADC0REFSEL_1V5_gc >> VREF_ADC0REFSEL_gp)
 
 #define DEFAULT     INTERNAL0V55
 #define INTERNAL    ADC_REFSEL_INTREF_gc
