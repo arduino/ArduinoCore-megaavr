@@ -52,11 +52,11 @@ volatile uint32_t timerb3_overflow_count = 0;
 volatile uint32_t timerb3_millis = 0;
 static uint16_t timerb3_fract = 0;
 
-inline uint16_t clockCyclesPerMicrosecond(uint32_t clk ){ 
-	return ( (clk) / 1000000L ); 
+inline uint16_t clockCyclesPerMicrosecond(uint32_t clk ){
+	return ( (clk) / 1000000L );
 }
 
-inline uint16_t clockCyclesToMicroseconds(uint16_t cycles, uint32_t clk){ 
+inline uint16_t clockCyclesToMicroseconds(uint16_t cycles, uint32_t clk){
 	return ( cycles / clockCyclesPerMicrosecond(clk) );
 }
 
@@ -112,7 +112,7 @@ unsigned long micros() {
 	cli();
 
 	/* Get current number of overflows and timer count */
-	overflows = timerb3_overflow_count;	
+	overflows = timerb3_overflow_count;
 	ticks = TCB3.CNTL;
 
 	/* If the timer overflow flag is raised, we just missed it,
@@ -259,7 +259,7 @@ void delayMicroseconds(unsigned int us)
 	// per iteration, so execute it us/4 times
 	// us is at least 4, divided by 4 gives us 1 (no zero delay bug)
 	us >>= 2; // us div 4, = 4 cycles
-	
+
 
 #endif
 
@@ -400,16 +400,6 @@ void init()
 	PORTMUX.USARTA = (PORTMUX_USART1_ALT1_gc // MAIN
 					| PORTMUX_USART0_ALT1_gc // SPARE
 					| PORTMUX_USART3_ALT1_gc); // DEBUG
-
-	//
-	// 	// the bootloader connects pins 0 and 1 to the USART; disconnect them
-	// 	// here so they can be used as normal digital i/o; they will be
-	// 	// reconnected in Serial.begin()
-	// #if defined(UCSRB)
-	// 	UCSRB = 0;
-	// #elif defined(UCSR0B)
-	// 	UCSR0B = 0;
-	// #endif
 
 /********************* TCB3 for system time tracking **************************/
 
