@@ -33,6 +33,8 @@ void pinMode(uint8_t pin, PinMode mode)
 	if ((bit_pos == NOT_A_PIN)||(mode > INPUT_PULLUP)) return;
 
 	PORT_t* port = digitalPinToPortStruct(pin);
+	if(port == NULL) return;
+	
 	uint8_t bit_mask = (1 << bit_pos);
 
 	if(mode == OUTPUT){
