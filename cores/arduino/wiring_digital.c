@@ -34,7 +34,7 @@ void pinMode(uint8_t pin, PinMode mode)
 
 	PORT_t* port = digitalPinToPortStruct(pin);
 	if(port == NULL) return;
-	
+
 	uint8_t bit_mask = (1 << bit_pos);
 
 	if(mode == OUTPUT){
@@ -150,33 +150,59 @@ void digitalWrite(uint8_t pin, PinStatus val)
 	PORT_t *port = digitalPinToPortStruct(pin);
 	if(port == NULL) return;
 
-// 	/* Output direction */
-// 	if(port->DIR & bit_mask){
+	/* Output direction */
+	if(port->DIR & bit_mask){
 
 		/* Save system status and disable interrupts */
 		uint8_t status = SREG;
 		cli();
 
 		/* Set output to value */
-		if (val == HIGH) {
-			port->OUTSET = bit_mask;
-		} else if (val == TOGGLE) {
-			port->OUTTGL = bit_mask;
-		} else {
+		if (val == LOW) { /* If LOW */
 			port->OUTCLR = bit_mask;
+
+		} else if (val == TOGGLE) { /* If TOGGLE */
+			port->OUTTGL = bit_mask;
+									/* If HIGH OR  > TOGGLE  */
+		} else {
+			port->OUTSET = bit_mask;
 		}
 
 		/* Restore system status */
 		SREG = status;
 
-// 	} else {
-// 		/* Old implementation has side effect when pin set as input -
-// 		pull up is enabled if this function is called.
-// 		Should we purposely implement this side effect?
-// 		*/
-//
-// 		/* Enable pull-up ?? */
-// 	}
+
+	/* Input direction */
+	} else {
+		/* Old implementation has side effect when pin set as input -
+		pull up is enabled if this function is called.
+		Should we purposely implement this side effect?
+		*/
+
+		/* Get bit position for getting pin ctrl reg */
+		uint8_t bit_pos = digitalPinToBitPosition(pin);
+
+		/* Calculate where pin control register is */
+		uint8_t* pin_ctrl_reg = getPINnCTRLregister(port, bit_pos);
+
+		/* Save system status and disable interrupts */
+		uint8_t status = SREG;
+		cli();
+
+		if(val == LOW){
+			/* Disable pullup */
+			*pin_ctrl_reg &= ~PORT_PULLUPEN_bm;
+
+		} else {
+			/* Enable pull-up */
+			*pin_ctrl_reg |= PORT_PULLUPEN_bm;
+		}
+
+		/* Restore system status */
+		SREG = status;
+
+	}
+
 }
 
 PinStatus digitalRead(uint8_t pin)
