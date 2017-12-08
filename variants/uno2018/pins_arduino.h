@@ -30,7 +30,7 @@
 #define NUM_TESTPOINT_PINS			0	
 //#define NUM_TOTAL_PINS				(NUM_DIGITAL_PINS + NUM_ANALOG_INPUTS + NUM_TESTPOINT_PINS)	
 #define NUM_TOTAL_PINS				41
-#define analogInputToDigitalPin(p)  ((p < 6) ? (p) + 14 : -1)
+#define analogInputToDigitalPin(p)  ((p < 6) ? (p) + 14 : NOT_A_PIN)
 
 #define digitalPinHasPWM(p)         ((p) == 3 || (p) == 5 || (p) == 6 || (p) == 9 || (p) == 10 || (p) == 11)
 
