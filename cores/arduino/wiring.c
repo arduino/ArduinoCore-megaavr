@@ -39,11 +39,8 @@ uint32_t F_CPU_CORRECTED = F_CPU;
 // the whole number of milliseconds per timerb3 overflow
 uint16_t millis_inc;
 
-// the fractional number of milliseconds per timer0 overflow. we shift right
-// by three to fit these numbers into a byte. (for the clock speeds we care
-// about - 8 and 16 MHz - this doesn't lose precision.)
+// the fractional number of milliseconds per timerb3 overflow
 uint16_t fract_inc;
-//#define FRACT_MAX (1000 >> 3)
 #define FRACT_MAX (1000)
 
 // whole number of microseconds per timerb3 tick
