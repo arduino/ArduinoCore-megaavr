@@ -31,7 +31,8 @@ uint32_t F_CPU_CORRECTED = F_CPU;
 #define PWM_TIMER_PERIOD	0xFF	/* For frequency */
 #define PWM_TIMER_COMPARE	0x80	/* For duty cycle */
 
-#define TIME_TRACKING_TICKS_PER_OVF		256		/* Timer ticks per overflow of TCB3 */
+#define TIME_TRACKING_TIMER_PERIOD		0xFF
+#define TIME_TRACKING_TICKS_PER_OVF		(TIME_TRACKING_TIMER_PERIOD + 1)	/* Timer ticks per overflow of TCB3 */
 #define TIME_TRACKING_TIMER_DIVIDER		64		/* Clock divider for TCB3 */
 #define TIME_TRACKING_CYCLES_PER_OVF	(TIME_TRACKING_TICKS_PER_OVF * TIME_TRACKING_TIMER_DIVIDER)
 
@@ -104,7 +105,6 @@ unsigned long millis()
 
 unsigned long micros() {
 	unsigned long overflows, microseconds;
-	//uint16_t overflows, microseconds;
 	uint8_t ticks;
 
 	/* Save current state and disable interrupts */
@@ -403,25 +403,24 @@ void init()
 /********************* TCB3 for system time tracking **************************/
 
 	/* Calculate relevant time tracking values */
-	//microseconds_per_timerb3_overflow = clockCyclesToMicroseconds(TIME_TRACKING_CYCLES_PER_OVF, F_CPU_CORRECTED);
-	microseconds_per_timerb3_overflow = clockCyclesToMicroseconds(TIME_TRACKING_CYCLES_PER_OVF, F_CPU);
+	microseconds_per_timerb3_overflow = clockCyclesToMicroseconds(TIME_TRACKING_CYCLES_PER_OVF, F_CPU_CORRECTED);
+	microseconds_per_timerb3_tick = microseconds_per_timerb3_overflow/TIME_TRACKING_TIMER_PERIOD;
+
 	millis_inc = microseconds_per_timerb3_overflow / 1000;
 	fract_inc = ((microseconds_per_timerb3_overflow % 1000));
-	microseconds_per_timerb3_tick = microseconds_per_timerb3_overflow/PWM_TIMER_PERIOD;
 
 	/* Default Periodic Interrupt Mode */
 	/* TOP value for overflow every 1024 clock cycles */
-	TCB3.CCMP = PWM_TIMER_PERIOD;
+	TCB3.CCMP = TIME_TRACKING_TIMER_PERIOD;
 
 	/* Enable TCB3 interrupt */
 	TCB3.INTCTRL |= TCB_CAPT_bm;
 
 	/* Clock selection -> same as TCA (F_CPU/64 -- 250kHz) */
 	TCB3.CTRLA = TCB_CLKSEL_CLKTCA_gc;
-	//TCB3.CTRLA = TCB_CLKSEL_CLKDIV2_gc;
 
-	// 	/* Enable & start */
-	TCB3.CTRLA |= TCB_ENABLE_bm;
+	/* Enable & start */
+	TCB3.CTRLA |= TCB_ENABLE_bm;	/* Keep this last before enabling interrupts to ensure tracking as accurate as possible */
 
 /*************************** ENABLE GLOBAL INTERRUPTS *************************/
 
