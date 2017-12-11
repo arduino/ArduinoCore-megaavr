@@ -140,7 +140,6 @@ void delay(unsigned long ms)
 
 	/* If return time overflows */
 	if(return_time < delay_time){
-		PORTD.OUTTGL = PIN4_bm;
 		/* Wait until micros overflows */
 		while(micros() > return_time);
 	}
