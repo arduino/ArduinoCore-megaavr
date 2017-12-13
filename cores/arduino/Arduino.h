@@ -94,8 +94,7 @@ extern const uint8_t PROGMEM digital_pin_to_interrupt[];
 
 #define portToPortStruct(port) ( (port < NUMBER_OF_PORTS) ? ((PORT_t *)&PORTA + port) : NULL)
 #define digitalPinToPortStruct(pin) ( (pin < NUM_TOTAL_PINS) ? ((PORT_t *)&PORTA + digitalPinToPort(pin)) : NULL)
-#define getPINnCTRLregister(port, bit_pos) ( ((port != NULL) && (bit_pos < NOT_A_PIN)) ? ((uint8_t *)&(port->PIN0CTRL) + bit_pos) : NULL )
-
+#define getPINnCTRLregister(port_addr, bit_pos) ( ((port_addr != NULL) && (bit_pos < NOT_A_PIN)) ? ((uint8_t *)&(port_addr->PIN0CTRL) + bit_pos) : NULL )
 #define digitalPinToInterrupt(p) ( pgm_read_byte(digital_pin_to_interrupt + p) )
 #define portPinToInterrupt(port, bit_pos) ( pgm_read_byte(port_interrupt_offset + port) + bit_pos )
 
