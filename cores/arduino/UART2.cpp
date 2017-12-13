@@ -1,5 +1,5 @@
 /*
-  UartClass2.cpp - Hardware serial library for Wiring
+  UART2.cpp - Hardware serial library for Wiring
   Copyright (c) 2006 Nicholas Zambetti.  All right reserved.
 
   This library is free software; you can redistribute it and/or
@@ -36,17 +36,28 @@
 
 #if defined(HAVE_HWSERIAL2)
 
-ISR(USART2_RX_vect)
+#if defined(HWSERIAL2_RXC_VECTOR)
+ISR(HWSERIAL2_RXC_VECTOR)
 {
   Serial2._rx_complete_irq();
 }
+#else
+#error "Don't know what the Data Received interrupt vector is called for Serial1"
+#endif
 
-ISR(USART2_UDRE_vect)
+//!!BUG in headerfile. The RXC and DRE vectors are swapped!!
+#if defined(HWSERIAL2_DRE_VECTOR)
+ISR(HWSERIAL2_DRE_VECTOR)
 {
-  Serial2._tx_udr_empty_irq();
+  Serial2._tx_data_empty_irq();
 }
+#else
+#error "Don't know what the Data Received interrupt vector is called for Serial"
+#endif
 
-UartClass Serial2(&UBRR2H, &UBRR2L, &UCSR2A, &UCSR2B, &UCSR2C, &UDR2);
+#if defined(HWSERIAL2)
+  UartClass Serial2(HWSERIAL2, PIN_WIRE_HWSERIAL2_RX, PIN_WIRE_HWSERIAL2_TX);
+#endif
 
 // Function that can be weakly referenced by serialEventRun to prevent
 // pulling in this file if it's not otherwise used.

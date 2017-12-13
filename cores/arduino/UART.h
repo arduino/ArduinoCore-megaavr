@@ -25,6 +25,7 @@
 
 #include <inttypes.h>
 #include "api/HardwareSerial.h"
+#include "pins_arduino.h"
 
 // Define constants and variables for buffering incoming serial data.  We're
 // using a ring buffer (I think), in which head is the index of the location
@@ -88,40 +89,45 @@ typedef uint8_t rx_buffer_index_t;
 #undef SERIAL_7O2
 #undef SERIAL_8O2
 
-#define SERIAL_5N1 0x00
-#define SERIAL_6N1 0x02
-#define SERIAL_7N1 0x04
-#define SERIAL_8N1 0x06
-#define SERIAL_5N2 0x08
-#define SERIAL_6N2 0x0A
-#define SERIAL_7N2 0x0C
-#define SERIAL_8N2 0x0E
-#define SERIAL_5E1 0x20
-#define SERIAL_6E1 0x22
-#define SERIAL_7E1 0x24
-#define SERIAL_8E1 0x26
-#define SERIAL_5E2 0x28
-#define SERIAL_6E2 0x2A
-#define SERIAL_7E2 0x2C
-#define SERIAL_8E2 0x2E
-#define SERIAL_5O1 0x30
-#define SERIAL_6O1 0x32
-#define SERIAL_7O1 0x34
-#define SERIAL_8O1 0x36
-#define SERIAL_5O2 0x38
-#define SERIAL_6O2 0x3A
-#define SERIAL_7O2 0x3C
-#define SERIAL_8O2 0x3E
+// Define config for Serial.begin(baud, config); Default: SERIAL_8N1
+#define SERIAL_5N1 (USART_CMODE_ASYNCHRONOUS_gc | USART_CHSIZE_5BIT_gc | USART_PMODE_DISABLED_gc | USART_SBMODE_1BIT_gc)
+#define SERIAL_6N1 (USART_CMODE_ASYNCHRONOUS_gc | USART_CHSIZE_6BIT_gc | USART_PMODE_DISABLED_gc | USART_SBMODE_1BIT_gc)
+#define SERIAL_7N1 (USART_CMODE_ASYNCHRONOUS_gc | USART_CHSIZE_7BIT_gc | USART_PMODE_DISABLED_gc | USART_SBMODE_1BIT_gc)
+#define SERIAL_8N1 (USART_CMODE_ASYNCHRONOUS_gc | USART_CHSIZE_8BIT_gc | USART_PMODE_DISABLED_gc | USART_SBMODE_1BIT_gc)
+
+#define SERIAL_5N2 (USART_CMODE_ASYNCHRONOUS_gc | USART_CHSIZE_5BIT_gc | USART_PMODE_DISABLED_gc | USART_SBMODE_2BIT_gc)
+#define SERIAL_6N2 (USART_CMODE_ASYNCHRONOUS_gc | USART_CHSIZE_6BIT_gc | USART_PMODE_DISABLED_gc | USART_SBMODE_2BIT_gc)
+#define SERIAL_7N2 (USART_CMODE_ASYNCHRONOUS_gc | USART_CHSIZE_7BIT_gc | USART_PMODE_DISABLED_gc | USART_SBMODE_2BIT_gc)
+#define SERIAL_8N2 (USART_CMODE_ASYNCHRONOUS_gc | USART_CHSIZE_8BIT_gc | USART_PMODE_DISABLED_gc | USART_SBMODE_2BIT_gc)
+
+#define SERIAL_5E1 (USART_CMODE_ASYNCHRONOUS_gc | USART_CHSIZE_5BIT_gc | USART_PMODE_EVEN_gc | USART_SBMODE_1BIT_gc)
+#define SERIAL_6E1 (USART_CMODE_ASYNCHRONOUS_gc | USART_CHSIZE_6BIT_gc | USART_PMODE_EVEN_gc | USART_SBMODE_1BIT_gc)
+#define SERIAL_7E1 (USART_CMODE_ASYNCHRONOUS_gc | USART_CHSIZE_7BIT_gc | USART_PMODE_EVEN_gc | USART_SBMODE_1BIT_gc)
+#define SERIAL_8E1 (USART_CMODE_ASYNCHRONOUS_gc | USART_CHSIZE_8BIT_gc | USART_PMODE_EVEN_gc | USART_SBMODE_1BIT_gc)
+
+#define SERIAL_5E2 (USART_CMODE_ASYNCHRONOUS_gc | USART_CHSIZE_5BIT_gc | USART_PMODE_EVEN_gc | USART_SBMODE_2BIT_gc)
+#define SERIAL_6E2 (USART_CMODE_ASYNCHRONOUS_gc | USART_CHSIZE_6BIT_gc | USART_PMODE_EVEN_gc | USART_SBMODE_2BIT_gc)
+#define SERIAL_7E2 (USART_CMODE_ASYNCHRONOUS_gc | USART_CHSIZE_7BIT_gc | USART_PMODE_EVEN_gc | USART_SBMODE_2BIT_gc)
+#define SERIAL_8E2 (USART_CMODE_ASYNCHRONOUS_gc | USART_CHSIZE_8BIT_gc | USART_PMODE_EVEN_gc | USART_SBMODE_2BIT_gc)
+
+#define SERIAL_5O1 (USART_CMODE_ASYNCHRONOUS_gc | USART_CHSIZE_5BIT_gc | USART_PMODE_ODD_gc | USART_SBMODE_1BIT_gc)
+#define SERIAL_6O1 (USART_CMODE_ASYNCHRONOUS_gc | USART_CHSIZE_6BIT_gc | USART_PMODE_ODD_gc | USART_SBMODE_1BIT_gc)
+#define SERIAL_7O1 (USART_CMODE_ASYNCHRONOUS_gc | USART_CHSIZE_7BIT_gc | USART_PMODE_ODD_gc | USART_SBMODE_1BIT_gc)
+#define SERIAL_8O1 (USART_CMODE_ASYNCHRONOUS_gc | USART_CHSIZE_8BIT_gc | USART_PMODE_ODD_gc | USART_SBMODE_1BIT_gc)
+
+#define SERIAL_5O2 (USART_CMODE_ASYNCHRONOUS_gc | USART_CHSIZE_5BIT_gc | USART_PMODE_ODD_gc | USART_SBMODE_2BIT_gc)
+#define SERIAL_6O2 (USART_CMODE_ASYNCHRONOUS_gc | USART_CHSIZE_6BIT_gc | USART_PMODE_ODD_gc | USART_SBMODE_2BIT_gc)
+#define SERIAL_7O2 (USART_CMODE_ASYNCHRONOUS_gc | USART_CHSIZE_7BIT_gc | USART_PMODE_ODD_gc | USART_SBMODE_2BIT_gc)
+#define SERIAL_8O2 (USART_CMODE_ASYNCHRONOUS_gc | USART_CHSIZE_8BIT_gc | USART_PMODE_ODD_gc | USART_SBMODE_2BIT_gc)
 
 class UartClass : public HardwareSerial
 {
   protected:
-    volatile uint8_t * const _ubrrh;
-    volatile uint8_t * const _ubrrl;
-    volatile uint8_t * const _ucsra;
-    volatile uint8_t * const _ucsrb;
-    volatile uint8_t * const _ucsrc;
-    volatile uint8_t * const _udr;
+    volatile USART_t * const _hwserial_module;
+
+    volatile uint8_t const _hwserial_rx_pin;
+    volatile uint8_t const _hwserial_tx_pin;
+
     // Has any byte been written to the UART since begin()
     bool _written;
 
@@ -137,10 +143,7 @@ class UartClass : public HardwareSerial
     unsigned char _tx_buffer[SERIAL_TX_BUFFER_SIZE];
 
   public:
-    inline UartClass(
-      volatile uint8_t *ubrrh, volatile uint8_t *ubrrl,
-      volatile uint8_t *ucsra, volatile uint8_t *ucsrb,
-      volatile uint8_t *ucsrc, volatile uint8_t *udr);
+    inline UartClass(volatile USART_t *hwserial_module, uint8_t hwserial_rx_pin, uint8_t hwserial_tx_pin);
     void begin(unsigned long baud) { begin(baud, SERIAL_8N1); }
     void begin(unsigned long, uint16_t);
     void end();
@@ -159,22 +162,22 @@ class UartClass : public HardwareSerial
 
     // Interrupt handlers - Not intended to be called externally
     inline void _rx_complete_irq(void);
-    void _tx_udr_empty_irq(void);
+    void _tx_data_empty_irq(void);
 };
 
-#if defined(UBRRH) || defined(UBRR0H)
+#if defined(HWSERIAL0)
   extern UartClass Serial;
   #define HAVE_HWSERIAL0
 #endif
-#if defined(UBRR1H)
+#if defined(HWSERIAL1)
   extern UartClass Serial1;
   #define HAVE_HWSERIAL1
 #endif
-#if defined(UBRR2H)
+#if defined(HWSERIAL2)
   extern UartClass Serial2;
   #define HAVE_HWSERIAL2
 #endif
-#if defined(UBRR3H)
+#if defined(HWSERIAL3)
   extern UartClass Serial3;
   #define HAVE_HWSERIAL3
 #endif

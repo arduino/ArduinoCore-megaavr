@@ -36,29 +36,28 @@
 
 #if defined(HAVE_HWSERIAL1)
 
-#if defined(UART1_RX_vect)
-ISR(UART1_RX_vect)
-#elif defined(USART1_RX_vect)
-ISR(USART1_RX_vect)
-#else
-#error "Don't know what the Data Register Empty vector is called for Serial1"
-#endif
+#if defined(HWSERIAL1_RXC_VECTOR)
+ISR(HWSERIAL1_RXC_VECTOR)
 {
   Serial1._rx_complete_irq();
 }
-
-#if defined(UART1_UDRE_vect)
-ISR(UART1_UDRE_vect)
-#elif defined(USART1_UDRE_vect)
-ISR(USART1_UDRE_vect)
 #else
-#error "Don't know what the Data Register Empty vector is called for Serial1"
+#error "Don't know what the Data Received interrupt vector is called for Serial1"
 #endif
-{
-  Serial1._tx_udr_empty_irq();
-}
 
-UartClass Serial1(&UBRR1H, &UBRR1L, &UCSR1A, &UCSR1B, &UCSR1C, &UDR1);
+//!!BUG in headerfile. The RXC and DRE vectors are swapped!!
+#if defined(HWSERIAL1_DRE_VECTOR)
+ISR(HWSERIAL1_DRE_VECTOR)
+{
+  Serial1._tx_data_empty_irq();
+}
+#else
+#error "Don't know what the Data Received interrupt vector is called for Serial"
+#endif
+
+#if defined(HWSERIAL1)
+  UartClass Serial1(HWSERIAL1, PIN_WIRE_HWSERIAL1_RX, PIN_WIRE_HWSERIAL1_TX);
+#endif
 
 // Function that can be weakly referenced by serialEventRun to prevent
 // pulling in this file if it's not otherwise used.

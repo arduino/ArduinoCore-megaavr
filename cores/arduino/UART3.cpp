@@ -1,5 +1,5 @@
 /*
-  UartClass3.cpp - Hardware serial library for Wiring
+  UART3.cpp - Hardware serial library for Wiring
   Copyright (c) 2006 Nicholas Zambetti.  All right reserved.
 
   This library is free software; you can redistribute it and/or
@@ -36,17 +36,28 @@
 
 #if defined(HAVE_HWSERIAL3)
 
-ISR(USART3_RX_vect)
+#if defined(HWSERIAL3_RXC_VECTOR)
+ISR(HWSERIAL3_RXC_VECTOR)
 {
   Serial3._rx_complete_irq();
 }
+#else
+#error "Don't know what the Data Received interrupt vector is called for Serial1"
+#endif
 
-ISR(USART3_UDRE_vect)
+//!!BUG in headerfile. The RXC and DRE vectors are swapped!!
+#if defined(HWSERIAL3_DRE_VECTOR)
+ISR(HWSERIAL3_DRE_VECTOR)
 {
-  Serial3._tx_udr_empty_irq();
+  Serial3._tx_data_empty_irq();
 }
+#else
+#error "Don't know what the Data Received interrupt vector is called for Serial"
+#endif
 
-UartClass Serial3(&UBRR3H, &UBRR3L, &UCSR3A, &UCSR3B, &UCSR3C, &UDR3);
+#if defined(HWSERIAL3)
+  UartClass Serial3(HWSERIAL3, PIN_WIRE_HWSERIAL3_RX, PIN_WIRE_HWSERIAL3_TX);
+#endif
 
 // Function that can be weakly referenced by serialEventRun to prevent
 // pulling in this file if it's not otherwise used.
