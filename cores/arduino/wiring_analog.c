@@ -137,12 +137,15 @@ void analogWrite(uint8_t pin, int val)
 		/* Get timer */
 		uint8_t digital_pin_timer =  digitalPinToTimer(pin);
 
+		uint16_t* timer_cmp_out;
+		TCB_t *timer_B;
+
 		/* Find out Port and Pin to correctly handle port mux, and timer. */
-		switch (digital_pin_timer)
-		{
+		switch (digital_pin_timer) {
+
 			case TIMERA0:
 				/* Calculate correct compare buffer register */
-				uint16_t* timer_cmp_out = ((uint16_t*) (&TCA0.SINGLE.CMP0BUF)) + bit_pos;
+				timer_cmp_out = ((uint16_t*) (&TCA0.SINGLE.CMP0BUF)) + bit_pos;
 
 				/* Configure duty cycle for correct compare channel */
 				(*timer_cmp_out) = (val);
@@ -151,6 +154,7 @@ void analogWrite(uint8_t pin, int val)
 				TCA0.SINGLE.CTRLB |= (1 << (TCA_SINGLE_CMP0EN_bp + bit_pos));
 
 				break;
+
 			case TIMERB0:
 			case TIMERB1:
 			case TIMERB2:
@@ -158,7 +162,7 @@ void analogWrite(uint8_t pin, int val)
 
 				/* Get pointer to timer, TIMERB0 order definition in Arduino.h*/
 				//assert (((TIMERB0 - TIMERB3) == 2));
-				TCB_t *timer_B = ((TCB_t *)&TCB0 + (digital_pin_timer - TIMERB0));
+				timer_B = ((TCB_t *)&TCB0 + (digital_pin_timer - TIMERB0));
 
 				/* set duty cycle */
 				timer_B->CCMPH = val;

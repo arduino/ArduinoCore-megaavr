@@ -90,7 +90,7 @@ void pinMode(uint8_t pin, PinMode mode)
 //
 //static inline void turnOffPWM(uint8_t timer) __attribute__ ((always_inline));
 //static inline void turnOffPWM(uint8_t timer)
-static void turnOffPWM(uint8_t timer)
+static void turnOffPWM(uint8_t pin)
 {
 	/* Actually turn off compare channel, not the timer */
 
@@ -98,30 +98,35 @@ static void turnOffPWM(uint8_t timer)
 	uint8_t timer = digitalPinToTimer(pin);
 	if(timer == NOT_ON_TIMER) return;
 
+	uint8_t bit_pos;
+	TCB_t *timerB;
+
 	switch (timer) {
 
 	/* TCA0 */
 	case TIMERA0:
 		/* Bit position will give output channel */
-		uint8_t bit_pos = digitalPinToBitPosition(pin);
+		bit_pos = digitalPinToBitPosition(pin);
 
 		/* Disable corresponding channel */
 		TCA0.SINGLE.CTRLB &= ~(1 << (TCA_SINGLE_CMP0EN_bp + bit_pos));
 
 		break;
+
 	/* TCB - only one output */
 	case TIMERB0:
 	case TIMERB1:
 	case TIMERB2:
 	case TIMERB3:
 
-		TCB_t *timerB = (TCB_t *)&TCB0 + (timer - TIMERB0);
+		timerB = (TCB_t *)&TCB0 + (timer - TIMERB0);
 
 		/* Disable TCB compare channel */
 		timerB->CTRLB &= ~(TCB_CCMPEN_bm);
 
 		break;
 	default:
+		break;
 	}
 }
 

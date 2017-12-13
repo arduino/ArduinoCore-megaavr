@@ -34,14 +34,7 @@
 
 static volatile voidFuncPtr intFunc[EXTERNAL_NUM_INTERRUPTS];
 
-//#define DISABLE   PORT_ISC_INTDISABLE_gc
-//#define CHANGE    PORT_ISC_BOTHEDGES_gc
-//#define RISING    PORT_ISC_RISING_gc
-//#define FALLING   PORT_ISC_FALLING_gc
-//#define LOW_LEVEL PORT_ISC_LEVEL_gc
-
-
-void attachInterrupt(uint8_t interruptNum, void (*userFunc)(void), PinStatus mode) {
+void attachInterrupt(uint8_t pin, void (*userFunc)(void), PinStatus mode) {
 
   /* Get bit position and check pin validity */
   uint8_t bit_pos = digitalPinToBitPosition(pin);
@@ -51,7 +44,7 @@ void attachInterrupt(uint8_t interruptNum, void (*userFunc)(void), PinStatus mod
   uint8_t interruptNum = digitalPinToInterrupt(pin);
 
   /* Check interrupt number and apply function pointer to correct array index */
-  if((interruptNum < EXTERNAL_NUM_INTERRUPTS) && (interruptNum > NOT_AN_INTERRUPT)) {
+  if(interruptNum < EXTERNAL_NUM_INTERRUPTS) {
     intFunc[interruptNum] = userFunc;
 
     // Configure the interrupt mode (trigger on low input, any change, rising
@@ -91,7 +84,7 @@ void attachInterrupt(uint8_t interruptNum, void (*userFunc)(void), PinStatus mod
   }
 }
 
-void detachInterrupt(uint8_t interruptNum) {
+void detachInterrupt(uint8_t pin) {
   /* Get bit position and check pin validity */
   uint8_t bit_pos = digitalPinToBitPosition(pin);
   if(bit_pos == NOT_A_PIN) return;
