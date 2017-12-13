@@ -15,11 +15,9 @@
   You should have received a copy of the GNU Lesser General Public
   License along with this library; if not, write to the Free Software
   Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-  
-  Modified 23 November 2006 by David A. Mellis
-  Modified 28 September 2010 by Mark Sproul
-  Modified 14 August 2012 by Alarus
-  Modified 3 December 2013 by Matthijs Kooijman
+
+  Created: 09.11.2017 07:29:09
+  Author: M44307
 */
 
 #include <stdlib.h>
@@ -32,6 +30,8 @@
 
 #include "UART.h"
 #include "UART_private.h"
+
+//#define PERFORM_BAUD_CORRECTION
 
 // this next line disables the entire UART.cpp,
 // this is so I can support Attiny series and any other chip without a uart
@@ -87,29 +87,31 @@ void serialEventRun(void)
 
 // Actual interrupt handlers //////////////////////////////////////////////////////////////
 
-void UartClass::_tx_udr_empty_irq(void)
+void UartClass::_tx_data_empty_irq(void)
 {
-  // If interrupts are enabled, there must be more data in the output
+  // Check if tx buffer already empty.
+  // This interrupt-handler can be called "manually" from flush();
+  if (_tx_buffer_head == _tx_buffer_tail) {
+    // Buffer empty, so disable "data register empty" interrupt
+    (*_hwserial_module).CTRLA &= (~USART_DREIE_bm);
+    return;
+  }
+
+  // There must be more data in the output
   // buffer. Send the next byte
   unsigned char c = _tx_buffer[_tx_buffer_tail];
   _tx_buffer_tail = (_tx_buffer_tail + 1) % SERIAL_TX_BUFFER_SIZE;
 
-  *_udr = c;
+  (*_hwserial_module).TXDATAL = c;
 
-  // clear the TXC bit -- "can be cleared by writing a one to its bit
+  // clear the TXCIF flag -- "can be cleared by writing a one to its bit
   // location". This makes sure flush() won't return until the bytes
-  // actually got written. Other r/w bits are preserved, and zeroes
-  // written to the rest.
-
-#ifdef MPCM0
-  *_ucsra = ((*_ucsra) & ((1 << U2X0) | (1 << MPCM0))) | (1 << TXC0);
-#else
-  *_ucsra = ((*_ucsra) & ((1 << U2X0) | (1 << TXC0)));
-#endif
+  // actually got written
+  (*_hwserial_module).STATUS |= USART_TXCIF_bm;
 
   if (_tx_buffer_head == _tx_buffer_tail) {
-    // Buffer empty, so disable interrupts
-    cbi(*_ucsrb, UDRIE0);
+    // Buffer empty, so disable "data register empty" interrupt
+    (*_hwserial_module).CTRLA &= (~USART_DREIE_bm);
   }
 }
 
@@ -117,37 +119,99 @@ void UartClass::_tx_udr_empty_irq(void)
 
 void UartClass::begin(unsigned long baud, uint16_t config)
 {
-  // Try u2x mode first
-  uint16_t baud_setting = (F_CPU / 4 / baud - 1) / 2;
-  *_ucsra = 1 << U2X0;
+  //uint16_t baud_setting = 0;
+  int32_t baud_setting = 0;
+  uint8_t error = 0;
 
-  // hardcoded exception for 57600 for compatibility with the bootloader
-  // shipped with the Duemilanove and previous boards and the firmware
-  // on the 8U2 on the Uno and Mega 2560. Also, The baud_setting cannot
-  // be > 4095, so switch back to non-u2x mode if the baud rate is too
-  // low.
-  if (((F_CPU == 16000000UL) && (baud == 57600)) || (baud_setting >4095))
-  {
-    *_ucsra = 0;
-    baud_setting = (F_CPU / 8 / baud - 1) / 2;
+  //Make sure global interrupts are disabled during initialization
+  uint8_t oldSREG = SREG;
+  cli();
+
+  //Set up the rx and rx pins
+  pinMode(_hwserial_rx_pin, INPUT_PULLUP);
+
+  pinMode(_hwserial_tx_pin, OUTPUT);
+  digitalWrite(_hwserial_tx_pin, HIGH);
+
+  // Make sure no transmissions are ongoing in case begin() is called by accident
+  // without first calling end()
+  flush();
+
+  // ********Check if desired baud rate is within the acceptable range for using CLK2X RX-mode********
+  // Condition from datasheet
+  // This limits the minimum baud_setting value to 64 (0x0040)
+  if((8 * baud) <= F_CPU) {
+
+    // Check that the desired baud rate is not so low that it will
+    // cause the BAUD register to overflow (1024 * 64 = 2^16)
+    if(baud > (F_CPU / (8 * 1024))) {
+      // Datasheet formula for calculating the baud setting including trick to reduce rounding error ((2*(X/Y))+1)/2
+      // baud_setting = ( ( (2 * (64 * F_CPU) / (8 * baud) ) + 1 ) / 2;
+      baud_setting = (((16 * F_CPU) / baud) + 1 ) / 2;
+      // Enable CLK2X
+      (*_hwserial_module).CTRLB |= USART_RXMODE_CLK2X_gc;
+    } else {
+      // Invalid baud rate requested.
+      error = 1;
+    }
+
+  // ********Check if desired baud rate is within the acceptable range for using normal RX-mode********
+  // Condition from datasheet
+  // This limits the minimum baud_setting value to 64 (0x0040)
+  } else if ((16 * baud <= F_CPU)) {
+
+    // Check that the desired baud rate is not so low that it will
+    // cause the BAUD register to overflow (1024 * 64 = 2^16)
+    if(baud > (F_CPU / (16 * 1024))) {
+      // Datasheet formula for calculating the baud setting including trick to reduce rounding error
+      // baud_setting = ( ( (2 * (64 * F_CPU) / (16 * baud) ) + 1 ) / 2;
+      baud_setting = (((8 * F_CPU) / baud) + 1 ) / 2;
+      // Make sure CLK2X is disabled
+      (*_hwserial_module).CTRLB &= (~USART_RXMODE_CLK2X_gc);
+    } else {
+      // Invalid baud rate requested.
+      error = 1;
+    }
+
+  } else {
+    // Invalid baud rate requested.
+    error = 1;
   }
 
-  // assign the baud_setting, a.k.a. ubrr (USART Baud Rate Register)
-  *_ubrrh = baud_setting >> 8;
-  *_ubrrl = baud_setting;
+  // Do nothing if an invalid baud rate is requested
+  if(!error) {
 
-  _written = false;
+#ifdef PERFORM_BAUD_CORRECTION
+    // Compensate baud rate register value with factory stored frequency error
+    // Routine assumes Vcc to be 5V
+    // Verify that the desired baud setting is large enough
+    // (taking into account maximum negative compensation value)
+    if( baud_setting >= 0x4A ){
 
-  //set the data bits, parity, and stop bits
-#if defined(__AVR_ATmega8__)
-  config |= 0x80; // select UCSRC register (shared with UBRRH)
+      int8_t sigrow_val = 0;
+      if(FUSE.OSCCFG & FREQSEL_16MHZ_gc){
+        sigrow_val = SIGROW.OSC16ERR5V;
+      } else if (FUSE.OSCCFG & FREQSEL_20MHZ_gc){
+        sigrow_val = SIGROW.OSC20ERR5V;
+      }
+      baud_setting *= (1024 + sigrow_val);
+      baud_setting /= 1024;
+    }
 #endif
-  *_ucsrc = config;
-  
-  sbi(*_ucsrb, RXEN0);
-  sbi(*_ucsrb, TXEN0);
-  sbi(*_ucsrb, RXCIE0);
-  cbi(*_ucsrb, UDRIE0);
+
+    // assign the baud_setting, a.k.a. BAUD (USART Baud Rate Register)
+    (*_hwserial_module).BAUD = (int16_t) baud_setting;
+
+    _written = false;
+
+    (*_hwserial_module).CTRLC = config;
+
+    (*_hwserial_module).CTRLA |= USART_RXCIE_bm;
+    (*_hwserial_module).CTRLB |= (USART_RXEN_bm | USART_TXEN_bm);
+  }
+
+  // Restore SREG content
+  SREG = oldSREG;
 }
 
 void UartClass::end()
@@ -155,13 +219,15 @@ void UartClass::end()
   // wait for transmission of outgoing data
   flush();
 
-  cbi(*_ucsrb, RXEN0);
-  cbi(*_ucsrb, TXEN0);
-  cbi(*_ucsrb, RXCIE0);
-  cbi(*_ucsrb, UDRIE0);
-  
+  // Disable receiver and transmitter as well as the RX complete and
+  // data register empty interrupts.
+  (*_hwserial_module).CTRLB &= ~(USART_RXEN_bm | USART_TXEN_bm);
+  (*_hwserial_module).CTRLA &= ~(USART_RXCIE_bm | USART_DREIE_bm);
+
   // clear any received data
   _rx_buffer_head = _rx_buffer_tail;
+
+  _written = false;
 }
 
 int UartClass::available(void)
@@ -206,76 +272,71 @@ int UartClass::availableForWrite(void)
 void UartClass::flush()
 {
   // If we have never written a byte, no need to flush. This special
-  // case is needed since there is no way to force the TXC (transmit
+  // case is needed since there is no way to force the TXCIF (transmit
   // complete) bit to 1 during initialization
-  if (!_written)
+  if (!_written) {
     return;
-
-  while (bit_is_set(*_ucsrb, UDRIE0) || bit_is_clear(*_ucsra, TXC0)) {
-    if (bit_is_clear(SREG, SREG_I) && bit_is_set(*_ucsrb, UDRIE0))
-	// Interrupts are globally disabled, but the DR empty
-	// interrupt should be enabled, so poll the DR empty flag to
-	// prevent deadlock
-	if (bit_is_set(*_ucsra, UDRE0))
-	  _tx_udr_empty_irq();
   }
-  // If we get here, nothing is queued anymore (DRIE is disabled) and
-  // the hardware finished tranmission (TXC is set).
+
+  // Spin until the data-register-empty-interrupt is disabled and TX complete interrupt flag is raised
+  while ( ((*_hwserial_module).CTRLA & USART_DREIE_bm) || (!((*_hwserial_module).STATUS & USART_TXCIF_bm)) ) {
+
+    // If interrupts are globally disabled or the and DR empty interrupt is disabled,
+    // poll the "data register empty" interrupt flag to prevent deadlock
+    if ( (!(SREG & CPU_I_bm)) || (!((*_hwserial_module).CTRLA & USART_DREIE_bm)) ){ //TODO: Verify that || instead of && is correct here
+      if ( (*_hwserial_module).STATUS & USART_DREIF_bm ){
+        _tx_data_empty_irq();
+      }
+    }
+  }
+  // If we get here, nothing is queued anymore (DREIE is disabled) and
+  // the hardware finished transmission (TXCIF is set).
 }
 
 size_t UartClass::write(uint8_t c)
 {
   _written = true;
+
   // If the buffer and the data register is empty, just write the byte
   // to the data register and be done. This shortcut helps
-  // significantly improve the effective datarate at high (>
-  // 500kbit/s) bitrates, where interrupt overhead becomes a slowdown.
-  if (_tx_buffer_head == _tx_buffer_tail && bit_is_set(*_ucsra, UDRE0)) {
-    // If TXC is cleared before writing UDR and the previous byte
-    // completes before writing to UDR, TXC will be set but a byte
-    // is still being transmitted causing flush() to return too soon.
-    // So writing UDR must happen first.
-    // Writing UDR and clearing TC must be done atomically, otherwise
-    // interrupts might delay the TXC clear so the byte written to UDR
-    // is transmitted (setting TXC) before clearing TXC. Then TXC will
-    // be cleared when no bytes are left, causing flush() to hang
-    ATOMIC_BLOCK(ATOMIC_RESTORESTATE) {
-      *_udr = c;
-#ifdef MPCM0
-      *_ucsra = ((*_ucsra) & ((1 << U2X0) | (1 << MPCM0))) | (1 << TXC0);
-#else
-      *_ucsra = ((*_ucsra) & ((1 << U2X0) | (1 << TXC0)));
-#endif
-    }
+  // significantly improve the effective data rate at high (>
+  // 500kbit/s) bit rates, where interrupt overhead becomes a slowdown.
+  if ( (_tx_buffer_head == _tx_buffer_tail) && ((*_hwserial_module).STATUS & USART_DREIF_bm) ) {
+    (*_hwserial_module).TXDATAL = c;
+    (*_hwserial_module).STATUS |= USART_TXCIF_bm;
+
+    // Make sure data register empty interrupt is disabled to avoid
+    // that the interrupt handler is called in this situation
+    (*_hwserial_module).CTRLA &= (~USART_DREIE_bm);
+
     return 1;
   }
+
   tx_buffer_index_t i = (_tx_buffer_head + 1) % SERIAL_TX_BUFFER_SIZE;
-	
-  // If the output buffer is full, there's nothing for it other than to 
+
+  // If the output buffer is full, there's nothing for it other than to
   // wait for the interrupt handler to empty it a bit
   while (i == _tx_buffer_tail) {
-    if (bit_is_clear(SREG, SREG_I)) {
-      // Interrupts are disabled, so we'll have to poll the data
-      // register empty flag ourselves. If it is set, pretend an
-      // interrupt has happened and call the handler to free up
-      // space for us.
-      if(bit_is_set(*_ucsra, UDRE0))
-	_tx_udr_empty_irq();
+
+    if ( (!(SREG & CPU_I_bm)) || (!((*_hwserial_module).CTRLA & USART_DREIE_bm)) ) {//TODO: Verify addition of DREIE-check
+      // Interrupts are disabled either globally or for data register empty,
+      // so we'll have to poll the "data register empty" flag ourselves.
+      // If it is set, pretend an interrupt has happened and call the handler 
+      //to free up space for us.
+      if( (*_hwserial_module).STATUS & USART_DREIF_bm) {
+        _tx_data_empty_irq();
+      }
     } else {
       // nop, the interrupt handler will free up space for us
     }
   }
 
   _tx_buffer[_tx_buffer_head] = c;
+  _tx_buffer_head = i;
 
-  // make atomic to prevent execution of ISR between setting the
-  // head pointer and setting the interrupt flag resulting in buffer
-  // retransmission
-  ATOMIC_BLOCK(ATOMIC_RESTORESTATE) {
-    _tx_buffer_head = i;
-    sbi(*_ucsrb, UDRIE0);
-  }
-  
+  // Enable data "register empty interrupt"
+  (*_hwserial_module).CTRLA |= USART_DREIE_bm;
+
   return 1;
 }
 

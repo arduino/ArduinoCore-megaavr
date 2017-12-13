@@ -30,35 +30,44 @@
 extern "C"{
 #endif
 
-#if defined(__AVR_ATtiny24__) || defined(__AVR_ATtiny44__) || defined(__AVR_ATtiny84__)
-  #define DEFAULT 0
-  #define EXTERNAL 1
-  #define INTERNAL1V1 2
-  #define INTERNAL INTERNAL1V1
-#elif defined(__AVR_ATtiny25__) || defined(__AVR_ATtiny45__) || defined(__AVR_ATtiny85__)
-  #define DEFAULT 0
-  #define EXTERNAL 4
-  #define INTERNAL1V1 8
-  #define INTERNAL INTERNAL1V1
-  #define INTERNAL2V56 9
-  #define INTERNAL2V56_EXTCAP 13
-#else  
-#if defined(__AVR_ATmega1280__) || defined(__AVR_ATmega2560__) || defined(__AVR_ATmega1284__) || defined(__AVR_ATmega1284P__) || defined(__AVR_ATmega644__) || defined(__AVR_ATmega644A__) || defined(__AVR_ATmega644P__) || defined(__AVR_ATmega644PA__)
-#define INTERNAL1V1 2
-#define INTERNAL2V56 3
-#else
-#define INTERNAL 3
-#endif
-#define DEFAULT 1
-#define EXTERNAL 0
-#endif
+#define TOGGLE          0x2
+#define PINCTRL_OFFSET  0x10
+
+#define DISABLE   PORT_ISC_INTDISABLE_gc
+#define CHANGE    PORT_ISC_BOTHEDGES_gc
+#define RISING    PORT_ISC_RISING_gc
+#define FALLING   PORT_ISC_FALLING_gc
+#define LOW_LEVEL PORT_ISC_LEVEL_gc
+
+/* Analog reference options */
+
+/* Change in mega4809: two places to define analog reference
+ - VREF peripheral defines internal reference
+ - analog peripherals define internal/Vdd/external
+*/
+
+ // internal from VREF
+ // external from VREF pin
+
+#define INTERNAL0V55 0x0
+#define INTERNAL1V1 0x1
+#define INTERNAL2V5 0x2
+#define INTERNAL4V3 0x3
+#define INTERNAL1V5 0x4
+
+#define DEFAULT     INTERNAL0V55
+#define INTERNAL    ADC_REFSEL_INTREF_gc
+#define VDD         ADC_REFSEL_VDDREF_gc
+#define EXTERNAL    ADC_REFSEL_VREFA_gc
+
+extern uint32_t F_CPU_CORRECTED;
 
 #define interrupts() sei()
 #define noInterrupts() cli()
 
-#define clockCyclesPerMicrosecond() ( F_CPU / 1000000L )
-#define clockCyclesToMicroseconds(a) ( (a) / clockCyclesPerMicrosecond() )
-#define microsecondsToClockCycles(a) ( (a) * clockCyclesPerMicrosecond() )
+uint16_t clockCyclesPerMicrosecond(uint32_t clk);
+uint16_t clockCyclesToMicroseconds(uint16_t cycles, uint32_t clk);
+uint32_t microsecondsToClockCycles(uint16_t cycles, uint32_t clk);
 
 // avr-libc defines _NOP() since 1.6.2
 #ifndef _NOP
@@ -68,71 +77,48 @@ extern "C"{
 // Get the bit location within the hardware port of the given virtual pin.
 // This comes from the pins_*.c file for the active board configuration.
 
-#define analogInPinToBit(P) (P)
-
-// On the ATmega1280, the addresses of some of the port registers are
-// greater than 255, so we can't store them in uint8_t's.
-extern const uint16_t PROGMEM port_to_mode_PGM[];
-extern const uint16_t PROGMEM port_to_input_PGM[];
-extern const uint16_t PROGMEM port_to_output_PGM[];
-
-extern const uint8_t PROGMEM digital_pin_to_port_PGM[];
-// extern const uint8_t PROGMEM digital_pin_to_bit_PGM[];
-extern const uint8_t PROGMEM digital_pin_to_bit_mask_PGM[];
-extern const uint8_t PROGMEM digital_pin_to_timer_PGM[];
+extern const uint8_t PROGMEM digital_pin_to_port[];
+extern const uint8_t PROGMEM digital_pin_to_bit_mask[];
+extern const uint8_t PROGMEM digital_pin_to_bit_position[];
+extern const uint8_t PROGMEM digital_pin_to_timer[];
+extern const uint8_t PROGMEM port_interrupt_offset[];
+extern const uint8_t PROGMEM digital_pin_to_interrupt[];
 
 // Get the bit location within the hardware port of the given virtual pin.
 // This comes from the pins_*.c file for the active board configuration.
 // 
 // These perform slightly better as macros compared to inline functions
 //
-#define digitalPinToPort(P) ( pgm_read_byte( digital_pin_to_port_PGM + (P) ) )
-#define digitalPinToBitMask(P) ( pgm_read_byte( digital_pin_to_bit_mask_PGM + (P) ) )
-#define digitalPinToTimer(P) ( pgm_read_byte( digital_pin_to_timer_PGM + (P) ) )
-#define analogInPinToBit(P) (P)
-#define portOutputRegister(P) ( (volatile uint8_t *)( pgm_read_word( port_to_output_PGM + (P))) )
-#define portInputRegister(P) ( (volatile uint8_t *)( pgm_read_word( port_to_input_PGM + (P))) )
-#define portModeRegister(P) ( (volatile uint8_t *)( pgm_read_word( port_to_mode_PGM + (P))) )
+#define digitalPinToPort(pin) ( (pin < NUM_TOTAL_PINS) ? pgm_read_byte(digital_pin_to_port + pin) : NOT_A_PIN )
+#define digitalPinToBitPosition(pin) ( (pin < NUM_TOTAL_PINS) ? pgm_read_byte(digital_pin_to_bit_position + pin) : NOT_A_PIN )
+#define analogPinToBitPosition(pin) ( (pin < NUM_ANALOG_INPUTS) ? pgm_read_byte(digital_pin_to_bit_position + pin + 14) : NOT_A_PIN )
+#define digitalPinToBitMask(pin) ( (pin < NUM_TOTAL_PINS) ? (1 << digitalPinToBitPosition(pin)) : NOT_A_PIN )
+#define analogPinToBitMask(pin) ( (pin < NUM_ANALOG_INPUTS) ? (1 << analogPinToBitPosition(pin)) : NOT_A_PIN )
+#define digitalPinToTimer(pin) ( (pin < NUM_TOTAL_PINS) ? pgm_read_byte(digital_pin_to_timer + pin) : NOT_ON_TIMER )
 
-#define NOT_A_PIN 0
-#define NOT_A_PORT 0
+#define portToPortStruct(port) ( (port > NOT_A_PORT) ? ((PORT_t *)&PORTA + port) : NULL)
+#define digitalPinToPortStruct(pin) ( (pin < NUM_TOTAL_PINS) ? ((PORT_t *)&PORTA + digitalPinToPort(pin)) : NULL)
+#define getPINnCTRLregister(port, bit_pos) ( ((port != NULL) && (bit_pos > NOT_A_PIN)) ? ((uint8_t *)&(port->PIN0CTRL) + bit_pos) : NULL )
+#define digitalPinToInterrupt(p) ( pgm_read_byte(digital_pin_to_interrupt + p) )
+#define portPinToInterrupt(port, bit_pos) ( pgm_read_byte(port_interrupt_offset + port) + bit_pos )
 
-#define NOT_AN_INTERRUPT -1
+#define NOT_A_PIN 255
+#define NOT_A_PORT 255
+#define NOT_AN_INTERRUPT 255
 
-#ifdef ARDUINO_MAIN
-#define PA 1
-#define PB 2
-#define PC 3
-#define PD 4
-#define PE 5
-#define PF 6
-#define PG 7
-#define PH 8
-#define PJ 10
-#define PK 11
-#define PL 12
-#endif
+#define PA 0
+#define PB 1
+#define PC 2
+#define PD 3
+#define PE 4
+#define PF 5
 
 #define NOT_ON_TIMER 0
-#define TIMER0A 1
-#define TIMER0B 2
-#define TIMER1A 3
-#define TIMER1B 4
-#define TIMER1C 5
-#define TIMER2  6
-#define TIMER2A 7
-#define TIMER2B 8
-
-#define TIMER3A 9
-#define TIMER3B 10
-#define TIMER3C 11
-#define TIMER4A 12
-#define TIMER4B 13
-#define TIMER4C 14
-#define TIMER4D 15
-#define TIMER5A 16
-#define TIMER5B 17
-#define TIMER5C 18
+#define TIMERA0 1
+#define TIMERB0 2
+#define TIMERB1 3
+#define TIMERB2 4
+#define TIMERB3 5
 
 #ifdef __cplusplus
 } // extern "C"
