@@ -28,33 +28,51 @@
 
 void pinMode(uint8_t pin, PinMode mode)
 {
-	uint8_t bit = digitalPinToBitMask(pin);
-	uint8_t port = digitalPinToPort(pin);
-	volatile uint8_t *reg, *out;
+	uint8_t bit_pos = digitalPinToBitPosition(pin);
 
-	if (port == NOT_A_PIN) return;
+	if ((bit_pos == NOT_A_PIN)||(mode > INPUT_PULLUP)) return;
 
-	// JWS: can I let the optimizer do this?
-	reg = portModeRegister(port);
-	out = portOutputRegister(port);
+	PORT_t* port = digitalPinToPortStruct(pin);
+	uint8_t bit_mask = (1 << bit_pos);
 
-	if (mode == INPUT) { 
-		uint8_t oldSREG = SREG;
-                cli();
-		*reg &= ~bit;
-		*out &= ~bit;
-		SREG = oldSREG;
-	} else if (mode == INPUT_PULLUP) {
-		uint8_t oldSREG = SREG;
-                cli();
-		*reg &= ~bit;
-		*out |= bit;
-		SREG = oldSREG;
-	} else {
-		uint8_t oldSREG = SREG;
-                cli();
-		*reg |= bit;
-		SREG = oldSREG;
+	if(mode == OUTPUT){
+
+		/* Save state */
+		uint8_t status = SREG;
+		cli();
+
+		/* Configure direction as output */
+		port->DIRSET = bit_mask;
+
+		/* Restore state */
+		SREG = status;
+
+	} else { /* mode == INPUT or INPUT_PULLUP */
+
+		/* Calculate where pin control register is */
+		uint8_t* pin_ctrl_reg = getPINnCTRLregister(port, bit_pos);
+
+		/* Save state */
+		uint8_t status = SREG;
+		cli();
+
+		/* Configure direction as input */
+		port->DIRCLR = bit_mask;
+
+		/* Configure pull-up resistor */
+		if(mode == INPUT_PULLUP){
+
+			/* Enable pull-up */
+			*pin_ctrl_reg |= PORT_PULLUPEN_bm;
+
+		} else { /* mode == INPUT (no pullup) */
+
+			/* Disable pull-up */
+			*pin_ctrl_reg &= ~(PORT_PULLUPEN_bm);
+		}
+
+		/* Restore state */
+		SREG = status;
 	}
 }
 
@@ -74,106 +92,105 @@ void pinMode(uint8_t pin, PinMode mode)
 //static inline void turnOffPWM(uint8_t timer)
 static void turnOffPWM(uint8_t timer)
 {
-	switch (timer)
-	{
-		#if defined(TCCR1A) && defined(COM1A1)
-		case TIMER1A:   cbi(TCCR1A, COM1A1);    break;
-		#endif
-		#if defined(TCCR1A) && defined(COM1B1)
-		case TIMER1B:   cbi(TCCR1A, COM1B1);    break;
-		#endif
-		#if defined(TCCR1A) && defined(COM1C1)
-		case TIMER1C:   cbi(TCCR1A, COM1C1);    break;
-		#endif
-		
-		#if defined(TCCR2) && defined(COM21)
-		case  TIMER2:   cbi(TCCR2, COM21);      break;
-		#endif
-		
-		#if defined(TCCR0A) && defined(COM0A1)
-		case  TIMER0A:  cbi(TCCR0A, COM0A1);    break;
-		#endif
-		
-		#if defined(TCCR0A) && defined(COM0B1)
-		case  TIMER0B:  cbi(TCCR0A, COM0B1);    break;
-		#endif
-		#if defined(TCCR2A) && defined(COM2A1)
-		case  TIMER2A:  cbi(TCCR2A, COM2A1);    break;
-		#endif
-		#if defined(TCCR2A) && defined(COM2B1)
-		case  TIMER2B:  cbi(TCCR2A, COM2B1);    break;
-		#endif
-		
-		#if defined(TCCR3A) && defined(COM3A1)
-		case  TIMER3A:  cbi(TCCR3A, COM3A1);    break;
-		#endif
-		#if defined(TCCR3A) && defined(COM3B1)
-		case  TIMER3B:  cbi(TCCR3A, COM3B1);    break;
-		#endif
-		#if defined(TCCR3A) && defined(COM3C1)
-		case  TIMER3C:  cbi(TCCR3A, COM3C1);    break;
-		#endif
+	/* Actually turn off compare channel, not the timer */
 
-		#if defined(TCCR4A) && defined(COM4A1)
-		case  TIMER4A:  cbi(TCCR4A, COM4A1);    break;
-		#endif					
-		#if defined(TCCR4A) && defined(COM4B1)
-		case  TIMER4B:  cbi(TCCR4A, COM4B1);    break;
-		#endif
-		#if defined(TCCR4A) && defined(COM4C1)
-		case  TIMER4C:  cbi(TCCR4A, COM4C1);    break;
-		#endif			
-		#if defined(TCCR4C) && defined(COM4D1)
-		case TIMER4D:	cbi(TCCR4C, COM4D1);	break;
-		#endif			
-			
-		#if defined(TCCR5A)
-		case  TIMER5A:  cbi(TCCR5A, COM5A1);    break;
-		case  TIMER5B:  cbi(TCCR5A, COM5B1);    break;
-		case  TIMER5C:  cbi(TCCR5A, COM5C1);    break;
-		#endif
+	/* Get pin's timer */
+	uint8_t timer = digitalPinToTimer(pin);
+	if(timer == NOT_ON_TIMER) return;
+
+	switch (timer) {
+
+	/* TCA0 */
+	case TIMERA0:
+		/* Bit position will give output channel */
+		uint8_t bit_pos = digitalPinToBitPosition(pin);
+
+		/* Disable corresponding channel */
+		TCA0.SINGLE.CTRLB &= ~(1 << (TCA_SINGLE_CMP0EN_bp + bit_pos));
+
+		break;
+	/* TCB - only one output */
+	case TIMERB0:
+	case TIMERB1:
+	case TIMERB2:
+	case TIMERB3:
+
+		TCB_t *timerB = (TCB_t *)&TCB0 + (timer - TIMERB0);
+
+		/* Disable TCB compare channel */
+		timerB->CTRLB &= ~(TCB_CCMPEN_bm);
+
+		break;
+	default:
 	}
 }
 
 void digitalWrite(uint8_t pin, PinStatus val)
 {
-	uint8_t timer = digitalPinToTimer(pin);
-	uint8_t bit = digitalPinToBitMask(pin);
-	uint8_t port = digitalPinToPort(pin);
-	volatile uint8_t *out;
+	/* Get bit mask for pin */
+	uint8_t bit_mask = digitalPinToBitMask(pin);
+	if(bit_mask == NOT_A_PIN) return;
 
-	if (port == NOT_A_PIN) return;
+	/* Turn off PWM if applicable */
 
 	// If the pin that support PWM output, we need to turn it off
 	// before doing a digital write.
-	if (timer != NOT_ON_TIMER) turnOffPWM(timer);
+	turnOffPWM(pin);
 
-	out = portOutputRegister(port);
+	/* Assuming the direction is already output !! */
 
-	uint8_t oldSREG = SREG;
-	cli();
+	/* Get port */
+	PORT_t *port = digitalPinToPortStruct(pin);
+	if(port == NULL) return;
 
-	if (val == LOW) {
-		*out &= ~bit;
-	} else {
-		*out |= bit;
-	}
+// 	/* Output direction */
+// 	if(port->DIR & bit_mask){
 
-	SREG = oldSREG;
+		/* Save system status and disable interrupts */
+		uint8_t status = SREG;
+		cli();
+
+		/* Set output to value */
+		if (val == HIGH) {
+			port->OUTSET = bit_mask;
+		} else if (val == TOGGLE) {
+			port->OUTTGL = bit_mask;
+		} else {
+			port->OUTCLR = bit_mask;
+		}
+
+		/* Restore system status */
+		SREG = status;
+
+// 	} else {
+// 		/* Old implementation has side effect when pin set as input -
+// 		pull up is enabled if this function is called.
+// 		Should we purposely implement this side effect?
+// 		*/
+//
+// 		/* Enable pull-up ?? */
+// 	}
 }
 
 PinStatus digitalRead(uint8_t pin)
 {
-	uint8_t timer = digitalPinToTimer(pin);
-	uint8_t bit = digitalPinToBitMask(pin);
-	uint8_t port = digitalPinToPort(pin);
-
-	if (port == NOT_A_PIN) return LOW;
+	/* Get bit mask and check valid pin */
+	uint8_t bit_mask = digitalPinToBitMask(pin);
+	if(bit_mask == NOT_A_PIN) return LOW;
 
 	// If the pin that support PWM output, we need to turn it off
 	// before getting a digital reading.
-	if (timer != NOT_ON_TIMER) turnOffPWM(timer);
+	turnOffPWM(pin);
 
-	if (*portInputRegister(port) & bit) return HIGH;
+	/* Get port and check valid port */
+	PORT_t *port = digitalPinToPortStruct(pin);
+	if(port == NULL) return LOW;
+
+	/* Read pin value from PORTx.IN register */
+	if(port->IN & bit_mask){
+		return HIGH;
+	} else {
+		return LOW;
+	}
 	return LOW;
 }
