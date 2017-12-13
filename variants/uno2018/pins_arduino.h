@@ -159,8 +159,8 @@ const uint8_t PROGMEM digital_pin_to_interrupt[] = {
 	2, //20 TWI_SDA PA2
 	3, //21 TWI_SCL PA3
 	17, //22 SPI SS PC3
-	4, //23 USART0_Rx PA5
-	5, //24 USART0_Tx PA4
+	5, //23 USART0_Rx PA5
+	4, //24 USART0_Tx PA4
 	28, //25 LED_BUILTIN PD6
 	13, //26 USART3_Rx PB5
 	12, //27 USART3_Tx PB4
@@ -171,8 +171,8 @@ const uint8_t PROGMEM digital_pin_to_interrupt[] = {
 	30, // 32 PE0
 	31, // 33 PE1
 	32, // 34 PE2
-	35, // 35 PF2
-	36, // 36 PF3
+	36, // 35 PF2
+	37, // 36 PF3
 	34, // 37 PF0 TOSC 1
 	35, // 38 PF1 TOSC 2
 	29, // 39 PD7 VREF
