@@ -24,76 +24,86 @@
 
 #include "wiring_private.h"
 #include "pins_arduino.h"
+#include "Arduino.h"
 
 uint8_t analog_reference = DEFAULT;
 
 void analogReference(uint8_t mode)
 {
-	// can't actually set the register here because the default setting
-	// will connect AVCC and the AREF pin, which would cause a short if
-	// there's something connected to AREF.
-	analog_reference = mode;
+	/* Clear relevant settings */
+	ADC0.CTRLC &= ~(ADC_REFSEL_gm);
+	VREF.CTRLA &= ~(VREF_ADC0REFSEL_gm);
+
+	/* If reference NOT using internal reference from VREF */
+	if((mode == EXTERNAL) || (mode == VDD)) {
+
+		/* Set reference in ADC peripheral */
+		ADC0.CTRLC |= mode;
+
+	/* If reference using internal reference from VREF */
+	} else if (
+	   (mode == INTERNAL0V55)
+		|| (mode == INTERNAL1V1)
+		|| (mode == INTERNAL2V5)
+		|| (mode == INTERNAL4V3)
+		|| (mode == INTERNAL1V5)) {
+
+		/* Set ADC reference to INTERNAL */
+		ADC0.CTRLC |= INTERNAL;
+
+		/* Configure VREF ADC0 reference */
+		VREF.CTRLA |= (mode << VREF_ADC0REFSEL_gp);
+
+	/* Non-standard values / default */
+	} else {
+
+		/* Non valid value will set default */
+		/* Set ADC reference to INTERNAL */
+		ADC0.CTRLC |= INTERNAL;
+
+		/* Configure VREF ADC0 reference */
+		VREF.CTRLA |= (INTERNAL0V55 << VREF_ADC0REFSEL_gp);
+	}
 }
 
 int analogRead(uint8_t pin)
 {
+	if(pin > NUM_ANALOG_INPUTS) return NOT_A_PIN;
+
 	uint8_t low, high;
 
 #if defined(analogPinToChannel)
-#if defined(__AVR_ATmega32U4__)
-	if (pin >= 18) pin -= 18; // allow for channel or pin numbers
-#endif
-	pin = analogPinToChannel(pin);
-#elif defined(__AVR_ATmega1280__) || defined(__AVR_ATmega2560__)
-	if (pin >= 54) pin -= 54; // allow for channel or pin numbers
-#elif defined(__AVR_ATmega32U4__)
-	if (pin >= 18) pin -= 18; // allow for channel or pin numbers
-#elif defined(__AVR_ATmega1284__) || defined(__AVR_ATmega1284P__) || defined(__AVR_ATmega644__) || defined(__AVR_ATmega644A__) || defined(__AVR_ATmega644P__) || defined(__AVR_ATmega644PA__)
-	if (pin >= 24) pin -= 24; // allow for channel or pin numbers
-#else
-	if (pin >= 14) pin -= 14; // allow for channel or pin numbers
+	/* If analog pin number != adc0 channel */
 #endif
 
-#if defined(ADCSRB) && defined(MUX5)
-	// the MUX5 bit of ADCSRB selects whether we're reading from channels
-	// 0 to 7 (MUX5 low) or 8 to 15 (MUX5 high).
-	ADCSRB = (ADCSRB & ~(1 << MUX5)) | (((pin >> 3) & 0x01) << MUX5);
-#endif
-  
-	// set the analog reference (high two bits of ADMUX) and select the
-	// channel (low 4 bits).  this also sets ADLAR (left-adjust result)
-	// to 0 (the default).
-#if defined(ADMUX)
-#if defined(__AVR_ATtiny25__) || defined(__AVR_ATtiny45__) || defined(__AVR_ATtiny85__)
-	ADMUX = (analog_reference << 4) | (pin & 0x07);
-#else
-	ADMUX = (analog_reference << 6) | (pin & 0x07);
-#endif
-#endif
+#if defined(ADC0)
+	/* Reference should be already set up */
+	/* Select channel */
+	ADC0.MUXPOS = (pin << ADC_MUXPOS_gp);
 
-	// without a delay, we seem to read from the wrong channel
-	//delay(1);
+	/* Start conversion */
+	ADC0.COMMAND = ADC_STCONV_bm;
 
-#if defined(ADCSRA) && defined(ADCL)
-	// start the conversion
-	sbi(ADCSRA, ADSC);
+	/* Wait for result ready */
+	while(!(ADC0.INTFLAGS & ADC_RESRDY_bm));
 
-	// ADSC is cleared when the conversion finishes
-	while (bit_is_set(ADCSRA, ADSC));
+	/* Save state */
+	uint8_t status = SREG;
+	cli();
 
-	// we have to read ADCL first; doing so locks both ADCL
-	// and ADCH until ADCH is read.  reading ADCL second would
-	// cause the results of each conversion to be discarded,
-	// as ADCL and ADCH would be locked when it completed.
-	low  = ADCL;
-	high = ADCH;
-#else
-	// we dont have an ADC, return 0
-	low  = 0;
+	/* Read result */
+	low = ADC0.RESL;
+	high = ADC0.RESH;
+
+	/* Restore state */
+	SREG = status;
+
+#else	/* No ADC, return 0 */
+	low = 0;
 	high = 0;
 #endif
 
-	// combine the two bytes
+	/* Combine two bytes */
 	return (high << 8) | low;
 }
 
@@ -103,183 +113,63 @@ int analogRead(uint8_t pin)
 // to digital output.
 void analogWrite(uint8_t pin, int val)
 {
+
+	uint8_t bit_pos  = digitalPinToBitPosition(pin);
+	if(bit_pos == NOT_A_PIN) return;
+
 	// We need to make sure the PWM output is enabled for those pins
 	// that support it, as we turn it off when digitally reading or
 	// writing with them.  Also, make sure the pin is in output mode
-	// for consistenty with Wiring, which doesn't require a pinMode
+	// for consistently with Wiring, which doesn't require a pinMode
 	// call for the analog output pins.
 	pinMode(pin, OUTPUT);
-	if (val == 0)
-	{
+
+	if(val < 1){	/* if zero or negative drive digital low */
+
 		digitalWrite(pin, LOW);
-	}
-	else if (val == 255)
-	{
+
+	} else if(val == 255){	/* if max drive digital high */
+
 		digitalWrite(pin, HIGH);
-	}
-	else
-	{
-		switch(digitalPinToTimer(pin))
+
+	} else {	/* handle pwm to generate analog value */
+
+		/* Get timer */
+		uint8_t digital_pin_timer =  digitalPinToTimer(pin);
+
+		/* Find out Port and Pin to correctly handle port mux, and timer. */
+		switch (digital_pin_timer)
 		{
-			// XXX fix needed for atmega8
-			#if defined(TCCR0) && defined(COM00) && !defined(__AVR_ATmega8__)
-			case TIMER0A:
-				// connect pwm to pin on timer 0
-				sbi(TCCR0, COM00);
-				OCR0 = val; // set pwm duty
-				break;
-			#endif
+			case TIMERA0:
+				/* Calculate correct compare buffer register */
+				uint16_t* timer_cmp_out = ((uint16_t*) (&TCA0.SINGLE.CMP0BUF)) + bit_pos;
 
-			#if defined(TCCR0A) && defined(COM0A1)
-			case TIMER0A:
-				// connect pwm to pin on timer 0, channel A
-				sbi(TCCR0A, COM0A1);
-				OCR0A = val; // set pwm duty
-				break;
-			#endif
+				/* Configure duty cycle for correct compare channel */
+				(*timer_cmp_out) = (val);
 
-			#if defined(TCCR0A) && defined(COM0B1)
-			case TIMER0B:
-				// connect pwm to pin on timer 0, channel B
-				sbi(TCCR0A, COM0B1);
-				OCR0B = val; // set pwm duty
-				break;
-			#endif
+				/* Enable output on pin */
+				TCA0.SINGLE.CTRLB |= (1 << (TCA_SINGLE_CMP0EN_bp + bit_pos));
 
-			#if defined(TCCR1A) && defined(COM1A1)
-			case TIMER1A:
-				// connect pwm to pin on timer 1, channel A
-				sbi(TCCR1A, COM1A1);
-				OCR1A = val; // set pwm duty
 				break;
-			#endif
+			case TIMERB0:
+			case TIMERB1:
+			case TIMERB2:
+			case TIMERB3:
 
-			#if defined(TCCR1A) && defined(COM1B1)
-			case TIMER1B:
-				// connect pwm to pin on timer 1, channel B
-				sbi(TCCR1A, COM1B1);
-				OCR1B = val; // set pwm duty
-				break;
-			#endif
+				/* Get pointer to timer, TIMERB0 order definition in Arduino.h*/
+				//assert (((TIMERB0 - TIMERB3) == 2));
+				TCB_t *timer_B = ((TCB_t *)&TCB0 + (digital_pin_timer - TIMERB0));
 
-			#if defined(TCCR1A) && defined(COM1C1)
-			case TIMER1C:
-				// connect pwm to pin on timer 1, channel B
-				sbi(TCCR1A, COM1C1);
-				OCR1C = val; // set pwm duty
-				break;
-			#endif
+				/* set duty cycle */
+				timer_B->CCMPH = val;
 
-			#if defined(TCCR2) && defined(COM21)
-			case TIMER2:
-				// connect pwm to pin on timer 2
-				sbi(TCCR2, COM21);
-				OCR2 = val; // set pwm duty
-				break;
-			#endif
+				/* Enable Timer Output	*/
+				timer_B->CTRLB |= (TCB_CCMPEN_bm);
 
-			#if defined(TCCR2A) && defined(COM2A1)
-			case TIMER2A:
-				// connect pwm to pin on timer 2, channel A
-				sbi(TCCR2A, COM2A1);
-				OCR2A = val; // set pwm duty
 				break;
-			#endif
 
-			#if defined(TCCR2A) && defined(COM2B1)
-			case TIMER2B:
-				// connect pwm to pin on timer 2, channel B
-				sbi(TCCR2A, COM2B1);
-				OCR2B = val; // set pwm duty
-				break;
-			#endif
-
-			#if defined(TCCR3A) && defined(COM3A1)
-			case TIMER3A:
-				// connect pwm to pin on timer 3, channel A
-				sbi(TCCR3A, COM3A1);
-				OCR3A = val; // set pwm duty
-				break;
-			#endif
-
-			#if defined(TCCR3A) && defined(COM3B1)
-			case TIMER3B:
-				// connect pwm to pin on timer 3, channel B
-				sbi(TCCR3A, COM3B1);
-				OCR3B = val; // set pwm duty
-				break;
-			#endif
-
-			#if defined(TCCR3A) && defined(COM3C1)
-			case TIMER3C:
-				// connect pwm to pin on timer 3, channel C
-				sbi(TCCR3A, COM3C1);
-				OCR3C = val; // set pwm duty
-				break;
-			#endif
-
-			#if defined(TCCR4A)
-			case TIMER4A:
-				//connect pwm to pin on timer 4, channel A
-				sbi(TCCR4A, COM4A1);
-				#if defined(COM4A0)		// only used on 32U4
-				cbi(TCCR4A, COM4A0);
-				#endif
-				OCR4A = val;	// set pwm duty
-				break;
-			#endif
-			
-			#if defined(TCCR4A) && defined(COM4B1)
-			case TIMER4B:
-				// connect pwm to pin on timer 4, channel B
-				sbi(TCCR4A, COM4B1);
-				OCR4B = val; // set pwm duty
-				break;
-			#endif
-
-			#if defined(TCCR4A) && defined(COM4C1)
-			case TIMER4C:
-				// connect pwm to pin on timer 4, channel C
-				sbi(TCCR4A, COM4C1);
-				OCR4C = val; // set pwm duty
-				break;
-			#endif
-				
-			#if defined(TCCR4C) && defined(COM4D1)
-			case TIMER4D:				
-				// connect pwm to pin on timer 4, channel D
-				sbi(TCCR4C, COM4D1);
-				#if defined(COM4D0)		// only used on 32U4
-				cbi(TCCR4C, COM4D0);
-				#endif
-				OCR4D = val;	// set pwm duty
-				break;
-			#endif
-
-							
-			#if defined(TCCR5A) && defined(COM5A1)
-			case TIMER5A:
-				// connect pwm to pin on timer 5, channel A
-				sbi(TCCR5A, COM5A1);
-				OCR5A = val; // set pwm duty
-				break;
-			#endif
-
-			#if defined(TCCR5A) && defined(COM5B1)
-			case TIMER5B:
-				// connect pwm to pin on timer 5, channel B
-				sbi(TCCR5A, COM5B1);
-				OCR5B = val; // set pwm duty
-				break;
-			#endif
-
-			#if defined(TCCR5A) && defined(COM5C1)
-			case TIMER5C:
-				// connect pwm to pin on timer 5, channel C
-				sbi(TCCR5A, COM5C1);
-				OCR5C = val; // set pwm duty
-				break;
-			#endif
+			/* If non timer pin, or unknown timer definition.	*/
+			/* do a digital write								*/
 
 			case NOT_ON_TIMER:
 			default:
@@ -288,7 +178,7 @@ void analogWrite(uint8_t pin, int val)
 				} else {
 					digitalWrite(pin, HIGH);
 				}
+				break;
 		}
 	}
 }
-
