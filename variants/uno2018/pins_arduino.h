@@ -234,7 +234,7 @@ const uint8_t PROGMEM digital_pin_to_port[] = {
 
 /* Use this for accessing PINnCTRL register */
 const uint8_t PROGMEM digital_pin_to_bit_position[] = {
-	PIN5_bp,	//0 USART1_Tx PC5
+	PIN5_bp,	//0 USART1_Rx PC5
 	PIN4_bp,	//1 USART1_Tx PC4
 	PIN0_bp,	//2 PA0
 	PIN5_bp,	//3 PF5
@@ -257,8 +257,8 @@ const uint8_t PROGMEM digital_pin_to_bit_position[] = {
 	PIN2_bp,	//20 TWI_SDA PA2
 	PIN3_bp,	//21 TWI_SCL PA3
 	PIN3_bp,	//22 SPI SS PC3
-	PIN4_bp,	//23 USART0_Rx PA5
-	PIN5_bp,	//24 USART0_Tx PA4
+	PIN5_bp,	//23 USART0_Rx PA5
+	PIN4_bp,	//24 USART0_Tx PA4
 	PIN6_bp,	//25 LED_BUILTIN PD6
 	PIN5_bp,	//26 USART3_Rx PB5
 	PIN4_bp,	//27 USART3_Tx PB4
