@@ -33,12 +33,6 @@ extern "C"{
 #define TOGGLE          0x2
 #define PINCTRL_OFFSET  0x10
 
-#define DISABLE   PORT_ISC_INTDISABLE_gc
-#define CHANGE    PORT_ISC_BOTHEDGES_gc
-#define RISING    PORT_ISC_RISING_gc
-#define FALLING   PORT_ISC_FALLING_gc
-#define LOW_LEVEL PORT_ISC_LEVEL_gc
-
 /* Analog reference options */
 
 /* Change in mega4809: two places to define analog reference

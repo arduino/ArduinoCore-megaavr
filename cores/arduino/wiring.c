@@ -22,98 +22,131 @@
 
 #include "wiring_private.h"
 
-// the prescaler is set so that timer0 ticks every 64 clock cycles, and the
+// the prescaler is set so that timerb3 ticks every 64 clock cycles, and the
 // the overflow handler is called every 256 ticks.
-#define MICROSECONDS_PER_TIMER0_OVERFLOW (clockCyclesToMicroseconds(64 * 256))
+uint16_t microseconds_per_timerb3_overflow;
 
-// the whole number of milliseconds per timer0 overflow
-#define MILLIS_INC (MICROSECONDS_PER_TIMER0_OVERFLOW / 1000)
+uint32_t F_CPU_CORRECTED = F_CPU;
+
+#define PWM_TIMER_PERIOD	0xFF	/* For frequency */
+#define PWM_TIMER_COMPARE	0x80	/* For duty cycle */
+
+#define TIME_TRACKING_TICKS_PER_OVF		256		/* Timer ticks per overflow of TCB3 */
+#define TIME_TRACKING_TIMER_DIVIDER		64		/* Clock divider for TCB3 */
+#define TIME_TRACKING_CYCLES_PER_OVF	(TIME_TRACKING_TICKS_PER_OVF * TIME_TRACKING_TIMER_DIVIDER)
+
+// the whole number of milliseconds per timerb3 overflow
+uint16_t millis_inc;
 
 // the fractional number of milliseconds per timer0 overflow. we shift right
 // by three to fit these numbers into a byte. (for the clock speeds we care
 // about - 8 and 16 MHz - this doesn't lose precision.)
-#define FRACT_INC ((MICROSECONDS_PER_TIMER0_OVERFLOW % 1000) >> 3)
-#define FRACT_MAX (1000 >> 3)
+uint16_t fract_inc;
+//#define FRACT_MAX (1000 >> 3)
+#define FRACT_MAX (1000)
 
-volatile unsigned long timer0_overflow_count = 0;
-volatile unsigned long timer0_millis = 0;
-static unsigned char timer0_fract = 0;
+// whole number of microseconds per timerb3 tick
+uint16_t microseconds_per_timerb3_tick;
 
-#if defined(TIM0_OVF_vect)
-ISR(TIM0_OVF_vect)
-#else
-ISR(TIMER0_OVF_vect)
-#endif
+volatile uint32_t timerb3_overflow_count = 0;
+volatile uint32_t timerb3_millis = 0;
+static uint16_t timerb3_fract = 0;
+
+inline uint16_t clockCyclesPerMicrosecond(uint32_t clk){ 
+	return ( (clk) / 1000000L ); 
+}
+
+inline uint16_t clockCyclesToMicroseconds(uint16_t cycles, uint32_t clk){ 
+	return ( cycles / clockCyclesPerMicrosecond(clk) );
+}
+
+inline uint32_t microsecondsToClockCycles(uint16_t cycles, uint32_t clk){
+	return ( cycles * clockCyclesPerMicrosecond(clk) );
+}
+
+ISR(TCB3_INT_vect)
 {
 	// copy these to local variables so they can be stored in registers
 	// (volatile variables must be read from memory on every access)
-	unsigned long m = timer0_millis;
-	unsigned char f = timer0_fract;
+	uint32_t m = timerb3_millis;
+	uint16_t f = timerb3_fract;
 
-	m += MILLIS_INC;
-	f += FRACT_INC;
+	m += millis_inc;
+	f += fract_inc;
 	if (f >= FRACT_MAX) {
+
 		f -= FRACT_MAX;
 		m += 1;
 	}
 
-	timer0_fract = f;
-	timer0_millis = m;
-	timer0_overflow_count++;
+	timerb3_fract = f;
+	timerb3_millis = m;
+	timerb3_overflow_count++;
+
+	/* Clear flag */
+	TCB3.INTFLAGS = TCB_CAPT_bm;
 }
 
 unsigned long millis()
 {
 	unsigned long m;
-	uint8_t oldSREG = SREG;
 
 	// disable interrupts while we read timer0_millis or we might get an
 	// inconsistent value (e.g. in the middle of a write to timer0_millis)
+	uint8_t status = SREG;
 	cli();
-	m = timer0_millis;
-	SREG = oldSREG;
+	m = timerb3_millis;
+
+	SREG = status;
 
 	return m;
 }
 
 unsigned long micros() {
-	unsigned long m;
-	uint8_t oldSREG = SREG, t;
-	
+	unsigned long overflows, microseconds;
+	//uint16_t overflows, microseconds;
+	uint8_t ticks;
+
+	/* Save current state and disable interrupts */
+	uint8_t status = SREG;
 	cli();
-	m = timer0_overflow_count;
-#if defined(TCNT0)
-	t = TCNT0;
-#elif defined(TCNT0L)
-	t = TCNT0L;
-#else
-	#error TIMER 0 not defined
-#endif
 
-#ifdef TIFR0
-	if ((TIFR0 & _BV(TOV0)) && (t < 255))
-		m++;
-#else
-	if ((TIFR & _BV(TOV0)) && (t < 255))
-		m++;
-#endif
+	/* Get current number of overflows and timer count */
+	overflows = timerb3_overflow_count;	
+	ticks = TCB3.CNTL;
 
-	SREG = oldSREG;
-	
-	return ((m << 8) + t) * (64 / clockCyclesPerMicrosecond());
+	/* If the timer overflow flag is raised, we just missed it,
+	increment to account for it, & read new ticks */
+	if(TCB3.INTFLAGS & TCB_CAPT_bm){
+		overflows++;
+		ticks = TCB3.CNTL;
+	}
+
+	/* Restore state */
+	SREG = status;
+
+	/* Return microseconds of up time  (resets every ~70mins) */
+	microseconds = ((overflows * microseconds_per_timerb3_overflow)
+				+ (ticks * microseconds_per_timerb3_tick));
+	return microseconds;
 }
 
 void delay(unsigned long ms)
 {
-	uint32_t start = micros();
+	uint32_t start_time = micros(), delay_time = 1000*ms;
 
-	while (ms > 0) {
-		yield();
-		while ( ms > 0 && (micros() - start) >= 1000) {
-			ms--;
-			start += 1000;
-		}
+	/* Calculate future time to return */
+	uint32_t return_time = start_time + delay_time;
+
+	/* If return time overflows */
+	if(return_time < delay_time){
+		PORTD.OUTTGL = PIN4_bm;
+		/* Wait until micros overflows */
+		while(micros() > return_time);
 	}
+
+	/* Wait until return time */
+	while(micros() < return_time);
 }
 
 /* Delay for the given number of microseconds.  Assumes a 1, 8, 12, 16, 20 or 24 MHz clock. */
@@ -242,151 +275,166 @@ void init()
 {
 	// this needs to be called before setup() or some functions won't
 	// work there
-	sei();
-	
-	// on the ATmega168, timer 0 is also used for fast hardware pwm
-	// (using phase-correct PWM would mean that timer 0 overflowed half as often
-	// resulting in different millis() behavior on the ATmega8 and ATmega168)
-#if defined(TCCR0A) && defined(WGM01)
-	sbi(TCCR0A, WGM01);
-	sbi(TCCR0A, WGM00);
-#endif
 
-	// set timer 0 prescale factor to 64
-#if defined(__AVR_ATmega128__)
-	// CPU specific: different values for the ATmega128
-	sbi(TCCR0, CS02);
-#elif defined(TCCR0) && defined(CS01) && defined(CS00)
-	// this combination is for the standard atmega8
-	sbi(TCCR0, CS01);
-	sbi(TCCR0, CS00);
-#elif defined(TCCR0B) && defined(CS01) && defined(CS00)
-	// this combination is for the standard 168/328/1280/2560
-	sbi(TCCR0B, CS01);
-	sbi(TCCR0B, CS00);
-#elif defined(TCCR0A) && defined(CS01) && defined(CS00)
-	// this combination is for the __AVR_ATmega645__ series
-	sbi(TCCR0A, CS01);
-	sbi(TCCR0A, CS00);
-#else
-	#error Timer 0 prescale factor 64 not set correctly
-#endif
+/******************************** CLOCK STUFF *********************************/
 
-	// enable timer 0 overflow interrupt
-#if defined(TIMSK) && defined(TOIE0)
-	sbi(TIMSK, TOIE0);
-#elif defined(TIMSK0) && defined(TOIE0)
-	sbi(TIMSK0, TOIE0);
-#else
-	#error	Timer 0 overflow interrupt not set correctly
-#endif
+	/* Disable system clock prescaler - F_CPU should now be ~16MHz */
+	_PROTECTED_WRITE(CLKCTRL_MCLKCTRLB, 0x00);
 
-	// timers 1 and 2 are used for phase-correct hardware pwm
-	// this is better for motors as it ensures an even waveform
-	// note, however, that fast pwm mode can achieve a frequency of up
-	// 8 MHz (with a 16 MHz clock) at 50% duty cycle
+	/* Calculate actual F_CPU with error values from signature row */
+	int8_t sigrow_val = SIGROW.OSC16ERR5V;
+	int64_t cpu_freq = F_CPU;
+	cpu_freq *= (1024 + sigrow_val);
+	cpu_freq /= 1024;
+	F_CPU_CORRECTED = (uint32_t)cpu_freq;
 
-#if defined(TCCR1B) && defined(CS11) && defined(CS10)
-	TCCR1B = 0;
+/***************************** TIMERS FOR PWM *********************************/
 
-	// set timer 1 prescale factor to 64
-	sbi(TCCR1B, CS11);
-#if F_CPU >= 8000000L
-	sbi(TCCR1B, CS10);
-#endif
-#elif defined(TCCR1) && defined(CS11) && defined(CS10)
-	sbi(TCCR1, CS11);
-#if F_CPU >= 8000000L
-	sbi(TCCR1, CS10);
-#endif
-#endif
-	// put timer 1 in 8-bit phase correct pwm mode
-#if defined(TCCR1A) && defined(WGM10)
-	sbi(TCCR1A, WGM10);
-#endif
 
-	// set timer 2 prescale factor to 64
-#if defined(TCCR2) && defined(CS22)
-	sbi(TCCR2, CS22);
-#elif defined(TCCR2B) && defined(CS22)
-	sbi(TCCR2B, CS22);
-//#else
-	// Timer 2 not finished (may not be present on this CPU)
-#endif
 
-	// configure timer 2 for phase correct pwm (8-bit)
-#if defined(TCCR2) && defined(WGM20)
-	sbi(TCCR2, WGM20);
-#elif defined(TCCR2A) && defined(WGM20)
-	sbi(TCCR2A, WGM20);
-//#else
-	// Timer 2 not finished (may not be present on this CPU)
-#endif
+							/*  TYPE A TIMER   */
 
-#if defined(TCCR3B) && defined(CS31) && defined(WGM30)
-	sbi(TCCR3B, CS31);		// set timer 3 prescale factor to 64
-	sbi(TCCR3B, CS30);
-	sbi(TCCR3A, WGM30);		// put timer 3 in 8-bit phase correct pwm mode
-#endif
+	/* PORTMUX setting for TCA -> all outputs [0:2] point to PORTB pins [0:2] */
+	PORTMUX.TCA	= PORTMUX_TCA0_PORTB_gc;
 
-#if defined(TCCR4A) && defined(TCCR4B) && defined(TCCR4D) /* beginning of timer4 block for 32U4 and similar */
-	sbi(TCCR4B, CS42);		// set timer4 prescale factor to 64
-	sbi(TCCR4B, CS41);
-	sbi(TCCR4B, CS40);
-	sbi(TCCR4D, WGM40);		// put timer 4 in phase- and frequency-correct PWM mode	
-	sbi(TCCR4A, PWM4A);		// enable PWM mode for comparator OCR4A
-	sbi(TCCR4C, PWM4D);		// enable PWM mode for comparator OCR4D
-#else /* beginning of timer4 block for ATMEGA1280 and ATMEGA2560 */
-#if defined(TCCR4B) && defined(CS41) && defined(WGM40)
-	sbi(TCCR4B, CS41);		// set timer 4 prescale factor to 64
-	sbi(TCCR4B, CS40);
-	sbi(TCCR4A, WGM40);		// put timer 4 in 8-bit phase correct pwm mode
-#endif
-#endif /* end timer4 block for ATMEGA1280/2560 and similar */	
+	/* Setup timers for single slope PWM, but do not enable, will do in analogWrite() */
+	TCA0.SINGLE.CTRLB |= (TCA_SINGLE_WGMODE_SINGLESLOPE_gc);
 
-#if defined(TCCR5B) && defined(CS51) && defined(WGM50)
-	sbi(TCCR5B, CS51);		// set timer 5 prescale factor to 64
-	sbi(TCCR5B, CS50);
-	sbi(TCCR5A, WGM50);		// put timer 5 in 8-bit phase correct pwm mode
-#endif
+	/* Period setting, 16 bit register but val resolution is 8 bit */
+	TCA0.SINGLE.PER	= PWM_TIMER_PERIOD;
 
-#if defined(ADCSRA)
-	// set a2d prescaler so we are inside the desired 50-200 KHz range.
+	/* Default duty 50%, will re-assign in analogWrite() */
+	TCA0.SINGLE.CMP0BUF = PWM_TIMER_COMPARE;
+	TCA0.SINGLE.CMP1BUF = PWM_TIMER_COMPARE;
+	TCA0.SINGLE.CMP2BUF = PWM_TIMER_COMPARE;
+
+	/* Use DIV64 prescaler (giving 250kHz clock), enable TCA timer */
+	TCA0.SINGLE.CTRLA = (TCA_SINGLE_CLKSEL_DIV64_gc) | (TCA_SINGLE_ENABLE_bm);
+
+
+						    /*	TYPE B TIMERS  */
+
+	/* PORTMUX alternate location needed for TCB0 & 1, TCB2 is default location */
+	PORTMUX.TCB	|= (PORTMUX_TCB0_bm | PORTMUX_TCB1_bm);
+
+	/* Start with TCB0 */
+	TCB_t *timer_B = (TCB_t *)&TCB0;
+
+	/* Timer B Setup loop for TCB[0:2] */
+	do{
+		/* 8 bit PWM mode, but do not enable output yet, will do in analogWrite() */
+		timer_B->CTRLB = (TCB_CNTMODE_PWM8_gc);
+
+		/* Assign 8-bit period */
+		timer_B->CCMPL = PWM_TIMER_PERIOD;
+
+		/* default duty 50%, set when output enabled */
+		timer_B->CCMPH = PWM_TIMER_COMPARE;
+
+		/* Use TCA clock (250kHz) and enable */
+		/* (sync update commented out, might try to synchronize later */
+		timer_B->CTRLA = (TCB_CLKSEL_CLKTCA_gc)
+						//|(TCB_SYNCUPD_bm)
+						|(TCB_ENABLE_bm);
+
+		/* Increment pointer to next TCB instance */
+		timer_B++;
+
+	/* Stop when pointing to TCB3 */
+	} while (timer_B < (TCB_t *)&TCB3);
+
+
+
+/* Stuff for synchronizing PWM timers */
+// 	/* Restart TCA to sync TCBs */
+// 	/* should not be needed		*/
+// 	TCA0.SINGLE.CTRLESET = TCA_SINGLE_CMD_RESTART_gc;
+// 	TCA0.SINGLE.CTRLECLR = TCA_SINGLE_CMD_RESTART_gc;
+//
+// 	timer_B = (TCB_t *)&TCB0;
+//
+// 	/* TCB are sync to TCA, remove setting	*/
+// 	for (uint8_t digitial_pin_timer = (TIMERB0 - TIMERB0);
+// 	digitial_pin_timer < (TIMERB3 - TIMERB0);
+// 	digitial_pin_timer++)
+// 	{
+// 		/* disable sync with tca */
+// 		timer_B->CTRLA &= ~ (TCB_SYNCUPD_bm);
+//
+// 		/* Add offset to register	*/
+// 		timer_B++;
+//
+// 	}
+
+/********************************* ADC ****************************************/
+
+//#if defined(ADC0)
+
+	/************* Need to double check no other init required for ADC ***************/
+
+	/* ADC clock between 50-200KHz */
+
 	#if F_CPU >= 16000000 // 16 MHz / 128 = 125 KHz
-		sbi(ADCSRA, ADPS2);
-		sbi(ADCSRA, ADPS1);
-		sbi(ADCSRA, ADPS0);
+		ADC0.CTRLC |= ADC_PRESC_DIV128_gc;
 	#elif F_CPU >= 8000000 // 8 MHz / 64 = 125 KHz
-		sbi(ADCSRA, ADPS2);
-		sbi(ADCSRA, ADPS1);
-		cbi(ADCSRA, ADPS0);
+		ADC0.CTRLC |= ADC_PRESC_DIV64_gc;
 	#elif F_CPU >= 4000000 // 4 MHz / 32 = 125 KHz
-		sbi(ADCSRA, ADPS2);
-		cbi(ADCSRA, ADPS1);
-		sbi(ADCSRA, ADPS0);
+		ADC0.CTRLC |= ADC_PRESC_DIV32_gc;
 	#elif F_CPU >= 2000000 // 2 MHz / 16 = 125 KHz
-		sbi(ADCSRA, ADPS2);
-		cbi(ADCSRA, ADPS1);
-		cbi(ADCSRA, ADPS0);
+		ADC0.CTRLC |= ADC_PRESC_DIV16_gc;
 	#elif F_CPU >= 1000000 // 1 MHz / 8 = 125 KHz
-		cbi(ADCSRA, ADPS2);
-		sbi(ADCSRA, ADPS1);
-		sbi(ADCSRA, ADPS0);
+		ADC0.CTRLC |= ADC_PRESC_DIV8_gc;
 	#else // 128 kHz / 2 = 64 KHz -> This is the closest you can get, the prescaler is 2
-		cbi(ADCSRA, ADPS2);
-		cbi(ADCSRA, ADPS1);
-		sbi(ADCSRA, ADPS0);
+		ADC0.CTRLC |= ADC_PRESC_DIV2_gc;
 	#endif
-	// enable a2d conversions
-	sbi(ADCSRA, ADEN);
-#endif
 
-	// the bootloader connects pins 0 and 1 to the USART; disconnect them
-	// here so they can be used as normal digital i/o; they will be
-	// reconnected in Serial.begin()
-#if defined(UCSRB)
-	UCSRB = 0;
-#elif defined(UCSR0B)
-	UCSR0B = 0;
-#endif
+	/* Enable ADC */
+	ADC0.CTRLA |= ADC_ENABLE_bm;
+
+//#endif
+
+
+/****************************** USART *****************************************/
+
+	/* Configure PORTMUX for USARTS */
+	PORTMUX.USARTA = (PORTMUX_USART1_ALT1_gc // MAIN
+					| PORTMUX_USART0_ALT1_gc // SPARE
+					| PORTMUX_USART3_ALT1_gc); // DEBUG
+
+	//
+	// 	// the bootloader connects pins 0 and 1 to the USART; disconnect them
+	// 	// here so they can be used as normal digital i/o; they will be
+	// 	// reconnected in Serial.begin()
+	// #if defined(UCSRB)
+	// 	UCSRB = 0;
+	// #elif defined(UCSR0B)
+	// 	UCSR0B = 0;
+	// #endif
+
+/********************* TCB3 for system time tracking **************************/
+
+	/* Calculate relevant time tracking values */
+	//microseconds_per_timerb3_overflow = clockCyclesToMicroseconds(TIME_TRACKING_CYCLES_PER_OVF, F_CPU_CORRECTED);
+	microseconds_per_timerb3_overflow = clockCyclesToMicroseconds(TIME_TRACKING_CYCLES_PER_OVF, F_CPU);
+	millis_inc = microseconds_per_timerb3_overflow / 1000;
+	fract_inc = ((microseconds_per_timerb3_overflow % 1000));
+	microseconds_per_timerb3_tick = microseconds_per_timerb3_overflow/PWM_TIMER_PERIOD;
+
+	/* Default Periodic Interrupt Mode */
+	/* TOP value for overflow every 1024 clock cycles */
+	TCB3.CCMP = PWM_TIMER_PERIOD;
+
+	/* Enable TCB3 interrupt */
+	TCB3.INTCTRL |= TCB_CAPT_bm;
+
+	/* Clock selection -> same as TCA (F_CPU/64 -- 250kHz) */
+	TCB3.CTRLA = TCB_CLKSEL_CLKTCA_gc;
+	//TCB3.CTRLA = TCB_CLKSEL_CLKDIV2_gc;
+
+	// 	/* Enable & start */
+	TCB3.CTRLA |= TCB_ENABLE_bm;
+
+/*************************** ENABLE GLOBAL INTERRUPTS *************************/
+
+	sei();
 }
