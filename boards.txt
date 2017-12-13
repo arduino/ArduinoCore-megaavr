@@ -21,7 +21,7 @@ uno2018.bootloader.high_fuses=0xDE
 uno2018.bootloader.extended_fuses=0xFD
 uno2018.bootloader.unlock_bits=0x3F
 uno2018.bootloader.lock_bits=0x0F
-uno2018.bootloader.file=optiboot/optiboot_atmega328.hex
+uno2018.bootloader.file=optiboot/optiboot_atmega4809.hex
 
 uno2018.build.mcu=atmega4809
 uno2018.build.f_cpu=16000000L
