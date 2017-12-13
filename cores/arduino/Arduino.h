@@ -92,7 +92,7 @@ extern const uint8_t PROGMEM digital_pin_to_interrupt[];
 #define analogPinToBitMask(pin) ( (pin < NUM_ANALOG_INPUTS) ? (1 << analogPinToBitPosition(pin)) : NOT_A_PIN )
 #define digitalPinToTimer(pin) ( (pin < NUM_TOTAL_PINS) ? pgm_read_byte(digital_pin_to_timer + pin) : NOT_ON_TIMER )
 
-#define portToPortStruct(port) ( (port < NOT_A_PORT) ? ((PORT_t *)&PORTA + port) : NULL)
+#define portToPortStruct(port) ( (port < NUMBER_OF_PORTS) ? ((PORT_t *)&PORTA + port) : NULL)
 #define digitalPinToPortStruct(pin) ( (pin < NUM_TOTAL_PINS) ? ((PORT_t *)&PORTA + digitalPinToPort(pin)) : NULL)
 #define getPINnCTRLregister(port, bit_pos) ( ((port != NULL) && (bit_pos < NOT_A_PIN)) ? ((uint8_t *)&(port->PIN0CTRL) + bit_pos) : NULL )
 
@@ -109,6 +109,7 @@ extern const uint8_t PROGMEM digital_pin_to_interrupt[];
 #define PD 3
 #define PE 4
 #define PF 5
+#define NUMBER_OF_PORTS 6
 
 #define NOT_ON_TIMER 0
 #define TIMERA0 1
