@@ -128,7 +128,7 @@ void analogWrite(uint8_t pin, int val)
 
 		digitalWrite(pin, LOW);
 
-	} else if(val == 255){	/* if max drive digital high */
+	} else if(val >= 255){	/* if max or greater drive digital high */
 
 		digitalWrite(pin, HIGH);
 
