@@ -27,9 +27,9 @@
 
 #define NUM_DIGITAL_PINS            20
 #define NUM_ANALOG_INPUTS           6
-#define NUM_TESTPOINT_PINS			9	
+#define NUM_TESTPOINT_PINS			9
 #define NUM_OCCUPIED_PINS			6 // (TOSC1/2, VREF, RESET, DEBUG USART Rx/Tx)
-#define NUM_TOTAL_FREE_PINS			(NUM_DIGITAL_PINS + NUM_ANALOG_INPUTS + NUM_TESTPOINT_PINS)	
+#define NUM_TOTAL_FREE_PINS			(NUM_DIGITAL_PINS + NUM_ANALOG_INPUTS + NUM_TESTPOINT_PINS)
 #define NUM_TOTAL_PINS				(NUM_DIGITAL_PINS + NUM_ANALOG_INPUTS + NUM_TESTPOINT_PINS + NUM_OCCUPIED_PINS)
 #define ANALOG_INPUT_OFFSET			14
 #define analogInputToDigitalPin(p)  ((p < NUM_ANALOG_INPUTS) ? (p) + ANALOG_INPUT_OFFSET : NOT_A_PIN)
@@ -82,7 +82,7 @@ static const uint8_t SCL = PIN_WIRE_SCL;
 #define PIN_WIRE_HWSERIAL2_RX (23)
 #define PIN_WIRE_HWSERIAL2_TX (24)
 
-#define LED_BUILTIN 25 
+#define LED_BUILTIN 25
 
 #define PIN_A0   (14)
 #define PIN_A1   (15)
@@ -90,8 +90,8 @@ static const uint8_t SCL = PIN_WIRE_SCL;
 #define PIN_A3   (17)
 #define PIN_A4   (18)
 #define PIN_A5   (19)
-#define PIN_A6   (20)	
-#define PIN_A7   (21)	
+#define PIN_A6   (20)
+#define PIN_A7   (21)
 
 static const uint8_t A0 = PIN_A0;
 static const uint8_t A1 = PIN_A1;
@@ -114,15 +114,15 @@ static const uint8_t A7 = PIN_A7;
 //					   (A5*)(A4*)	   (7)  (2)			   (R)		(3~) (6~)
 //				   PA4  PA3  PA2  PA1  PA0  GND  VDD  UPDI PF6  PF5  PF4  PF3
 //
-// 					48   47   46   45   44   43   42   41   40   39   38   37 
+// 					48   47   46   45   44   43   42   41   40   39   38   37
 //				 + ____ ____ ____ ____ ____ ____ ____ ____ ____ ____ ____ ____ +
-//		  PA5   1|															   |36  PF2 
+//		  PA5   1|															   |36  PF2
 //		  PA6   2|															   |35  PF1 (TOSC2)
 //	      PA7   3|															   |34  PF0 (TOSC1)
 //   (9~) PB0   4|															   |33  PE3 (8)
-//  (10~) PB1   5|															   |32  PE2  
-//   (5~) PB2   6|															   |31  PE1  
-//		  PB3   7|							48pin QFN						   |30  PE0 
+//  (10~) PB1   5|															   |32  PE2
+//   (5~) PB2   6|															   |31  PE1
+//		  PB3   7|							48pin QFN						   |30  PE0
 //   (Tx) PB4   8|															   |29  GND
 //   (Rx) PB5   9|															   |28  AVDD
 //	(11~) PC0  10|															   |27  PD7 (VREF)
@@ -199,11 +199,11 @@ const uint8_t PROGMEM digital_pin_to_port[] = {
 	PA, //7 PA1
 	PE, //8 PE3
 	PB, //9 PB0
-	PB, //10 PB1 
+	PB, //10 PB1
 	PC, //11 PC0
 	PC, //12 PC1
 	PC, //13 PC2
-	PD, //14 AI0 PD0 
+	PD, //14 AI0 PD0
 	PD, //15 AI1 PD1
 	PD, //16 AI2 PD2
 	PD, //17 AI3 PD3
