@@ -57,8 +57,8 @@ static const uint8_t SCL = PIN_WIRE_SCL;
 // Mapped to HWSERIAL0 in Serial library
 #define HWSERIAL0 (&USART1)
 //!!BUG in device header file. The RXC and DRE vectors are swapped!!
-#define HWSERIAL0_DRE_VECTOR (USART1_RXC_vect)
-#define HWSERIAL0_RXC_VECTOR (USART1_DRE_vect)
+#define HWSERIAL0_DRE_VECTOR (USART1_DRE_vect)
+#define HWSERIAL0_RXC_VECTOR (USART1_RXC_vect)
 #define PIN_WIRE_HWSERIAL0_RX (0)
 #define PIN_WIRE_HWSERIAL0_TX (1)
 
@@ -67,8 +67,8 @@ static const uint8_t SCL = PIN_WIRE_SCL;
 // Mapped to HWSERIAL1 in Serial library
 #define HWSERIAL1 (&USART3)
 //!!BUG in device header file. The RXC and DRE vectors are swapped!!
-#define HWSERIAL1_DRE_VECTOR (USART3_RXC_vect)
-#define HWSERIAL1_RXC_VECTOR (USART3_DRE_vect)
+#define HWSERIAL1_DRE_VECTOR (USART3_DRE_vect)
+#define HWSERIAL1_RXC_VECTOR (USART3_RXC_vect)
 #define PIN_WIRE_HWSERIAL1_RX (26)
 #define PIN_WIRE_HWSERIAL1_TX (27)
 
@@ -77,8 +77,8 @@ static const uint8_t SCL = PIN_WIRE_SCL;
 // Mapped to HWSERIAL2 in Serial library
 #define HWSERIAL2 (&USART0)
 //!!BUG in device header file. The RXC and DRE vectors are swapped!!
-#define HWSERIAL2_DRE_VECTOR (USART0_RXC_vect)
-#define HWSERIAL2_RXC_VECTOR (USART0_DRE_vect)
+#define HWSERIAL2_DRE_VECTOR (USART0_DRE_vect)
+#define HWSERIAL2_RXC_VECTOR (USART0_RXC_vect)
 #define PIN_WIRE_HWSERIAL2_RX (23)
 #define PIN_WIRE_HWSERIAL2_TX (24)
 
@@ -339,7 +339,9 @@ const uint8_t PROGMEM digital_pin_to_timer[] = {
 //
 // SERIAL_PORT_HARDWARE_OPEN  Hardware serial ports which are open for use.  Their RX & TX
 //                            pins are NOT connected to anything by default.
-#define SERIAL_PORT_MONITOR   Serial
-#define SERIAL_PORT_HARDWARE  Serial
+#define SERIAL_PORT_MONITOR			Serial
+#define SERIAL_PORT_HARDWARE		Serial
+#define SERIAL_PORT_USBVIRTUAL		Serial1
+#define SERIAL_PORT_HARDWARE_OPEN	Serial2
 
 #endif
