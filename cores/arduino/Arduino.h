@@ -82,10 +82,6 @@ uint16_t clockCyclesPerMicrosecond(uint32_t clk);
 uint16_t clockCyclesToMicroseconds(uint16_t cycles, uint32_t clk);
 uint32_t microsecondsToClockCycles(uint16_t cycles, uint32_t clk);
 
-uint16_t clockCyclesPerMicrosecondOrig();
-uint16_t clockCyclesToMicrosecondsOrig(uint16_t cycles);
-uint32_t microsecondsToClockCyclesOrig(uint16_t cycles);
-
 int atexit(void (*func)()) __attribute__((weak));
 
 void pinMode(uint8_t, uint8_t);

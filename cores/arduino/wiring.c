@@ -52,7 +52,7 @@ volatile uint32_t timerb3_overflow_count = 0;
 volatile uint32_t timerb3_millis = 0;
 static uint16_t timerb3_fract = 0;
 
-inline uint16_t clockCyclesPerMicrosecond(uint32_t clk){ 
+inline uint16_t clockCyclesPerMicrosecond(uint32_t clk ){ 
 	return ( (clk) / 1000000L ); 
 }
 
