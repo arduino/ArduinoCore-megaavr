@@ -66,46 +66,12 @@ extern uint32_t F_CPU_CORRECTED;
 #define _NOP() do { __asm__ volatile ("nop"); } while (0)
 #endif
 
-typedef unsigned int word;
-
-#define bit(b) (1UL << (b))
-
-typedef bool boolean;
-typedef uint8_t byte;
 
 extern uint32_t F_CPU_CORRECTED;
-
-void init(void);
-void initVariant(void);
 
 uint16_t clockCyclesPerMicrosecond(uint32_t clk);
 uint16_t clockCyclesToMicroseconds(uint16_t cycles, uint32_t clk);
 uint32_t microsecondsToClockCycles(uint16_t cycles, uint32_t clk);
-
-int atexit(void (*func)()) __attribute__((weak));
-
-void pinMode(uint8_t, uint8_t);
-void digitalWrite(uint8_t, uint8_t);
-int digitalRead(uint8_t);
-int analogRead(uint8_t);
-void analogReference(uint8_t mode);
-void analogWrite(uint8_t, int);
-
-unsigned long millis(void);
-unsigned long micros(void);
-void delay(unsigned long);
-void delayMicroseconds(unsigned int us);
-unsigned long pulseIn(uint8_t pin, uint8_t state, unsigned long timeout);
-unsigned long pulseInLong(uint8_t pin, uint8_t state, unsigned long timeout);
-
-void shiftOut(uint8_t dataPin, uint8_t clockPin, uint8_t bitOrder, uint8_t val);
-uint8_t shiftIn(uint8_t dataPin, uint8_t clockPin, uint8_t bitOrder);
-
-void attachInterrupt(uint8_t, void (*)(void), int mode);
-void detachInterrupt(uint8_t);
-
-void setup(void);
-void loop(void);
 
 // Get the bit location within the hardware port of the given virtual pin.
 // This comes from the pins_*.c file for the active board configuration.
