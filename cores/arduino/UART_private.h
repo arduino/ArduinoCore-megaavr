@@ -1,5 +1,5 @@
 /*
-  HardwareSerial_private.h - Hardware serial library for Wiring
+  UART_private.h - Hardware serial library for Wiring
   Copyright (c) 2006 Nicholas Zambetti.  All right reserved.
 
   This library is free software; you can redistribute it and/or
@@ -23,7 +23,7 @@
 
 #include "wiring_private.h"
 
-// this next line disables the entire HardwareSerial.cpp, 
+// this next line disables the entire UART.cpp, 
 // this is so I can support Attiny series and any other chip without a uart
 #if defined(HAVE_HWSERIAL0) || defined(HAVE_HWSERIAL1) || defined(HAVE_HWSERIAL2) || defined(HAVE_HWSERIAL3)
 

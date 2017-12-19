@@ -45,14 +45,13 @@ ISR(HWSERIAL1_RXC_VECTOR)
 #error "Don't know what the Data Received interrupt vector is called for Serial1"
 #endif
 
-//!!BUG in headerfile. The RXC and DRE vectors are swapped!!
 #if defined(HWSERIAL1_DRE_VECTOR)
 ISR(HWSERIAL1_DRE_VECTOR)
 {
   Serial1._tx_data_empty_irq();
 }
 #else
-#error "Don't know what the Data Received interrupt vector is called for Serial"
+#error "Don't know what the Data Register Empty interrupt vector is called for Serial1"
 #endif
 
 #if defined(HWSERIAL1)

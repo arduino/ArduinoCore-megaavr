@@ -42,17 +42,16 @@ ISR(HWSERIAL3_RXC_VECTOR)
   Serial3._rx_complete_irq();
 }
 #else
-#error "Don't know what the Data Received interrupt vector is called for Serial1"
+#error "Don't know what the Data Received interrupt vector is called for Serial3"
 #endif
 
-//!!BUG in headerfile. The RXC and DRE vectors are swapped!!
 #if defined(HWSERIAL3_DRE_VECTOR)
 ISR(HWSERIAL3_DRE_VECTOR)
 {
   Serial3._tx_data_empty_irq();
 }
 #else
-#error "Don't know what the Data Received interrupt vector is called for Serial"
+#error "Don't know what the Data Register Empty interrupt vector is called for Serial3"
 #endif
 
 #if defined(HWSERIAL3)

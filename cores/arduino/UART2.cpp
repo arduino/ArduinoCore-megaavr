@@ -42,17 +42,16 @@ ISR(HWSERIAL2_RXC_VECTOR)
   Serial2._rx_complete_irq();
 }
 #else
-#error "Don't know what the Data Received interrupt vector is called for Serial1"
+#error "Don't know what the Data Received interrupt vector is called for Serial2"
 #endif
 
-//!!BUG in headerfile. The RXC and DRE vectors are swapped!!
 #if defined(HWSERIAL2_DRE_VECTOR)
 ISR(HWSERIAL2_DRE_VECTOR)
 {
   Serial2._tx_data_empty_irq();
 }
 #else
-#error "Don't know what the Data Received interrupt vector is called for Serial"
+#error "Don't know what the Data Register Empty interrupt vector is called for Serial2"
 #endif
 
 #if defined(HWSERIAL2)
