@@ -291,7 +291,7 @@ void init()
 							/*  TYPE A TIMER   */
 
 	/* PORTMUX setting for TCA -> all outputs [0:2] point to PORTB pins [0:2] */
-	PORTMUX.TCA	= PORTMUX_TCA0_PORTB_gc;
+	PORTMUX.TCAROUTEA	= PORTMUX_TCA0_PORTB_gc;
 
 	/* Setup timers for single slope PWM, but do not enable, will do in analogWrite() */
 	TCA0.SINGLE.CTRLB |= (TCA_SINGLE_WGMODE_SINGLESLOPE_gc);
@@ -311,7 +311,7 @@ void init()
 						    /*	TYPE B TIMERS  */
 
 	/* PORTMUX alternate location needed for TCB0 & 1, TCB2 is default location */
-	PORTMUX.TCB	|= (PORTMUX_TCB0_bm | PORTMUX_TCB1_bm);
+	PORTMUX.TCBROUTEA	|= (PORTMUX_TCB0_bm | PORTMUX_TCB1_bm);
 
 	/* Start with TCB0 */
 	TCB_t *timer_B = (TCB_t *)&TCB0;
@@ -393,7 +393,7 @@ void init()
 /****************************** USART *****************************************/
 
 	/* Configure PORTMUX for USARTS */
-	PORTMUX.USARTA = (PORTMUX_USART1_ALT1_gc // MAIN
+	PORTMUX.USARTROUTEA = (PORTMUX_USART1_ALT1_gc // MAIN
 					| PORTMUX_USART0_ALT1_gc // SPARE
 					| PORTMUX_USART3_ALT1_gc); // DEBUG
 
