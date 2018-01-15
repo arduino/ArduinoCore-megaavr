@@ -392,10 +392,20 @@ void init()
 
 /****************************** USART *****************************************/
 
+#ifdef REV_A_ENGINEERING_SAMPLE
+	/* Configure PORTMUX for USARTS */
+	//PORTMUX.USARTROUTEA = (PORTMUX_USART1_ALT1_gc // MAIN
+	//| PORTMUX_USART0_ALT1_gc // SPARE
+	//| PORTMUX_USART3_ALT1_gc); // DEBUG
+
+	PORTMUX.USARTROUTEA = (PORTMUX_USART0_ALT1_gc // SPARE
+	| PORTMUX_USART3_ALT1_gc); // DEBUG
+#else
 	/* Configure PORTMUX for USARTS */
 	PORTMUX.USARTROUTEA = (PORTMUX_USART1_ALT1_gc // MAIN
 					| PORTMUX_USART0_ALT1_gc // SPARE
 					| PORTMUX_USART3_ALT1_gc); // DEBUG
+#endif
 
 /********************* TCB3 for system time tracking **************************/
 

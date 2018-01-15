@@ -59,8 +59,13 @@ static const uint8_t SCL = PIN_WIRE_SCL;
 //!!BUG in device header file. The RXC and DRE vectors are swapped!!
 #define HWSERIAL0_DRE_VECTOR (USART1_DRE_vect)
 #define HWSERIAL0_RXC_VECTOR (USART1_RXC_vect)
+#ifdef REV_A_ENGINEERING_SAMPLE
+#define PIN_WIRE_HWSERIAL0_RX (12)
+#define PIN_WIRE_HWSERIAL0_TX (11)
+#else
 #define PIN_WIRE_HWSERIAL0_RX (0)
 #define PIN_WIRE_HWSERIAL0_TX (1)
+#endif
 
 // Uno2 Debug USART (not available on headers, only via the EDGB virtual COM port)
 // USART3 on mega4809 (alternative pins)
