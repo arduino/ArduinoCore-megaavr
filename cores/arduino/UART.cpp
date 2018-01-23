@@ -101,24 +101,38 @@ void UartClass::_tx_data_empty_irq(void)
   // buffer. Send the next byte
   unsigned char c = _tx_buffer[_tx_buffer_tail];
   _tx_buffer_tail = (_tx_buffer_tail + 1) % SERIAL_TX_BUFFER_SIZE;
-
-  (*_hwserial_module).TXDATAL = c;
-
+  
   // clear the TXCIF flag -- "can be cleared by writing a one to its bit
   // location". This makes sure flush() won't return until the bytes
   // actually got written
-  (*_hwserial_module).STATUS |= USART_TXCIF_bm;
+  (*_hwserial_module).STATUS = USART_TXCIF_bm;
+  
+  (*_hwserial_module).TXDATAL = c;
+  
+  while(!((*_hwserial_module).STATUS & USART_DREIF_bm));
 
-  if (_tx_buffer_head == _tx_buffer_tail) {
-    // Buffer empty, so disable "data register empty" interrupt
-    (*_hwserial_module).CTRLA &= (~USART_DREIE_bm);
-  }
+   if (_tx_buffer_head == _tx_buffer_tail) {
+     // Buffer empty, so disable "data register empty" interrupt
+     (*_hwserial_module).CTRLA &= (~USART_DREIE_bm);
+	 
+	 //Take the DRE interrupt back no normal priority level if it has been elevated
+	 if(_hwserial_dre_interrupt_elevated){
+		 CPUINT.LVL1VEC = _prev_lvl1_interrupt_vect;
+		 _hwserial_dre_interrupt_elevated = 0;
+	 }	 
+   }
 }
 
 // Public Methods //////////////////////////////////////////////////////////////
 
 void UartClass::begin(unsigned long baud, uint16_t config)
 {
+  // Make sure no transmissions are ongoing and USART is disabled in case begin() is called by accident
+  // without first calling end()
+  if(_written){
+	  this->end();
+  }
+
   //uint16_t baud_setting = 0;
   int32_t baud_setting = 0;
   uint8_t error = 0;
@@ -126,16 +140,6 @@ void UartClass::begin(unsigned long baud, uint16_t config)
   //Make sure global interrupts are disabled during initialization
   uint8_t oldSREG = SREG;
   cli();
-
-  //Set up the rx and rx pins
-  pinMode(_hwserial_rx_pin, INPUT_PULLUP);
-
-  pinMode(_hwserial_tx_pin, OUTPUT);
-  digitalWrite(_hwserial_tx_pin, HIGH);
-
-  // Make sure no transmissions are ongoing in case begin() is called by accident
-  // without first calling end()
-  flush();
 
   // ********Check if desired baud rate is within the acceptable range for using CLK2X RX-mode********
   // Condition from datasheet
@@ -178,7 +182,7 @@ void UartClass::begin(unsigned long baud, uint16_t config)
     error = 1;
   }
 
-  // Do nothing if an invalid baud rate is requested
+// Do nothing if an invalid baud rate is requested
   if(!error) {
 
 #ifdef PERFORM_BAUD_CORRECTION
@@ -199,15 +203,25 @@ void UartClass::begin(unsigned long baud, uint16_t config)
     }
 #endif
 
-    // assign the baud_setting, a.k.a. BAUD (USART Baud Rate Register)
-    (*_hwserial_module).BAUD = (int16_t) baud_setting;
-
     _written = false;
 
-    (*_hwserial_module).CTRLC = config;
+	//Set up the rx pin
+	pinMode(_hwserial_rx_pin, INPUT_PULLUP);
+	
+	//Set up the tx pin
+	digitalWrite(_hwserial_tx_pin, HIGH);
+	pinMode(_hwserial_tx_pin, OUTPUT);	
 
+	// assign the baud_setting, a.k.a. BAUD (USART Baud Rate Register)
+    (*_hwserial_module).BAUD = (int16_t) baud_setting;
+
+	// Set USART mode of operation
+    (*_hwserial_module).CTRLC = config;
+	
+	// Enable transmitter and receiver	
+	(*_hwserial_module).CTRLB |= (USART_RXEN_bm | USART_TXEN_bm);
+		
     (*_hwserial_module).CTRLA |= USART_RXCIE_bm;
-    (*_hwserial_module).CTRLB |= (USART_RXEN_bm | USART_TXEN_bm);
   }
 
   // Restore SREG content
@@ -277,16 +291,25 @@ void UartClass::flush()
   if (!_written) {
     return;
   }
+  
+  //Check if we are inside an ISR already (e.g. connected to a different peripheral then UART), in which case the UART ISRs will not be called.
+  //Temporarily elevate the DRE interrupt to allow it to run.
+  if(CPUINT.STATUS & CPUINT_LVL0EX_bm){
+	  //Elevate the priority level of the Data Register Empty Interrupt vector
+	  //and copy whatever vector number that might be in the register already.
+	  _prev_lvl1_interrupt_vect = CPUINT.LVL1VEC;
+	  CPUINT.LVL1VEC = _hwserial_dre_interrupt_vect_num;
+	  
+	  _hwserial_dre_interrupt_elevated = 1;
+  }
 
   // Spin until the data-register-empty-interrupt is disabled and TX complete interrupt flag is raised
   while ( ((*_hwserial_module).CTRLA & USART_DREIE_bm) || (!((*_hwserial_module).STATUS & USART_TXCIF_bm)) ) {
 
     // If interrupts are globally disabled or the and DR empty interrupt is disabled,
     // poll the "data register empty" interrupt flag to prevent deadlock
-    if ( (!(SREG & CPU_I_bm)) || (!((*_hwserial_module).CTRLA & USART_DREIE_bm)) ){ //TODO: Verify that || instead of && is correct here
-      if ( (*_hwserial_module).STATUS & USART_DREIF_bm ){
-        _tx_data_empty_irq();
-      }
+    if ( (!(SREG & CPU_I_bm)) || (!((*_hwserial_module).CTRLA & USART_DREIE_bm)) ){
+      _tx_data_empty_irq();      
     }
   }
   // If we get here, nothing is queued anymore (DREIE is disabled) and
@@ -303,7 +326,7 @@ size_t UartClass::write(uint8_t c)
   // 500kbit/s) bit rates, where interrupt overhead becomes a slowdown.
   if ( (_tx_buffer_head == _tx_buffer_tail) && ((*_hwserial_module).STATUS & USART_DREIF_bm) ) {
     (*_hwserial_module).TXDATAL = c;
-    (*_hwserial_module).STATUS |= USART_TXCIF_bm;
+    (*_hwserial_module).STATUS = USART_TXCIF_bm;
 
     // Make sure data register empty interrupt is disabled to avoid
     // that the interrupt handler is called in this situation
@@ -312,24 +335,33 @@ size_t UartClass::write(uint8_t c)
     return 1;
   }
 
+	//Check if we are inside an ISR already (could be from by a source other than UART),
+	// in which case the UART ISRs will be blocked.
+	if(CPUINT.STATUS & CPUINT_LVL0EX_bm){
+		//Elevate the priority level of the Data Register Empty Interrupt vector
+		//and copy whatever vector number that might be in the register already.
+		_prev_lvl1_interrupt_vect = CPUINT.LVL1VEC;
+		CPUINT.LVL1VEC = _hwserial_dre_interrupt_vect_num;
+		
+		_hwserial_dre_interrupt_elevated = 1;
+    }
+
   tx_buffer_index_t i = (_tx_buffer_head + 1) % SERIAL_TX_BUFFER_SIZE;
 
-  // If the output buffer is full, there's nothing for it other than to
-  // wait for the interrupt handler to empty it a bit
-  while (i == _tx_buffer_tail) {
-
-    if ( (!(SREG & CPU_I_bm)) || (!((*_hwserial_module).CTRLA & USART_DREIE_bm)) ) {//TODO: Verify addition of DREIE-check
-      // Interrupts are disabled either globally or for data register empty,
-      // so we'll have to poll the "data register empty" flag ourselves.
-      // If it is set, pretend an interrupt has happened and call the handler 
-      //to free up space for us.
-      if( (*_hwserial_module).STATUS & USART_DREIF_bm) {
-        _tx_data_empty_irq();
-      }
-    } else {
-      // nop, the interrupt handler will free up space for us
-    }
-  }
+   //If the output buffer is full, there's nothing for it other than to
+   //wait for the interrupt handler to empty it a bit
+   while (i == _tx_buffer_tail) {
+	   if ( ( !(SREG & CPU_I_bm) ) || ( !((*_hwserial_module).CTRLA & USART_DREIE_bm) ) ){
+		   // Interrupts are disabled either globally or for data register empty,
+		   // so we'll have to poll the "data register empty" flag ourselves.
+		   // If it is set, pretend an interrupt has happened and call the handler
+		   //to free up space for us.
+		   
+		   _tx_data_empty_irq();
+		   } else {
+		   // nop, the interrupt handler will free up space for us
+	   }
+   }
 
   _tx_buffer[_tx_buffer_head] = c;
   _tx_buffer_head = i;
