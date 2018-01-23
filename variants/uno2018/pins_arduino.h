@@ -46,8 +46,8 @@ static const uint8_t MOSI = PIN_SPI_MOSI;
 static const uint8_t MISO = PIN_SPI_MISO;
 static const uint8_t SCK  = PIN_SPI_SCK;
 
-#define PIN_WIRE_SDA        (18)
-#define PIN_WIRE_SCL        (19)
+#define PIN_WIRE_SDA        (20)
+#define PIN_WIRE_SCL        (21)
 
 static const uint8_t SDA = PIN_WIRE_SDA;
 static const uint8_t SCL = PIN_WIRE_SCL;
@@ -56,8 +56,8 @@ static const uint8_t SCL = PIN_WIRE_SCL;
 // USART1 on mega4809 (alternative pins)
 // Mapped to HWSERIAL0 in Serial library
 #define HWSERIAL0 (&USART1)
-//!!BUG in device header file. The RXC and DRE vectors are swapped!!
 #define HWSERIAL0_DRE_VECTOR (USART1_DRE_vect)
+#define HWSERIAL0_DRE_VECTOR_NUM (USART1_DRE_vect_num)
 #define HWSERIAL0_RXC_VECTOR (USART1_RXC_vect)
 #define PIN_WIRE_HWSERIAL0_RX (0)
 #define PIN_WIRE_HWSERIAL0_TX (1)
@@ -66,8 +66,8 @@ static const uint8_t SCL = PIN_WIRE_SCL;
 // USART3 on mega4809 (alternative pins)
 // Mapped to HWSERIAL1 in Serial library
 #define HWSERIAL1 (&USART3)
-//!!BUG in device header file. The RXC and DRE vectors are swapped!!
 #define HWSERIAL1_DRE_VECTOR (USART3_DRE_vect)
+#define HWSERIAL1_DRE_VECTOR_NUM (USART3_DRE_vect_num)
 #define HWSERIAL1_RXC_VECTOR (USART3_RXC_vect)
 #define PIN_WIRE_HWSERIAL1_RX (26)
 #define PIN_WIRE_HWSERIAL1_TX (27)
@@ -76,8 +76,8 @@ static const uint8_t SCL = PIN_WIRE_SCL;
 // USART0 on mega4809 (alternative pins)
 // Mapped to HWSERIAL2 in Serial library
 #define HWSERIAL2 (&USART0)
-//!!BUG in device header file. The RXC and DRE vectors are swapped!!
 #define HWSERIAL2_DRE_VECTOR (USART0_DRE_vect)
+#define HWSERIAL2_DRE_VECTOR_NUM (USART0_DRE_vect_num)
 #define HWSERIAL2_RXC_VECTOR (USART0_RXC_vect)
 #define PIN_WIRE_HWSERIAL2_RX (23)
 #define PIN_WIRE_HWSERIAL2_TX (24)
