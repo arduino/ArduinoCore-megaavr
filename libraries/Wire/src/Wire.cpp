@@ -29,16 +29,18 @@ extern "C" {
 
 #include "Wire.h"
 
+#define DEFAULT_FREQUENCY 100000
+
 // Initialize Class Variables //////////////////////////////////////////////////
 
 uint8_t TwoWire::rxBuffer[BUFFER_LENGTH];
-uint8_t TwoWire::rxBufferIndex = 0;
-uint8_t TwoWire::rxBufferLength = 0;
+uint8_t TwoWire::rxBufferIndex = 0;			//head
+uint8_t TwoWire::rxBufferLength = 0;		//tail
 
 uint8_t TwoWire::txAddress = 0;
 uint8_t TwoWire::txBuffer[BUFFER_LENGTH];
-uint8_t TwoWire::txBufferIndex = 0;
-uint8_t TwoWire::txBufferLength = 0;
+uint8_t TwoWire::txBufferIndex = 0;			//head
+uint8_t TwoWire::txBufferLength = 0;		//tail
 
 uint8_t TwoWire::transmitting = 0;
 void (*TwoWire::user_onRequest)(void);
@@ -54,69 +56,71 @@ TwoWire::TwoWire()
 
 void TwoWire::begin(void)
 {
-  rxBufferIndex = 0;
-  rxBufferLength = 0;
+	rxBufferIndex = 0;
+	rxBufferLength = 0;
 
-  txBufferIndex = 0;
-  txBufferLength = 0;
+	txBufferIndex = 0;
+	txBufferLength = 0;
 
-  twi_init();
-  twi_attachSlaveTxEvent(onRequestService); // default callback must exist
-  twi_attachSlaveRxEvent(onReceiveService); // default callback must exist
+	TWI_MasterInit(DEFAULT_FREQUENCY);	
 }
 
 void TwoWire::begin(uint8_t address)
 {
-  begin();
-  twi_setAddress(address);
+	rxBufferIndex = 0;
+	rxBufferLength = 0;
+
+	txBufferIndex = 0;
+	txBufferLength = 0;
+  
+	TWI_SlaveInit(address);
+	
+	TWI_attachSlaveTxEvent(onRequestService); // default callback must exist
+	TWI_attachSlaveRxEvent(onReceiveService); // default callback must exist
+	
 }
 
 void TwoWire::begin(int address)
 {
-  begin((uint8_t)address);
+	begin((uint8_t)address);
 }
 
 void TwoWire::end(void)
 {
-  twi_disable();
+	TWI_Disable();
 }
 
 void TwoWire::setClock(uint32_t clock)
 {
-  twi_setFrequency(clock);
+	TWI_MasterSetBaud(clock);
 }
 
 uint8_t TwoWire::requestFrom(uint8_t address, uint8_t quantity, uint32_t iaddress, uint8_t isize, uint8_t sendStop)
 {
-  if (isize > 0) {
-  // send internal address; this mode allows sending a repeated start to access
-  // some devices' internal registers. This function is executed by the hardware
-  // TWI module on other processors (for example Due's TWI_IADR and TWI_MMR registers)
+	if(isize > 3) {
+		isize = 3;
+	}
+	
+	if(quantity > BUFFER_LENGTH){
+		quantity = BUFFER_LENGTH;
+	}
+	
+	uint8_t bytes_read = TWI_MasterWriteRead(address,
+											(uint8_t *) &iaddress,
+											isize,
+											quantity,
+											sendStop);
+	
+	/* Copy read buffer from lower layer */
+	for(uint8_t i = 0; i < bytes_read; i++){
+		rxBuffer[i] = master_readData[i];
+	}
+	
+	/* Initialize read variables */
+	rxBufferIndex = 0;
+	rxBufferLength = bytes_read;
 
-  beginTransmission(address);
-
-  // the maximum size of internal address is 3 bytes
-  if (isize > 3){
-    isize = 3;
-  }
-
-  // write internal register address - most significant byte first
-  while (isize-- > 0)
-    write((uint8_t)(iaddress >> (isize*8)));
-  endTransmission(false);
-  }
-
-  // clamp to buffer length
-  if(quantity > BUFFER_LENGTH){
-    quantity = BUFFER_LENGTH;
-  }
-  // perform blocking read into buffer
-  uint8_t read = twi_readFrom(address, rxBuffer, quantity, sendStop);
-  // set rx buffer iterator vars
-  rxBufferIndex = 0;
-  rxBufferLength = read;
-
-  return read;
+	return bytes_read;
 }
 
 uint8_t TwoWire::requestFrom(uint8_t address, size_t quantity, bool sendStop) {
@@ -125,17 +129,17 @@ uint8_t TwoWire::requestFrom(uint8_t address, size_t quantity, bool sendStop) {
 
 uint8_t TwoWire::requestFrom(uint8_t address, size_t quantity)
 {
-  return requestFrom(address, quantity, true);
+	return requestFrom(address, quantity, true);
 }
 
 uint8_t TwoWire::requestFrom(int address, int quantity)
 {
-  return requestFrom((uint8_t)address, (size_t)quantity, true);
+	return requestFrom((uint8_t)address, (size_t)quantity, true);
 }
 
 uint8_t TwoWire::requestFrom(int address, int quantity, int sendStop)
 {
-  return requestFrom((uint8_t)address, (size_t)quantity, (bool)sendStop);
+	return requestFrom((uint8_t)address, (size_t)quantity, (bool)sendStop);
 }
 
 void TwoWire::beginTransmission(uint8_t address)
@@ -151,7 +155,7 @@ void TwoWire::beginTransmission(uint8_t address)
 
 void TwoWire::beginTransmission(int address)
 {
-  beginTransmission((uint8_t)address);
+	beginTransmission((uint8_t)address);
 }
 
 //
@@ -169,14 +173,17 @@ void TwoWire::beginTransmission(int address)
 //
 uint8_t TwoWire::endTransmission(bool sendStop)
 {
-  // transmit buffer (blocking)
-  uint8_t ret = twi_writeTo(txAddress, txBuffer, txBufferLength, 1, sendStop);
-  // reset tx buffer iterator vars
-  txBufferIndex = 0;
-  txBufferLength = 0;
-  // indicate that we are done transmitting
-  transmitting = 0;
-  return ret;
+	// transmit buffer (blocking)
+	uint8_t status = TWI_MasterWrite(txAddress, txBuffer, txBufferLength, sendStop);
+	
+	// reset tx buffer iterator vars
+	txBufferIndex = 0;
+	txBufferLength = 0;
+	
+	// indicate that we are done transmitting
+	transmitting = 0;
+	
+	return status;
 }
 
 //	This provides backwards compatibility with the original
@@ -192,24 +199,39 @@ uint8_t TwoWire::endTransmission(void)
 // or after beginTransmission(address)
 size_t TwoWire::write(uint8_t data)
 {
-  if(transmitting){
-  // in master transmitter mode
-    // don't bother if buffer is full
-    if(txBufferLength >= BUFFER_LENGTH){
-      setWriteError();
-      return 0;
-    }
-    // put byte in tx buffer
-    txBuffer[txBufferIndex] = data;
-    ++txBufferIndex;
-    // update amount in buffer   
-    txBufferLength = txBufferIndex;
-  }else{
-  // in slave send mode
-    // reply to master
-    twi_transmit(&data, 1);
-  }
-  return 1;
+	/* If master transmitter */
+	if(transmitting){
+
+		/* Check if buffer is full */
+		if(txBufferLength >= BUFFER_LENGTH){
+		  setWriteError();
+		  return 0;
+		}
+	
+		/* Put byte in txBuffer */
+		txBuffer[txBufferIndex] = data;
+		txBufferIndex++;
+	
+		/* Update buffer length */
+		txBufferLength = txBufferIndex;
+	
+	}
+  
+	/* If slave transmitter */
+	else{
+
+		/* Check if buffer full */
+		if(slave_bytesToWrite >= TWI_BUFFER_SIZE){
+			setWriteError();
+			return 0;
+		}
+
+		slave_writeData[slave_bytesToWrite] = data;
+		slave_bytesToWrite++;
+
+	}
+	 
+	 return 1;
 }
 
 // must be called in:
@@ -217,17 +239,12 @@ size_t TwoWire::write(uint8_t data)
 // or after beginTransmission(address)
 size_t TwoWire::write(const uint8_t *data, size_t quantity)
 {
-  if(transmitting){
-  // in master transmitter mode
-    for(size_t i = 0; i < quantity; ++i){
-      write(data[i]);
-    }
-  }else{
-  // in slave send mode
-    // reply to master
-    twi_transmit(data, quantity);
-  }
-  return quantity;
+
+	for(size_t i = 0; i < quantity; i++){
+		write(*(data + i));
+	}
+
+	return quantity;
 }
 
 // must be called in:
@@ -235,7 +252,7 @@ size_t TwoWire::write(const uint8_t *data, size_t quantity)
 // or after requestFrom(address, numBytes)
 int TwoWire::available(void)
 {
-  return rxBufferLength - rxBufferIndex;
+	return rxBufferLength - rxBufferIndex;
 }
 
 // must be called in:
@@ -243,15 +260,15 @@ int TwoWire::available(void)
 // or after requestFrom(address, numBytes)
 int TwoWire::read(void)
 {
-  int value = -1;
+	int value = -1;
   
-  // get each successive byte on each call
-  if(rxBufferIndex < rxBufferLength){
-    value = rxBuffer[rxBufferIndex];
-    ++rxBufferIndex;
-  }
+	// get each successive byte on each call
+	if(rxBufferIndex < rxBufferLength){
+		value = rxBuffer[rxBufferIndex];
+		rxBufferIndex++;
+	}
 
-  return value;
+	return value;
 }
 
 // must be called in:
@@ -259,70 +276,90 @@ int TwoWire::read(void)
 // or after requestFrom(address, numBytes)
 int TwoWire::peek(void)
 {
-  int value = -1;
+	int value = -1;
   
-  if(rxBufferIndex < rxBufferLength){
-    value = rxBuffer[rxBufferIndex];
-  }
+	if(rxBufferIndex < rxBufferLength){
+		value = rxBuffer[rxBufferIndex];
+	}
 
-  return value;
+	return value;
 }
 
+// can be used to get out of an error state in TWI module 
+// e.g. when MDATA regsiter is written before MADDR
 void TwoWire::flush(void)
 {
-  // XXX: to be implemented.
+// 	/* Clear buffers */
+// 	for(uint8_t i = 0; i < BUFFER_LENGTH; i++){
+// 		txBuffer[i] = 0;
+// 		rxBuffer[i] = 0;
+// 	}
+// 	
+// 	/* Clear buffer variables */
+// 	txBufferIndex = 0;
+// 	txBufferLength = 0;
+// 	rxBufferIndex = 0;
+// 	rxBufferLength = 0;
+// 	
+// 	/* Turn off and on TWI module */
+// 	TWI_Flush();
 }
 
 // behind the scenes function that is called when data is received
 void TwoWire::onReceiveService(uint8_t* inBytes, int numBytes)
 {
-  // don't bother if user hasn't registered a callback
-  if(!user_onReceive){
-    return;
-  }
-  // don't bother if rx buffer is in use by a master requestFrom() op
-  // i know this drops data, but it allows for slight stupidity
-  // meaning, they may not have read all the master requestFrom() data yet
-  if(rxBufferIndex < rxBufferLength){
-    return;
-  }
-  // copy twi rx buffer into local read buffer
-  // this enables new reads to happen in parallel
-  for(uint8_t i = 0; i < numBytes; ++i){
-    rxBuffer[i] = inBytes[i];    
-  }
-  // set rx iterator vars
-  rxBufferIndex = 0;
-  rxBufferLength = numBytes;
-  // alert user program
-  user_onReceive(numBytes);
+	// don't bother if user hasn't registered a callback
+	if(!user_onReceive){
+		return;
+	}
+	// don't bother if rx buffer is in use by a master requestFrom() op
+	// i know this drops data, but it allows for slight stupidity
+	// meaning, they may not have read all the master requestFrom() data yet
+	if(rxBufferIndex < rxBufferLength){
+		return;
+	}
+	
+	// copy twi rx buffer into local read buffer
+	// this enables new reads to happen in parallel
+	for(uint8_t i = 0; i < numBytes; ++i){
+		rxBuffer[i] = inBytes[i];    
+	}
+	
+	// set rx iterator vars
+	rxBufferIndex = 0;
+	rxBufferLength = numBytes;
+	
+	// alert user program
+	user_onReceive(numBytes);
 }
 
 // behind the scenes function that is called when data is requested
 void TwoWire::onRequestService(void)
 {
-  // don't bother if user hasn't registered a callback
-  if(!user_onRequest){
-    return;
-  }
-  // reset tx buffer iterator vars
-  // !!! this will kill any pending pre-master sendTo() activity
-  txBufferIndex = 0;
-  txBufferLength = 0;
-  // alert user program
-  user_onRequest();
+	// don't bother if user hasn't registered a callback
+	if(!user_onRequest){
+		return;
+	}
+	
+	// reset tx buffer iterator vars
+	// !!! this will kill any pending pre-master sendTo() activity
+	txBufferIndex = 0;
+	txBufferLength = 0;
+  
+	// alert user program
+	user_onRequest();
 }
 
 // sets function called on slave write
 void TwoWire::onReceive( void (*function)(int) )
 {
-  user_onReceive = function;
+	user_onReceive = function;
 }
 
 // sets function called on slave read
 void TwoWire::onRequest( void (*function)(void) )
 {
-  user_onRequest = function;
+	user_onRequest = function;
 }
 
 // Preinstantiate Objects //////////////////////////////////////////////////////
