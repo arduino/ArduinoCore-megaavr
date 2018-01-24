@@ -69,9 +69,10 @@ extern uint32_t F_CPU_CORRECTED;
 
 extern uint32_t F_CPU_CORRECTED;
 
-uint16_t clockCyclesPerMicrosecond(uint32_t clk);
-uint16_t clockCyclesToMicroseconds(uint16_t cycles, uint32_t clk);
-uint32_t microsecondsToClockCycles(uint16_t cycles, uint32_t clk);
+uint16_t clockCyclesPerMicrosecondComp(uint32_t clk);
+uint16_t clockCyclesPerMicrosecond();
+uint16_t clockCyclesToMicroseconds(uint16_t cycles);
+uint32_t microsecondsToClockCycles(uint16_t microseconds);
 
 // Get the bit location within the hardware port of the given virtual pin.
 // This comes from the pins_*.c file for the active board configuration.
