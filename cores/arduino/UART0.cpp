@@ -45,7 +45,6 @@ ISR(HWSERIAL0_RXC_VECTOR)
 #error "Don't know what the Data Received interrupt vector is called for Serial"
 #endif
 
-//!!BUG in headerfile. The RXC and DRE vectors are swapped!!
 #if defined(HWSERIAL0_DRE_VECTOR)
 ISR(HWSERIAL0_DRE_VECTOR)
 {
@@ -56,7 +55,7 @@ ISR(HWSERIAL0_DRE_VECTOR)
 #endif
 
 #if defined(HWSERIAL0)
-  UartClass Serial(HWSERIAL0, PIN_WIRE_HWSERIAL0_RX, PIN_WIRE_HWSERIAL0_TX);
+  UartClass Serial(HWSERIAL0, PIN_WIRE_HWSERIAL0_RX, PIN_WIRE_HWSERIAL0_TX, HWSERIAL0_DRE_VECTOR_NUM);
 #endif
 
 // Function that can be weakly referenced by serialEventRun to prevent
