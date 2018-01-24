@@ -19,20 +19,10 @@
 * THAT YOU HAVE PAID DIRECTLY TO MICROCHIP FOR THIS SOFTWARE.
 *
  *****************************************************************************/
-#ifndef TWI_MASTER_DRIVER_H
-#define TWI_MASTER_DRIVER_H
+#ifndef TWI_DRIVER_H
+#define TWI_DRIVER_H
 
 #include "avr/io.h"
-
-// typedef uint8_t bool;
-// #define false 0
-// #define true 1
-
-//#define F_CPU_CORRECTED 16000000
-
-/*! Baud register setting calculation. Formula described in datasheet. */
-//#define TWI_BAUD(F_SYS, F_TWI) ((F_SYS / (2 * F_TWI)) - 5)
-
 
 /*! Transaction status defines. */
 #define TWIM_STATUS_READY              0
@@ -167,4 +157,4 @@ void TWI_SlaveTransactionFinished(uint8_t result);
  */ 
 
 
-#endif /* TWI_MASTER_DRIVER_H */
+#endif /* TWI_DRIVER_H */
