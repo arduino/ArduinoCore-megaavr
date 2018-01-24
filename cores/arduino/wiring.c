@@ -277,12 +277,12 @@ void init()
 	/* Disable system clock prescaler - F_CPU should now be ~16MHz */
 	_PROTECTED_WRITE(CLKCTRL_MCLKCTRLB, 0x00);
 
-	/* Calculate actual F_CPU with error values from signature row */
-	int8_t sigrow_val = SIGROW.OSC16ERR5V;
-	int64_t cpu_freq = F_CPU;
-	cpu_freq *= (1024 + sigrow_val);
-	cpu_freq /= 1024;
-	F_CPU_CORRECTED = (uint32_t)cpu_freq;
+// 	/* Calculate actual F_CPU with error values from signature row */
+// 	int8_t sigrow_val = SIGROW.OSC16ERR5V;
+// 	int64_t cpu_freq = F_CPU;
+// 	cpu_freq *= (1024 + sigrow_val);
+// 	cpu_freq /= 1024;
+// 	F_CPU_CORRECTED = (uint32_t)cpu_freq;
 
 /***************************** TIMERS FOR PWM *********************************/
 
