@@ -56,7 +56,9 @@ extern "C"{
 #define VDD         ADC_REFSEL_VDDREF_gc
 #define EXTERNAL    ADC_REFSEL_VREFA_gc
 
-extern uint32_t F_CPU_CORRECTED;
+#define VCC_5V 2
+#define VCC_3V3 1
+#define VCC_1V8 0
 
 #define interrupts() sei()
 #define noInterrupts() cli()
@@ -66,7 +68,7 @@ extern uint32_t F_CPU_CORRECTED;
 #define _NOP() do { __asm__ volatile ("nop"); } while (0)
 #endif
 
-
+#define PERFORM_SIGROW_CORRECTION_F_CPU 0
 extern uint32_t F_CPU_CORRECTED;
 
 uint16_t clockCyclesPerMicrosecond(uint32_t clk);
