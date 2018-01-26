@@ -123,8 +123,8 @@ void analogWrite(uint8_t pin, int val)
 	if(bit_pos == NOT_A_PIN) return;
 
 	/* Special check for SPI_SS double bonded pin -- no action if SPI is active 
-		(Using Slave Select Disable as indicator of SPI activity) */
-	if((pin == 10) && (SPI0.CTRLB & SPI_SSD_bm)) return;
+		(Using SPI Enable bit as indicator of SPI activity) */
+	if((pin == 10) && (SPI0.CTRLA & SPI_ENABLE_bm)) return;
 	
 	/* Check if TWI is operating on double bonded pin (Master Enable is high 
 	in both Master and Slave mode for bus error detection, so this can 

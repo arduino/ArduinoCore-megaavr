@@ -38,8 +38,8 @@ void pinMode(uint8_t pin, PinMode mode)
 	if(((pin == PIN_A4) || (pin == PIN_A5)) && (TWI0.MCTRLA & TWI_ENABLE_bm)) return;
 	
 	/* Special check for SPI_SS double bonded pin -- no action if SPI is active 
-		(Using Slave Select Disable as indicator of SPI activity) */
-	if((pin == 10) && (SPI0.CTRLB & SPI_SSD_bm)) return;
+		(Using SPI Enable bit as indicator of SPI activity) */
+	if((pin == 10) && (SPI0.CTRLA & SPI_ENABLE_bm)) return;
 
 	PORT_t* port = digitalPinToPortStruct(pin);
 	if(port == NULL) return;
@@ -153,8 +153,8 @@ void digitalWrite(uint8_t pin, PinStatus val)
 	if(((pin == PIN_A4) || (pin == PIN_A5)) && (TWI0.MCTRLA & TWI_ENABLE_bm)) return;
 	
 	/* Special check for SPI_SS double bonded pin -- no action if SPI is active 
-	(Using Slave Select Disable as indicator of SPI activity) */
-	if((pin == 10) && (SPI0.CTRLB & SPI_SSD_bm)) return;
+		(Using SPI Enable bit as indicator of SPI activity) */
+	if((pin == 10) && (SPI0.CTRLA & SPI_ENABLE_bm)) return;
 
 	/* Turn off PWM if applicable */
 
@@ -235,8 +235,8 @@ PinStatus digitalRead(uint8_t pin)
 	if(((pin == PIN_A4) || (pin == PIN_A5)) && (TWI0.MCTRLA & TWI_ENABLE_bm)) return LOW;
 	
 	/* Special check for SPI_SS double bonded pin -- no action if SPI is active 
-	(Using Slave Select Disable as indicator of SPI activity) */
-	if((pin == 10) && (SPI0.CTRLB & SPI_SSD_bm)) return LOW;
+		(Using SPI Enable bit as indicator of SPI activity) */
+	if((pin == 10) && (SPI0.CTRLA & SPI_ENABLE_bm)) return;
 
 	// If the pin that support PWM output, we need to turn it off
 	// before getting a digital reading.
