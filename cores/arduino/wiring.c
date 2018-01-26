@@ -331,7 +331,7 @@ void init()
 	
 	AC0.CTRLA = 0x00;	
 	AC0.MUXCTRLA = 0x00;	
-	AC0.DACREF = 0x00;	
+	AC0.DACREF = 0xFF;	
 	
 	VREF.CTRLB = 0x00;	
 	VREF.CTRLA = 0x00;
