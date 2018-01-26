@@ -68,7 +68,14 @@ extern "C"{
 #define _NOP() do { __asm__ volatile ("nop"); } while (0)
 #endif
 
+/* Allows performing a correction on the CPU value using the signature row 
+	values indicating oscillator error provided from the device manufacturer */
 #define PERFORM_SIGROW_CORRECTION_F_CPU 0
+
+/* Variable containing corrected F_CPU value, after checks for safe operating
+	frequency vs supply voltage, oscillator fuse setting and MCLK divider.
+	Also includes the correction from signature row values if above #define
+	PERFORM_SIGROW_CORRECTION_F_CPU = 1 */
 extern uint32_t F_CPU_CORRECTED;
 
 uint16_t clockCyclesPerMicrosecond(uint32_t clk);
