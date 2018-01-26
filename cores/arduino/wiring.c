@@ -271,17 +271,152 @@ void init()
 {
 	// this needs to be called before setup() or some functions won't
 	// work there
+	
+/*************************** GET VCC & FUSE SETTING ***************************/
+
+
+	/* Measure VDD using ADC */
+	uint8_t supply_voltage;
+	
+	/* Initialize AC reference (what we are measuring) - 1.5V known */
+	VREF.CTRLA |= VREF_AC0REFSEL_1V5_gc;	
+	
+	/* Enable AC reference */
+	VREF.CTRLB |= VREF_AC0REFEN_bm;
+
+	/* DAC to max -- output reference voltage */
+	AC0.DACREF = 0xFF;
+	
+	/* Enable DAC REF by selecting it as input and enabling AC */
+	AC0.MUXCTRLA |= AC_MUXNEG_DACREF_gc;
+	AC0.CTRLA |= ADC_ENABLE_bm;
+
+	/* Initialize ADC reference (VDD) */
+	ADC0.CTRLC = ADC_REFSEL_VDDREF_gc;
+	
+	/* Initialize MUX (DAC/AC reference from VREF) */
+	ADC0.MUXPOS = ADC_MUXPOS_DACREF_gc;
+	
+	/* Enable ADC */
+	ADC0.CTRLA |= ADC_ENABLE_bm;
+	
+	/* Start a conversion */
+	ADC0.COMMAND |= ADC_STCONV_bm;
+	
+	/* Wait until result is ready */
+	while(!(ADC0.INTFLAGS & ADC_RESRDY_bm));
+	
+	/* Result ready */
+	/* supply_voltage = (VIN * 1024)/result where VIN = 1.5V from VREF */
+	uint16_t adc_result = ADC0.RES;
+	
+	uint16_t voltage = (15 * 1024) / adc_result; /* using 1.5 << 1 to avoid using float */
+	
+	/* Only for the purposes of staying within safe operating range -- approximate */
+	if(voltage >= 48){ /* 4.8V+ -> 5V */
+		supply_voltage = VCC_5V0;
+	} else if (voltage >= 30){ /* 3V-4V7 -> 3V3 */
+		supply_voltage = VCC_3V3;
+	} else { /* < 3V -> 1V8 */
+		supply_voltage = VCC_1V8;
+	}
+	
+	/* Fuse setting for 16/20MHz oscillator */
+	uint8_t fuse_setting = FUSE.OSCCFG & FUSE_FREQSEL_gm;
+	
+	/* Deinitialize ADC, AC & VREF */
+	ADC0.CTRLA = 0x00;
+	ADC0.MUXPOS = 0x00;	
+	ADC0.CTRLC = 0x00;		
+	
+	AC0.CTRLA = 0x00;	
+	AC0.MUXCTRLA = 0x00;	
+	AC0.DACREF = 0xFF;	
+	
+	VREF.CTRLB = 0x00;	
+	VREF.CTRLA = 0x00;
 
 /******************************** CLOCK STUFF *********************************/
 
-	/* Disable system clock prescaler - F_CPU should now be ~16MHz */
-	_PROTECTED_WRITE(CLKCTRL_MCLKCTRLB, 0x00);
+ 	int64_t cpu_freq;
+ 	
+ 	#if (PERFORM_SIGROW_CORRECTION_F_CPU == 1)
+ 	int8_t sigrow_val = 0;
+ 	#endif
 
-	/* Calculate actual F_CPU with error values from signature row */
-	int8_t sigrow_val = SIGROW.OSC16ERR5V;
-	int64_t cpu_freq = F_CPU;
-	cpu_freq *= (1024 + sigrow_val);
-	cpu_freq /= 1024;
+ 	/* Initialize clock divider to stay within safe operating area */
+
+ 	if(supply_voltage >= VCC_5V0){
+	 	
+	 	/* Disable system clock prescaler - F_CPU should now be ~16/20MHz */
+	 	_PROTECTED_WRITE(CLKCTRL_MCLKCTRLB, 0x00);
+	 	
+	 	/* Assign cpu_freq value and sigrow_val depending on fuse setting */
+	 	if(fuse_setting == FREQSEL_20MHZ_gc){
+		 	cpu_freq = 20000000;
+		 	
+		 	#if (PERFORM_SIGROW_CORRECTION_F_CPU == 1)
+		 	sigrow_val = SIGROW.OSC20ERR5V;
+		 	#endif
+
+		 } else { /* fuse_setting == FREQSEL_16MHZ_gc */
+		 	cpu_freq = 16000000;
+
+		 	#if (PERFORM_SIGROW_CORRECTION_F_CPU == 1)
+		 	sigrow_val = SIGROW.OSC16ERR5V;
+		 	#endif
+
+	 	}
+	 	
+	 } else if (supply_voltage == VCC_3V3) {
+	 	
+	 	/* Enable system clock prescaler to DIV2 - F_CPU should now be ~8/10MHz */
+	 	_PROTECTED_WRITE(CLKCTRL_MCLKCTRLB, (CLKCTRL_PEN_bm | CLKCTRL_PDIV_2X_gc));
+	 	
+	 	/* Assign cpu_freq value and sigrow_val depending on fuse setting */
+	 	if(fuse_setting == FREQSEL_20MHZ_gc){
+		 	cpu_freq = 10000000;
+		 	
+		 	#if (PERFORM_SIGROW_CORRECTION_F_CPU == 1)
+		 	sigrow_val = SIGROW.OSC20ERR3V;
+		 	#endif
+
+		 } else { /* fuse_setting == FREQSEL_16MHZ_gc */
+		 	cpu_freq = 8000000;
+		 	
+		 	#if (PERFORM_SIGROW_CORRECTION_F_CPU == 1)
+		 	sigrow_val = SIGROW.OSC16ERR3V;
+		 	#endif
+	 	}
+	 	
+	 } else {
+	 	/* Shouldn't get here but just in case... */
+	 	
+	 	/* Enable system clock prescaler to DIV4 - F_CPU should now be ~4/5MHz */
+	 	_PROTECTED_WRITE(CLKCTRL_MCLKCTRLB, (CLKCTRL_PEN_bm | CLKCTRL_PDIV_4X_gc));
+	 	
+	 	
+	 	if(fuse_setting == FREQSEL_20MHZ_gc){
+		 	cpu_freq = 5000000;
+		 	#if (PERFORM_SIGROW_CORRECTION_F_CPU == 1)
+		 	sigrow_val = SIGROW.OSC20ERR3V;
+		 	#endif
+		 	
+		 } else { /* fuse_setting == FREQSEL_16MHZ_gc */
+		 	cpu_freq = 4000000;
+		 	#if (PERFORM_SIGROW_CORRECTION_F_CPU == 1)
+		 	sigrow_val = SIGROW.OSC16ERR3V;
+		 	#endif
+	 	}
+ 	}
+
+ 	#if (PERFORM_SIGROW_CORRECTION_F_CPU == 1)
+ 	/* Calculate actual F_CPU with error values from signature row */
+ 	cpu_freq *= (1024 + sigrow_val);
+ 	cpu_freq /= 1024; 	
+ 	#endif /* (CORRECT_F_CPU == 1) */
+
+	/* Apply calculated value to F_CPU_CORRECTED */
 	F_CPU_CORRECTED = (uint32_t)cpu_freq;
 
 /***************************** TIMERS FOR PWM *********************************/
