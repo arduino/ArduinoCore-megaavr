@@ -1,6 +1,6 @@
 # See: http://code.google.com/p/arduino/wiki/Platforms
 
-menu.cpu=Processor
+menu.revision=Revision
 
 ##############################################################
 
@@ -14,6 +14,11 @@ uno2018.upload.protocol=xplainedmini_updi
 uno2018.upload.maximum_size=32256
 uno2018.upload.maximum_data_size=2048
 uno2018.upload.speed=115200
+
+uno2018.menu.revision.rev2=RevB
+uno2018.menu.revision.rev2.build.extra_flags=
+uno2018.menu.revision.rev1=RevA (Engineering sample)
+uno2018.menu.revision.rev1.build.extra_flags=-DREV_A_ENGINEERING_SAMPLE
 
 uno2018.bootloader.tool=avrdude
 uno2018.bootloader.low_fuses=0xFF
