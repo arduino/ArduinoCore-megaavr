@@ -56,7 +56,9 @@ extern "C"{
 #define VDD         ADC_REFSEL_VDDREF_gc
 #define EXTERNAL    ADC_REFSEL_VREFA_gc
 
-extern uint32_t F_CPU_CORRECTED;
+#define VCC_5V0 2
+#define VCC_3V3 1
+#define VCC_1V8 0
 
 #define interrupts() sei()
 #define noInterrupts() cli()
@@ -66,7 +68,14 @@ extern uint32_t F_CPU_CORRECTED;
 #define _NOP() do { __asm__ volatile ("nop"); } while (0)
 #endif
 
+/* Allows performing a correction on the CPU value using the signature row 
+	values indicating oscillator error provided from the device manufacturer */
+#define PERFORM_SIGROW_CORRECTION_F_CPU 0
 
+/* Variable containing corrected F_CPU value, after checks for safe operating
+	frequency vs supply voltage, oscillator fuse setting and MCLK divider.
+	Also includes the correction from signature row values if above #define
+	PERFORM_SIGROW_CORRECTION_F_CPU = 1 */
 extern uint32_t F_CPU_CORRECTED;
 
 uint16_t clockCyclesPerMicrosecond(uint32_t clk);
