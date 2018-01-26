@@ -31,8 +31,6 @@
 #include "UART.h"
 #include "UART_private.h"
 
-//#define PERFORM_BAUD_CORRECTION
-
 // this next line disables the entire UART.cpp,
 // this is so I can support Attiny series and any other chip without a uart
 #if defined(HAVE_HWSERIAL0) || defined(HAVE_HWSERIAL1) || defined(HAVE_HWSERIAL2) || defined(HAVE_HWSERIAL3)
@@ -144,14 +142,14 @@ void UartClass::begin(unsigned long baud, uint16_t config)
   // ********Check if desired baud rate is within the acceptable range for using CLK2X RX-mode********
   // Condition from datasheet
   // This limits the minimum baud_setting value to 64 (0x0040)
-  if((8 * baud) <= F_CPU) {
+  if((8 * baud) <= F_CPU_CORRECTED) {
 
     // Check that the desired baud rate is not so low that it will
     // cause the BAUD register to overflow (1024 * 64 = 2^16)
-    if(baud > (F_CPU / (8 * 1024))) {
+    if(baud > (F_CPU_CORRECTED / (8 * 1024))) {
       // Datasheet formula for calculating the baud setting including trick to reduce rounding error ((2*(X/Y))+1)/2
-      // baud_setting = ( ( (2 * (64 * F_CPU) / (8 * baud) ) + 1 ) / 2;
-      baud_setting = (((16 * F_CPU) / baud) + 1 ) / 2;
+      // baud_setting = ( ( (2 * (64 * F_CPU_CORRECTED) / (8 * baud) ) + 1 ) / 2;
+      baud_setting = (((16 * F_CPU_CORRECTED) / baud) + 1 ) / 2;
       // Enable CLK2X
       (*_hwserial_module).CTRLB |= USART_RXMODE_CLK2X_gc;
     } else {
@@ -162,14 +160,14 @@ void UartClass::begin(unsigned long baud, uint16_t config)
   // ********Check if desired baud rate is within the acceptable range for using normal RX-mode********
   // Condition from datasheet
   // This limits the minimum baud_setting value to 64 (0x0040)
-  } else if ((16 * baud <= F_CPU)) {
+  } else if ((16 * baud <= F_CPU_CORRECTED)) {
 
     // Check that the desired baud rate is not so low that it will
     // cause the BAUD register to overflow (1024 * 64 = 2^16)
-    if(baud > (F_CPU / (16 * 1024))) {
+    if(baud > (F_CPU_CORRECTED / (16 * 1024))) {
       // Datasheet formula for calculating the baud setting including trick to reduce rounding error
-      // baud_setting = ( ( (2 * (64 * F_CPU) / (16 * baud) ) + 1 ) / 2;
-      baud_setting = (((8 * F_CPU) / baud) + 1 ) / 2;
+      // baud_setting = ( ( (2 * (64 * F_CPU_CORRECTED) / (16 * baud) ) + 1 ) / 2;
+      baud_setting = (((8 * F_CPU_CORRECTED) / baud) + 1 ) / 2;
       // Make sure CLK2X is disabled
       (*_hwserial_module).CTRLB &= (~USART_RXMODE_CLK2X_gc);
     } else {
@@ -184,24 +182,6 @@ void UartClass::begin(unsigned long baud, uint16_t config)
 
 // Do nothing if an invalid baud rate is requested
   if(!error) {
-
-#ifdef PERFORM_BAUD_CORRECTION
-    // Compensate baud rate register value with factory stored frequency error
-    // Routine assumes Vcc to be 5V
-    // Verify that the desired baud setting is large enough
-    // (taking into account maximum negative compensation value)
-    if( baud_setting >= 0x4A ){
-
-      int8_t sigrow_val = 0;
-      if(FUSE.OSCCFG & FREQSEL_16MHZ_gc){
-        sigrow_val = SIGROW.OSC16ERR5V;
-      } else if (FUSE.OSCCFG & FREQSEL_20MHZ_gc){
-        sigrow_val = SIGROW.OSC20ERR5V;
-      }
-      baud_setting *= (1024 + sigrow_val);
-      baud_setting /= 1024;
-    }
-#endif
 
     _written = false;
 
