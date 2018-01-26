@@ -314,7 +314,7 @@ void init()
 	
 	/* Only for the purposes of staying within safe operating range -- approximate */
 	if(voltage >= 48){ /* 4.8V+ -> 5V */
-		supply_voltage = VCC_5V;
+		supply_voltage = VCC_5V0;
 	} else if (voltage >= 30){ /* 3V-4V7 -> 3V3 */
 		supply_voltage = VCC_3V3;
 	} else { /* < 3V -> 1V8 */
@@ -346,7 +346,7 @@ void init()
 
  	/* Initialize clock divider to stay within safe operating area */
 
- 	if(supply_voltage >= VCC_5V){
+ 	if(supply_voltage >= VCC_5V0){
 	 	
 	 	/* Disable system clock prescaler - F_CPU should now be ~16/20MHz */
 	 	_PROTECTED_WRITE(CLKCTRL_MCLKCTRLB, 0x00);
@@ -368,7 +368,7 @@ void init()
 
 	 	}
 	 	
-	 	} else if (supply_voltage == VCC_3V3) {
+	 } else if (supply_voltage == VCC_3V3) {
 	 	
 	 	/* Enable system clock prescaler to DIV2 - F_CPU should now be ~8/10MHz */
 	 	_PROTECTED_WRITE(CLKCTRL_MCLKCTRLB, (CLKCTRL_PEN_bm | CLKCTRL_PDIV_2X_gc));
@@ -389,7 +389,7 @@ void init()
 		 	#endif
 	 	}
 	 	
-	 	} else {
+	 } else {
 	 	/* Shouldn't get here but just in case... */
 	 	
 	 	/* Enable system clock prescaler to DIV4 - F_CPU should now be ~4/5MHz */

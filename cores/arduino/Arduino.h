@@ -56,7 +56,7 @@ extern "C"{
 #define VDD         ADC_REFSEL_VDDREF_gc
 #define EXTERNAL    ADC_REFSEL_VREFA_gc
 
-#define VCC_5V 2
+#define VCC_5V0 2
 #define VCC_3V3 1
 #define VCC_1V8 0
 
