@@ -50,16 +50,20 @@ volatile uint32_t timerb3_overflow_count = 0;
 volatile uint32_t timerb3_millis = 0;
 static uint16_t timerb3_fract = 0;
 
-inline uint16_t clockCyclesPerMicrosecond(uint32_t clk ){
+inline uint16_t clockCyclesPerMicrosecondComp(uint32_t clk){
 	return ( (clk) / 1000000L );
 }
 
-inline uint16_t clockCyclesToMicroseconds(uint16_t cycles, uint32_t clk){
-	return ( cycles / clockCyclesPerMicrosecond(clk) );
+inline uint16_t clockCyclesPerMicrosecond(){
+	return clockCyclesPerMicrosecondComp(F_CPU_CORRECTED);
 }
 
-inline uint32_t microsecondsToClockCycles(uint16_t cycles, uint32_t clk){
-	return ( cycles * clockCyclesPerMicrosecond(clk) );
+inline uint16_t clockCyclesToMicroseconds(uint16_t cycles){
+	return ( cycles / clockCyclesPerMicrosecond() );
+}
+
+inline uint32_t microsecondsToClockCycles(uint16_t microseconds){
+	return ( microseconds * clockCyclesPerMicrosecond() );
 }
 
 ISR(TCB3_INT_vect)
@@ -545,7 +549,7 @@ void init()
 /********************* TCB3 for system time tracking **************************/
 
 	/* Calculate relevant time tracking values */
-	microseconds_per_timerb3_overflow = clockCyclesToMicroseconds(TIME_TRACKING_CYCLES_PER_OVF, F_CPU_CORRECTED);
+	microseconds_per_timerb3_overflow = clockCyclesToMicroseconds(TIME_TRACKING_CYCLES_PER_OVF);
 	microseconds_per_timerb3_tick = microseconds_per_timerb3_overflow/TIME_TRACKING_TIMER_PERIOD;
 
 	millis_inc = microseconds_per_timerb3_overflow / 1000;
