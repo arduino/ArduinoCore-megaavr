@@ -190,13 +190,11 @@ uint8_t TWI_MasterWrite(uint8_t slave_address,
 					 uint8_t bytes_to_write,
 					 uint8_t send_stop)
 {
-	TWI_MasterWriteRead(slave_address, 
+	return TWI_MasterWriteRead(slave_address, 
 						write_data, 
 						bytes_to_write, 
 						0,
 						send_stop);
-						
-	return master_trans_status;
 }
 
 
@@ -249,10 +247,10 @@ uint8_t TWI_MasterWriteRead(uint8_t slave_address,
 	
 	/* Parameter sanity check. */
 	if (bytes_to_write > TWI_BUFFER_SIZE) {
-		return false;
+		return 1;
 	}
 	if (bytes_to_read > TWI_BUFFER_SIZE) {
-		return false;
+		return 0;
 	}
 
 	/*Initiate transaction if bus is ready. */
@@ -290,13 +288,28 @@ uint8_t TWI_MasterWriteRead(uint8_t slave_address,
 			uint8_t readAddress = ADD_READ_BIT(master_slaveAddress);
 			TWI0.MADDR = readAddress;
 		}
-		
+
+		else if (master_bytesToWrite == 0 && master_bytesToRead == 0) {
+			twi_mode = TWI_MODE_MASTER_TRANSMIT;
+			uint8_t writeAddress = ADD_WRITE_BIT(master_slaveAddress);
+			TWI0.MADDR = writeAddress;
+		}
+
 		/* Arduino requires blocking function */
-		while((master_bytesRead < master_bytesToRead) || (master_bytesWritten < master_bytesToWrite));
-	
-		return master_bytesRead;
+		while(master_result == TWIM_RESULT_UNKNOWN) {}
+
+		uint8_t ret = 0;
+		if (master_bytesToRead > 0) {
+			// return bytes really read
+			ret = master_bytesRead;
+		} else {
+			// return 0 if success, >0 otherwise
+			ret = (master_result == TWIM_RESULT_OK ? 0 : 1);
+		}
+
+		return ret;
 	} else {
-		return 0;
+		return 1;
 	}
 }
 
