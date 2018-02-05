@@ -23,10 +23,6 @@
 #include "wiring_private.h"
 #include "pins_arduino.h"
 
-// TODO: port to 4809
-
-#if 0
-
 /* Measures the length (in microseconds) of a pulse on the pin; state is HIGH
  * or LOW, the type of pulse to measure.  Works on pulses from 2-3 microseconds
  * to 3 minutes in length, but must be called at least a few dozen microseconds
@@ -45,7 +41,7 @@ unsigned long pulseIn(uint8_t pin, uint8_t state, unsigned long timeout)
 
 	// convert the timeout from microseconds to a number of times through
 	// the initial loop; it takes approximately 16 clock cycles per iteration
-	unsigned long maxloops = microsecondsToClockCycles(timeout, F_CPU)/16;
+	unsigned long maxloops = microsecondsToClockCycles(timeout)/12;
 
 	unsigned long width = countPulseASM(portInputRegister(port), bit, stateMask, maxloops);
 
@@ -95,5 +91,3 @@ unsigned long pulseInLong(uint8_t pin, uint8_t state, unsigned long timeout)
 	}
 	return micros() - start;
 }
-
-#endif

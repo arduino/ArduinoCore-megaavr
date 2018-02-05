@@ -58,11 +58,11 @@ inline uint16_t clockCyclesPerMicrosecond(){
 	return clockCyclesPerMicrosecondComp(F_CPU_CORRECTED);
 }
 
-inline uint16_t clockCyclesToMicroseconds(uint16_t cycles){
+inline unsigned long clockCyclesToMicroseconds(unsigned long cycles){
 	return ( cycles / clockCyclesPerMicrosecond() );
 }
 
-inline uint32_t microsecondsToClockCycles(uint16_t microseconds){
+inline unsigned long microsecondsToClockCycles(unsigned long microseconds){
 	return ( microseconds * clockCyclesPerMicrosecond() );
 }
 
