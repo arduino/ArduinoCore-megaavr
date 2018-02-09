@@ -49,9 +49,28 @@
 
 // Can't use TIMERB3 -- used for application time tracking 
 // Using TIMERA0 NOT RECOMMENDED -- all other timers use its clock!
-const uint8_t PROGMEM tone_pin_to_timer_PGM[] = { TIMERB1 /*, TIMERB2, TIMERB0 */ };
-static uint8_t tone_pins[AVAILABLE_TONE_PINS] = { NOT_A_PIN /*, NOT_A_PIN, NOT_A_PIN */ };
-	
+const uint8_t PROGMEM tone_pin_to_timer_PGM[] = { 
+												#if defined(USE_TIMERB1)
+												TIMERB1, 
+												#endif
+												#if defined(USE_TIMERB2)
+												TIMERB2,	
+												#endif
+												#if defined(USE_TIMERB0)
+												TIMERB0,
+												#endif	 
+												};
+static uint8_t tone_pins[AVAILABLE_TONE_PINS] ={
+												#if defined(USE_TIMERB1)
+												NOT_A_PIN,
+												#endif
+												#if defined(USE_TIMERB2)
+												NOT_A_PIN,
+												#endif
+												#if defined(USE_TIMERB0)
+												NOT_A_PIN,
+												#endif
+												};
 	
 // timerx_toggle_count:
 //  > 0 - duration specified
@@ -166,24 +185,28 @@ void tone(uint8_t _pin, unsigned int frequency, unsigned long duration)
 		timer_B->INTCTRL = TCB_CAPTEI_bm;
 				
 		// Populate variables needed in interrupt
+		#if defined(USE_TIMERB1)
 		if(_timer == TIMERB1){
 			timerb1_outtgl_reg = port_outtgl;
 			timerb1_bit_mask = bit_mask;
 			timerb1_toggle_count = toggle_count;
-		
+		}
+		#endif
 		#if defined(USE_TIMERB2)			
-		} else if(_timer == TIMERB2){
+		if(_timer == TIMERB2){
 			timerb2_outtgl_reg = port_outtgl;
 			timerb2_bit_mask = bit_mask;
 			timerb2_toggle_count = toggle_count;
+		}
 		#endif
 		#if defined(USE_TIMERB0)			
-		} else {	// _timer == TIMERB0
+		if(_timer == TIMERB0){
 			timerb0_outtgl_reg = port_outtgl;
 			timerb0_bit_mask = bit_mask;
 			timerb0_toggle_count = toggle_count;
-		#endif
 		}
+		#endif
+		
 			
 		// Enable timer
 		timer_B->CTRLA |= TCB_ENABLE_bm;
