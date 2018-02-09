@@ -69,13 +69,12 @@ volatile uint8_t timerb2_bit_mask;
 /*
 #define USE_TIMERB2		// interferes with PWM on pin 11
 #define USE_TIMERB0		// interferes with PWM on pin 6
-#define USE_TIMERA0		// interferes with PWM on pins 5,9,10
 */
 
 // Can't use TIMERB3 -- used for application time tracking 
 // Leave TIMERA0 to last -- all other timers use its clock
-const uint8_t PROGMEM tone_pin_to_timer_PGM[] = { TIMERB1 /*, TIMERB2, TIMERB0, TIMERA0 */ };
-static uint8_t tone_pins[AVAILABLE_TONE_PINS] = { NOT_A_PIN /*, NOT_A_PIN, NOT_A_PIN, NOT_A_PIN */ };
+const uint8_t PROGMEM tone_pin_to_timer_PGM[] = { TIMERB1 /*, TIMERB2, TIMERB0 */ };
+static uint8_t tone_pins[AVAILABLE_TONE_PINS] = { NOT_A_PIN /*, NOT_A_PIN, NOT_A_PIN */ };
 
 
 static int8_t toneBegin(uint8_t _pin)
@@ -359,6 +358,9 @@ ISR(TCA0_OVF_vect)
 		// keep pin low after stop (OUTCLR = OUTTGL - 1)
 		*(timera0_outtgl_reg - 1) = timera0_bit_mask;  
 	}
+	
+	/* Clear flag */
+	TCA0.SINGLE.INTFLAGS = TCA_SINGLE_OVF_bm;
 }
 #endif
 
@@ -385,6 +387,9 @@ ISR(TCB0_INT_vect)
 		// keep pin low after stop (OUTCLR = OUTTGL - 1)
 		*(timerb0_outtgl_reg - 1) = timerb0_bit_mask;
 	}
+	
+	/* Clear flag */
+	TCB0.INTFLAGS = TCB_CAPT_bm;
 }
 #endif
 
@@ -403,13 +408,16 @@ ISR(TCB1_INT_vect)
 		
 		// If no duration (toggle count negative), go on until noTone() call
 		
-		} else {	// If toggle count = 0, stop
+	} else {	// If toggle count = 0, stop
 		
 		disableTimer(TIMERB1);
 		
 		// keep pin low after stop (OUTCLR = OUTTGL - 1)
 		*(timerb1_outtgl_reg - 1) = timerb1_bit_mask;
 	}
+	
+	/* Clear flag */
+	TCB1.INTFLAGS = TCB_CAPT_bm;
 }
 #endif
 
@@ -428,13 +436,16 @@ ISR(TCB2_INT_vect)
 		
 		// If no duration (toggle count negative), go on until noTone() call
 		
-		} else {	// If toggle count = 0, stop
+	} else {	// If toggle count = 0, stop
 		
 		disableTimer(TIMERB2);
 		
 		// keep pin low after stop (OUTCLR = OUTTGL - 1)
 		*(timerb2_outtgl_reg - 1) = timerb2_bit_mask;
 	}
+	
+	/* Clear flag */
+	TCB2.INTFLAGS = TCB_CAPT_bm;
 }
 #endif
 
