@@ -1,6 +1,8 @@
 /* Tone.cpp
 
-  A Tone Generator Library for ATmega4809
+  A Tone Generator Library 
+  
+  Written by Brett Hagman
 
   This library is free software; you can redistribute it and/or
   modify it under the terms of the GNU Lesser General Public
@@ -15,68 +17,72 @@
   You should have received a copy of the GNU Lesser General Public
   License along with this library; if not, write to the Free Software
   Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-
-*************************************************/
+  
+  -------- ----------- -------- --------
+  0001    B Hagman    09/08/02 Initial coding
+  0002    B Hagman    09/08/18 Multiple pins
+  0003    B Hagman    09/08/18 Moved initialization from constructor to begin()
+  0004    B Hagman    09/09/26 Fixed problems with ATmega8
+  0005    B Hagman    09/11/23 Scanned prescalars for best fit on 8 bit timers
+                      09/11/25 Changed pin toggle method to XOR
+                      09/11/25 Fixed timer0 from being excluded
+  0006    D Mellis    09/12/29 Replaced objects with functions
+  0007    M Sproul    10/08/29 Changed #ifdefs from cpu to register
+  0008    S Kanemoto  12/06/22 Fixed for Leonardo by @maris_HY
+  0009    J Reucker   15/04/10 Issue #292 Fixed problems with ATmega8 (thanks to Pete62)
+  0010    jipp        15/04/13 added additional define check #2923
+  0011	   E Roy	   13/02/18 ported to ATmega4809
+  *************************************************/
 
 #include <avr/interrupt.h>
 #include <avr/pgmspace.h>
 #include "Arduino.h"
 #include "pins_arduino.h"
 
-#if defined(__AVR_ATmega8__) || defined(__AVR_ATmega128__)
-#define TCCR2A TCCR2
-#define TCCR2B TCCR2
-#define COM2A1 COM21
-#define COM2A0 COM20
-#define OCR2A OCR2
-#define TIMSK2 TIMSK
-#define OCIE2A OCIE2
-#define TIMER2_COMPA_vect TIMER2_COMP_vect
-#define TIMSK1 TIMSK
-#endif
+#define AVAILABLE_TONE_PINS 1	
 
+#define USE_TIMERB1		// interferes with PWM on pin 3
+/*
+#define USE_TIMERB2		// interferes with PWM on pin 11
+#define USE_TIMERB0		// interferes with PWM on pin 6
+#define USE_TIMERA0		// interferes with PWM on pins 5,9,10 NOT RECOMMENDED
+*/
+
+// Can't use TIMERB3 -- used for application time tracking 
+// Using TIMERA0 NOT RECOMMENDED -- leave to last -- all other timers use its clock!
+const uint8_t PROGMEM tone_pin_to_timer_PGM[] = { TIMERB1 /*, TIMERB2, TIMERB0, TIMERA0 */ };
+static uint8_t tone_pins[AVAILABLE_TONE_PINS] = { NOT_A_PIN /*, NOT_A_PIN, NOT_A_PIN, NOT_A_PIN */ };
+	
+	
 // timerx_toggle_count:
 //  > 0 - duration specified
 //  = 0 - stopped
 //  < 0 - infinitely (until stop() method called, or new play() called)
 
-#if defined(TCA0)
+#if defined(USE_TIMERA0)
 volatile long timera0_toggle_count;
 volatile uint8_t *timera0_outtgl_reg;
 volatile uint8_t timera0_bit_mask;
 #endif
 
-#if defined(TCB0)
+#if defined(USE_TIMERB0)
 volatile long timerb0_toggle_count;
 volatile uint8_t *timerb0_outtgl_reg;
 volatile uint8_t timerb0_bit_mask;
 #endif
 
-#if defined(TCB1)
+#if defined(USE_TIMERB1)
+	
 volatile long timerb1_toggle_count;
 volatile uint8_t *timerb1_outtgl_reg;
 volatile uint8_t timerb1_bit_mask;
 #endif
 
-#if defined(TCB2)
+#if defined(USE_TIMERB2)
 volatile long timerb2_toggle_count;
 volatile uint8_t *timerb2_outtgl_reg;
 volatile uint8_t timerb2_bit_mask;
 #endif
-
-#define AVAILABLE_TONE_PINS 1	
-#define USE_TIMERB1		// interferes with PWM on pin 3
-/*
-#define USE_TIMERB2		// interferes with PWM on pin 11
-#define USE_TIMERB0		// interferes with PWM on pin 6
-#define USE_TIMERA0		// interferes with PWM on pins 5,9,10
-*/
-
-// Can't use TIMERB3 -- used for application time tracking 
-// Leave TIMERA0 to last -- all other timers use its clock
-const uint8_t PROGMEM tone_pin_to_timer_PGM[] = { TIMERB1 /*, TIMERB2, TIMERB0, TIMERA0 */ };
-static uint8_t tone_pins[AVAILABLE_TONE_PINS] = { NOT_A_PIN /*, NOT_A_PIN, NOT_A_PIN, NOT_A_PIN */ };
-
 
 static int8_t toneBegin(uint8_t _pin)
 {
