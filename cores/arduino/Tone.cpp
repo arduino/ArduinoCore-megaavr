@@ -39,6 +39,9 @@
 #include "Arduino.h"
 #include "pins_arduino.h"
 
+/* For more than one tone, change AVAILABLE_TONE_PINS and uncomment the correct
+	number of timers 
+*/
 #define AVAILABLE_TONE_PINS 1	
 
 #define USE_TIMERB1		// interferes with PWM on pin 3
@@ -246,7 +249,7 @@ void disableTimer(uint8_t _timer)
 			
 }
 
-
+// pin which currently is being used for a tone
 void noTone(uint8_t _pin)
 {
 	int8_t _timer = NOT_ON_TIMER;
@@ -277,6 +280,7 @@ void noTone(uint8_t _pin)
 
 }
 
+// helper function for noTone()
 
 #ifdef USE_TIMERB0
 ISR(TCB0_INT_vect)
