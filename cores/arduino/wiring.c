@@ -430,7 +430,7 @@ void init()
 	PORTMUX.TCAROUTEA	= PORTMUX_TCA0_PORTB_gc;
 
 	/* Setup timers for single slope PWM, but do not enable, will do in analogWrite() */
-	TCA0.SINGLE.CTRLB |= (TCA_SINGLE_WGMODE_SINGLESLOPE_gc);
+	TCA0.SINGLE.CTRLB = TCA_SINGLE_WGMODE_SINGLESLOPE_gc;
 
 	/* Period setting, 16 bit register but val resolution is 8 bit */
 	TCA0.SINGLE.PER	= PWM_TIMER_PERIOD;
