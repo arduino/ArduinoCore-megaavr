@@ -103,33 +103,11 @@ volatile uint8_t *timerb2_outtgl_reg;
 volatile uint8_t timerb2_bit_mask;
 #endif
 
-static int8_t toneBegin(uint8_t _pin)
-{
-	int8_t _timer = -1;
-
-	// If pin already being used for tone, return the associated timer  
-	for (int i = 0; i < AVAILABLE_TONE_PINS; i++) {
-		if (tone_pins[i] == _pin) {
-			return pgm_read_byte(tone_pin_to_timer_PGM + i);
-		}
-	}
-  
-	// If not, search for an unused timer
-	for (int i = 0; i < AVAILABLE_TONE_PINS; i++) {
-		if (tone_pins[i] == NOT_A_PIN) {
-			tone_pins[i] = _pin;
-			_timer = pgm_read_byte(tone_pin_to_timer_PGM + i);
-		break;
-		}
-	}
-
-	return _timer;
-}
-
-
+// helper functions
+static uint8_t toneBegin(uint8_t _pin);
+static void disableTimer(uint8_t _timer);
 
 // frequency (in hertz) and duration (in milliseconds).
-
 void tone(uint8_t _pin, unsigned int frequency, unsigned long duration)
 {
 	long toggle_count = 0;
@@ -221,43 +199,35 @@ void tone(uint8_t _pin, unsigned int frequency, unsigned long duration)
 	}
 }
 
-/* Works for all timers -- the timer being disabled will go back to the 
-	configuration it had to output PWM for analogWrite() */
-void disableTimer(uint8_t _timer)
+// helper function for tone()
+static uint8_t toneBegin(uint8_t _pin)
 {
-	// Reinit back to producing PWM -- timer will be type B
-	  
-	// Get timer struct
-	TCB_t *timer_B = ((TCB_t *)&TCB0 + (_timer - TIMERB0));
-			
-	// Disable interrupt
-	timer_B->INTCTRL = 0;			  
-			
-	// Disable timer
-	timer_B->CTRLA = 0;
-			
-	// RESTORE PWM FUNCTIONALITY:
-			
-	/* 8 bit PWM mode, but do not enable output yet, will do in analogWrite() */
-	timer_B->CTRLB = (TCB_CNTMODE_PWM8_gc);
+	uint8_t _timer = NOT_ON_TIMER;
 
-	/* Assign 8-bit period */
-	timer_B->CCMPL = PWM_TIMER_PERIOD;
+	// If pin already being used for tone, return the associated timer
+	for (int i = 0; i < AVAILABLE_TONE_PINS; i++) {
+		if (tone_pins[i] == _pin) {
+			return pgm_read_byte(tone_pin_to_timer_PGM + i);
+		}
+	}
+	
+	// If not, search for an unused timer
+	for (int i = 0; i < AVAILABLE_TONE_PINS; i++) {
+		if (tone_pins[i] == NOT_A_PIN) {
+			tone_pins[i] = _pin;
+			_timer = pgm_read_byte(tone_pin_to_timer_PGM + i);
+			break;
+		}
+	}
 
-	/* default duty 50%, set when output enabled */
-	timer_B->CCMPH = PWM_TIMER_COMPARE;
-
-	/* Use TCA clock (250kHz) and enable */
-	/* (sync update commented out, might try to synchronize later */
-	timer_B->CTRLA = (TCB_CLKSEL_CLKTCA_gc)	| (TCB_ENABLE_bm);
-			
+	return _timer;
 }
 
 // pin which currently is being used for a tone
 void noTone(uint8_t _pin)
 {
 	int8_t _timer = NOT_ON_TIMER;
-  
+	
 	// Find timer associated with pin
 	for (int i = 0; i < AVAILABLE_TONE_PINS; i++) {
 		
@@ -277,7 +247,7 @@ void noTone(uint8_t _pin)
 
 	if(_timer > NOT_ON_TIMER){
 		disableTimer(_timer);
-	
+		
 		// Keep pin low after disabling of timer
 		digitalWrite(_pin, LOW);
 	}
@@ -285,6 +255,39 @@ void noTone(uint8_t _pin)
 }
 
 // helper function for noTone()
+/* Works for all timers -- the timer being disabled will go back to the 
+	configuration it had to output PWM for analogWrite() */
+static void disableTimer(uint8_t _timer)
+{
+	// Reinit back to producing PWM -- timer will be type B
+	
+	// Get timer struct
+	TCB_t *timer_B = ((TCB_t *)&TCB0 + (_timer - TIMERB0));
+		
+	// Disable interrupt
+	timer_B->INTCTRL = 0;
+		
+	// Disable timer
+	timer_B->CTRLA = 0;
+		
+	// RESTORE PWM FUNCTIONALITY:
+		
+	/* 8 bit PWM mode, but do not enable output yet, will do in analogWrite() */
+	timer_B->CTRLB = (TCB_CNTMODE_PWM8_gc);
+		
+	/* Assign 8-bit period */
+	timer_B->CCMPL = PWM_TIMER_PERIOD;
+		
+	/* default duty 50%, set when output enabled */
+	timer_B->CCMPH = PWM_TIMER_COMPARE;
+		
+	/* Use TCA clock (250kHz) and enable */
+	/* (sync update commented out, might try to synchronize later */
+	timer_B->CTRLA = (TCB_CLKSEL_CLKTCA_gc)	| (TCB_ENABLE_bm);
+			
+}
+
+
 
 #ifdef USE_TIMERB0
 ISR(TCB0_INT_vect)
