@@ -170,22 +170,24 @@ void tone(uint8_t _pin, unsigned int frequency, unsigned long duration)
 			timerb1_outtgl_reg = port_outtgl;
 			timerb1_bit_mask = bit_mask;
 			timerb1_toggle_count = toggle_count;
-					
+		
+		#if defined(USE_TIMERB2)			
 		} else if(_timer == TIMERB2){
 			timerb2_outtgl_reg = port_outtgl;
 			timerb2_bit_mask = bit_mask;
 			timerb2_toggle_count = toggle_count;
-					
+		#endif
+		#if defined(USE_TIMERB0)			
 		} else {	// _timer == TIMERB0
 			timerb0_outtgl_reg = port_outtgl;
 			timerb0_bit_mask = bit_mask;
 			timerb0_toggle_count = toggle_count;
+		#endif
 		}
 			
 		// Enable timer
 		timer_B->CTRLA |= TCB_ENABLE_bm;
 				
-		}
 	}
 }
 
