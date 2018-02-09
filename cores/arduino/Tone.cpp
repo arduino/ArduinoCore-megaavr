@@ -49,6 +49,10 @@
 #define USE_TIMERB2		// interferes with PWM on pin 11
 #define USE_TIMERB0		// interferes with PWM on pin 6
 */
+#if !defined(USE_TIMERB1) && !defined(USE_TIMERB2) && !defined(USE_TIMERB0)
+	# error "No timers allowed for tone()"
+	/* Please uncomment a timer above and rebuild */
+#endif
 
 // Can't use TIMERB3 -- used for application time tracking 
 // Using TIMERA0 NOT RECOMMENDED -- all other timers use its clock!
