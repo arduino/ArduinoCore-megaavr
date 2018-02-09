@@ -97,7 +97,7 @@ static int8_t toneBegin(uint8_t _pin)
   
 	// If not, search for an unused timer
 	for (int i = 0; i < AVAILABLE_TONE_PINS; i++) {
-		if (tone_pins[i] == 255) {
+		if (tone_pins[i] == NOT_A_PIN) {
 			tone_pins[i] = _pin;
 			_timer = pgm_read_byte(tone_pin_to_timer_PGM + i);
 		break;
@@ -158,7 +158,9 @@ void tone(uint8_t _pin, unsigned int frequency, unsigned long duration)
 				TCB_t *timer_B = ((TCB_t *)&TCB0 + (_timer - TIMERB0));
 			
 				// Disable for now, set clk according to 'prescaler_needed'	
-				// (Prescaled clock will come from TCA)
+				// (Prescaled clock will come from TCA -- 
+				//  by default it should have a prescaler of 64 (250kHz clock)
+				// TCA default initialization is in wiring.c -- init()  )
 				if(prescaler_needed){
 					timer_B->CTRLA = TCB_CLKSEL_CLKTCA_gc;
 				} else {
@@ -189,7 +191,7 @@ void tone(uint8_t _pin, unsigned int frequency, unsigned long duration)
 				} else {	// _timer == TIMERB0
 					timerb0_outtgl_reg = port_outtgl;
 					timerb0_bit_mask = bit_mask;
-					timerb2_toggle_count = toggle_count;
+					timerb0_toggle_count = toggle_count;
 				}
 			
 				// Enable timer
@@ -200,6 +202,8 @@ void tone(uint8_t _pin, unsigned int frequency, unsigned long duration)
 			}
 			}
 			
+			/* Keep in mind this is NOT RECOMMENDED since other timers
+					rely on the clock of TCA0 */
 			#if defined(USE_TIMERA0)
 			case TIMERA0:{
 			
@@ -243,6 +247,8 @@ void tone(uint8_t _pin, unsigned int frequency, unsigned long duration)
 	}
 }
 
+/* Works for all timers -- the timer being disabled will go back to the 
+	configuration it had to output PWM for analogWrite() */
 void disableTimer(uint8_t _timer)
 {
 	switch (_timer){
@@ -291,7 +297,7 @@ void disableTimer(uint8_t _timer)
 			// RESTORE PWM FUNCTIONALITY:
 		
 			/* Setup timers for single slope PWM, but do not enable, will do in analogWrite() */
-			TCA0.SINGLE.CTRLB |= (TCA_SINGLE_WGMODE_SINGLESLOPE_gc);
+			TCA0.SINGLE.CTRLB = TCA_SINGLE_WGMODE_SINGLESLOPE_gc;
 
 			/* Period setting, 16 bit register but val resolution is 8 bit */
 			TCA0.SINGLE.PER	= PWM_TIMER_PERIOD;
