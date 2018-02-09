@@ -69,12 +69,13 @@ volatile uint8_t timerb2_bit_mask;
 /*
 #define USE_TIMERB2		// interferes with PWM on pin 11
 #define USE_TIMERB0		// interferes with PWM on pin 6
+#define USE_TIMERA0		// interferes with PWM on pins 5,9,10
 */
 
 // Can't use TIMERB3 -- used for application time tracking 
 // Leave TIMERA0 to last -- all other timers use its clock
-const uint8_t PROGMEM tone_pin_to_timer_PGM[] = { TIMERB1 /*, TIMERB2, TIMERB0 */ };
-static uint8_t tone_pins[AVAILABLE_TONE_PINS] = { NOT_A_PIN /*, NOT_A_PIN, NOT_A_PIN */ };
+const uint8_t PROGMEM tone_pin_to_timer_PGM[] = { TIMERB1 /*, TIMERB2, TIMERB0, TIMERA0 */ };
+static uint8_t tone_pins[AVAILABLE_TONE_PINS] = { NOT_A_PIN /*, NOT_A_PIN, NOT_A_PIN, NOT_A_PIN */ };
 
 
 static int8_t toneBegin(uint8_t _pin)
