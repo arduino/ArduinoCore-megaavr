@@ -302,9 +302,15 @@ void init()
 		/* Clock DIV8 */
 		_PROTECTED_WRITE(CLKCTRL_MCLKCTRLB, (CLKCTRL_PEN_bm | CLKCTRL_PDIV_8X_gc))
 	#else
-		# warning "F_CPU not defined OR defined as an invalid value"
 		
-	//#define F_CPU 16000000
+		#ifndef F_CPU
+			# warning "F_CPU not defined"
+			#define F_CPU 16000000
+		#endif
+		
+		# warning "F_CPU defined as an invalid value - may cause undefined behavior"
+		
+		/* Default value is 16MHz */
 		cpu_freq = 16000000;
 				
 		/* No division on clock */
