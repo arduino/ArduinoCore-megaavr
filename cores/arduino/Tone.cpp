@@ -45,25 +45,18 @@
 /*
 #define USE_TIMERB2		// interferes with PWM on pin 11
 #define USE_TIMERB0		// interferes with PWM on pin 6
-#define USE_TIMERA0		// interferes with PWM on pins 5,9,10 NOT RECOMMENDED
 */
 
 // Can't use TIMERB3 -- used for application time tracking 
-// Using TIMERA0 NOT RECOMMENDED -- leave to last -- all other timers use its clock!
-const uint8_t PROGMEM tone_pin_to_timer_PGM[] = { TIMERB1 /*, TIMERB2, TIMERB0, TIMERA0 */ };
-static uint8_t tone_pins[AVAILABLE_TONE_PINS] = { NOT_A_PIN /*, NOT_A_PIN, NOT_A_PIN, NOT_A_PIN */ };
+// Using TIMERA0 NOT RECOMMENDED -- all other timers use its clock!
+const uint8_t PROGMEM tone_pin_to_timer_PGM[] = { TIMERB1 /*, TIMERB2, TIMERB0 */ };
+static uint8_t tone_pins[AVAILABLE_TONE_PINS] = { NOT_A_PIN /*, NOT_A_PIN, NOT_A_PIN */ };
 	
 	
 // timerx_toggle_count:
 //  > 0 - duration specified
 //  = 0 - stopped
 //  < 0 - infinitely (until stop() method called, or new play() called)
-
-#if defined(USE_TIMERA0)
-volatile long timera0_toggle_count;
-volatile uint8_t *timera0_outtgl_reg;
-volatile uint8_t timera0_bit_mask;
-#endif
 
 #if defined(USE_TIMERB0)
 volatile long timerb0_toggle_count;
@@ -147,101 +140,50 @@ void tone(uint8_t _pin, unsigned int frequency, unsigned long duration)
 			toggle_count = -1;
 		}
 			
-		// Timer settings
-		switch (_timer){
+		// Timer settings -- will be type B
 				
-			case TIMERB0:{
-			case TIMERB1:{
-			case TIMERB2:{
-				
-				// Get timer struct
-				TCB_t *timer_B = ((TCB_t *)&TCB0 + (_timer - TIMERB0));
+		// Get timer struct
+		TCB_t *timer_B = ((TCB_t *)&TCB0 + (_timer - TIMERB0));
 			
-				// Disable for now, set clk according to 'prescaler_needed'	
-				// (Prescaled clock will come from TCA -- 
-				//  by default it should have a prescaler of 64 (250kHz clock)
-				// TCA default initialization is in wiring.c -- init()  )
-				if(prescaler_needed){
-					timer_B->CTRLA = TCB_CLKSEL_CLKTCA_gc;
-				} else {
-					timer_B->CTRLA = TCB_CLKSEL_CLKDIV1_gc;	
-				}	
+		// Disable for now, set clk according to 'prescaler_needed'	
+		// (Prescaled clock will come from TCA -- 
+		//  by default it should have a prescaler of 64 (250kHz clock)
+		// TCA default initialization is in wiring.c -- init()  )
+		if(prescaler_needed){
+			timer_B->CTRLA = TCB_CLKSEL_CLKTCA_gc;
+		} else {
+			timer_B->CTRLA = TCB_CLKSEL_CLKDIV1_gc;	
+		}	
 						
-				// Timer to Periodic interrupt mode
-				// This write will also disable any active PWM outputs
-				timer_B->CTRLB = TCB_CNTMODE_INT_gc;
+		// Timer to Periodic interrupt mode
+		// This write will also disable any active PWM outputs
+		timer_B->CTRLB = TCB_CNTMODE_INT_gc;
 				
-				// Write compare register
-				timer_B->CCMP = compare_val;
+		// Write compare register
+		timer_B->CCMP = compare_val;
 			
-				// Enable interrupt
-				timer_B->INTCTRL = TCB_CAPTEI_bm;
+		// Enable interrupt
+		timer_B->INTCTRL = TCB_CAPTEI_bm;
 				
-				// Populate variables needed in interrupt
-				if(_timer == TIMERB1){
-					timerb1_outtgl_reg = port_outtgl;
-					timerb1_bit_mask = bit_mask;
-					timerb1_toggle_count = toggle_count;
+		// Populate variables needed in interrupt
+		if(_timer == TIMERB1){
+			timerb1_outtgl_reg = port_outtgl;
+			timerb1_bit_mask = bit_mask;
+			timerb1_toggle_count = toggle_count;
 					
-				} else if(_timer == TIMERB2){
-					timerb2_outtgl_reg = port_outtgl;
-					timerb2_bit_mask = bit_mask;
-					timerb2_toggle_count = toggle_count;
+		} else if(_timer == TIMERB2){
+			timerb2_outtgl_reg = port_outtgl;
+			timerb2_bit_mask = bit_mask;
+			timerb2_toggle_count = toggle_count;
 					
-				} else {	// _timer == TIMERB0
-					timerb0_outtgl_reg = port_outtgl;
-					timerb0_bit_mask = bit_mask;
-					timerb0_toggle_count = toggle_count;
-				}
+		} else {	// _timer == TIMERB0
+			timerb0_outtgl_reg = port_outtgl;
+			timerb0_bit_mask = bit_mask;
+			timerb0_toggle_count = toggle_count;
+		}
 			
-				// Enable timer
-				timer_B->CTRLA |= TCB_ENABLE_bm;
-			
-				break;
-			}
-			}
-			}
-			
-			/* Keep in mind this is NOT RECOMMENDED since other timers
-					rely on the clock of TCA0 */
-			#if defined(USE_TIMERA0)
-			case TIMERA0:{
-			
-				// Disable for now, assign clock according to prescaler_needed
-				if(prescaler_needed){
-					TCA0.SINGLE.CTRLA = TCA_SINGLE_CLKSEL_DIV64_gc;
-				} else {
-					// WARNING: THIS MIGHT AFFECT TCB OPERATION 
-					//		-- THEY MAY BE USING TCA CLOCK!!!!
-					TCA0.SINGLE.CTRLA = TCA_SINGLE_CLKSEL_DIV1_gc;
-				}
-						
-				// Timer to Normal mode 
-				// This write will also disable any active PWM outputs
-				TCA0.SINGLE.CTRLB = TCA_SINGLE_WGMODE_NORMAL_gc;
-				
-				// Write compare register 
-				TCA0.SINGLE.PERBUF = compare_val;
-				
-				// Enable interrupt
-				TCA0.SINGLE.INTCTRL = TCA_SINGLE_OVF_bm;
-				
-				// Populate variables needed in interrupt
-				timera0_outtgl_reg = port_outtgl;
-				timera0_bit_mask = bit_mask;
-				timera0_toggle_count = toggle_count;
-				
-				// Enable timer
-				TCA0.SINGLE.CTRLA |= TCA_SINGLE_ENABLE_bm;
-				
-				break;
-			}
-			#endif	
-			
-			default:{
-				
-				break;
-			}
+		// Enable timer
+		timer_B->CTRLA |= TCB_ENABLE_bm;
 				
 		}
 	}
@@ -251,80 +193,38 @@ void tone(uint8_t _pin, unsigned int frequency, unsigned long duration)
 	configuration it had to output PWM for analogWrite() */
 void disableTimer(uint8_t _timer)
 {
-	switch (_timer){
-		case TIMERB0:{
-		case TIMERB1:{
-		case TIMERB2:{
+	// Reinit back to producing PWM -- timer will be type B
 	  
-	  		// Get timer struct
-	  		TCB_t *timer_B = ((TCB_t *)&TCB0 + (_timer - TIMERB0));
+	// Get timer struct
+	TCB_t *timer_B = ((TCB_t *)&TCB0 + (_timer - TIMERB0));
 			
-			// Disable interrupt
-			timer_B->INTCTRL = 0;			  
+	// Disable interrupt
+	timer_B->INTCTRL = 0;			  
 			
-			// Disable timer
-			timer_B->CTRLA = 0;
+	// Disable timer
+	timer_B->CTRLA = 0;
 			
-			// RESTORE PWM FUNCTIONALITY:
+	// RESTORE PWM FUNCTIONALITY:
 			
-			/* 8 bit PWM mode, but do not enable output yet, will do in analogWrite() */
-			timer_B->CTRLB = (TCB_CNTMODE_PWM8_gc);
+	/* 8 bit PWM mode, but do not enable output yet, will do in analogWrite() */
+	timer_B->CTRLB = (TCB_CNTMODE_PWM8_gc);
 
-			/* Assign 8-bit period */
-			timer_B->CCMPL = PWM_TIMER_PERIOD;
+	/* Assign 8-bit period */
+	timer_B->CCMPL = PWM_TIMER_PERIOD;
 
-			/* default duty 50%, set when output enabled */
-			timer_B->CCMPH = PWM_TIMER_COMPARE;
+	/* default duty 50%, set when output enabled */
+	timer_B->CCMPH = PWM_TIMER_COMPARE;
 
-			/* Use TCA clock (250kHz) and enable */
-			/* (sync update commented out, might try to synchronize later */
-			timer_B->CTRLA = (TCB_CLKSEL_CLKTCA_gc)	| (TCB_ENABLE_bm);
+	/* Use TCA clock (250kHz) and enable */
+	/* (sync update commented out, might try to synchronize later */
+	timer_B->CTRLA = (TCB_CLKSEL_CLKTCA_gc)	| (TCB_ENABLE_bm);
 			
-			break;
-		}
-		}
-		}
-	  
-		#if defined(USE_TIMERA0)		
-		case TIMERA0:{
-		
-			// Disable interrupt
-			TCA0.SINGLE.INTCTRL = 0;
-		
-			// Disable timer
-			TCA0.SINGLE.CTRLA = 0;
-			
-			// RESTORE PWM FUNCTIONALITY:
-		
-			/* Setup timers for single slope PWM, but do not enable, will do in analogWrite() */
-			TCA0.SINGLE.CTRLB = TCA_SINGLE_WGMODE_SINGLESLOPE_gc;
-
-			/* Period setting, 16 bit register but val resolution is 8 bit */
-			TCA0.SINGLE.PER	= PWM_TIMER_PERIOD;
-
-			/* Default duty 50%, will re-assign in analogWrite() */
-			TCA0.SINGLE.CMP0BUF = PWM_TIMER_COMPARE;
-			TCA0.SINGLE.CMP1BUF = PWM_TIMER_COMPARE;
-			TCA0.SINGLE.CMP2BUF = PWM_TIMER_COMPARE;
-
-			/* Use DIV64 prescaler (giving 250kHz clock), enable TCA timer */
-			TCA0.SINGLE.CTRLA = (TCA_SINGLE_CLKSEL_DIV64_gc) | (TCA_SINGLE_ENABLE_bm);
-	  
-			break;
-		}
-		#endif
-			
-		default:{
-	  
-			break;
-		}
-	}
 }
 
 
 void noTone(uint8_t _pin)
 {
-	int8_t _timer = -1;
+	int8_t _timer = NOT_ON_TIMER;
   
 	// Find timer associated with pin
 	for (int i = 0; i < AVAILABLE_TONE_PINS; i++) {
@@ -342,40 +242,15 @@ void noTone(uint8_t _pin)
 			break;
 		}
 	}
-  
-	disableTimer(_timer);
-	
-	// Keep pin low after disabling of timer
-	digitalWrite(_pin, LOW);
-}
 
-#ifdef USE_TIMERA0
-ISR(TCA0_OVF_vect)
-{
-	if (timera0_toggle_count != 0){
-    
-		// toggle the pin
-		*timera0_outtgl_reg = timera0_bit_mask;
-		
-		// If duration was defined, decrement
-		if (timera0_toggle_count > 0){
-			timera0_toggle_count--;
-		}
-		
-		// If no duration (toggle count negative), go on until noTone() call
-		
-	} else {	// If toggle count = 0, stop
-		
-		disableTimer(TIMERA0);
+	if(_timer > NOT_ON_TIMER){
+		disableTimer(_timer);
 	
-		// keep pin low after stop (OUTCLR = OUTTGL - 1)
-		*(timera0_outtgl_reg - 1) = timera0_bit_mask;  
+		// Keep pin low after disabling of timer
+		digitalWrite(_pin, LOW);
 	}
-	
-	/* Clear flag */
-	TCA0.SINGLE.INTFLAGS = TCA_SINGLE_OVF_bm;
+
 }
-#endif
 
 
 #ifdef USE_TIMERB0
