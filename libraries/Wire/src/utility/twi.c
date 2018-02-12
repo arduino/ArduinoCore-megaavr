@@ -448,6 +448,8 @@ void TWI_MasterReadHandler()
 		}
 		
 		TWI_MasterTransactionFinished(TWIM_RESULT_BUFFER_OVERFLOW);
+		master_bytesToRead = 0;
+		return;
 	}
 
 	/* Local variable used in if test to avoid compiler warning. */
