@@ -89,14 +89,14 @@ static const uint8_t SCL = PIN_WIRE_SCL;
 
 #define LED_BUILTIN 25
 
-#define PIN_A0   (14)
-#define PIN_A1   (15)
-#define PIN_A2   (16)
-#define PIN_A3   (17)
-#define PIN_A4   (18)
-#define PIN_A5   (19)
-#define PIN_A6   (20)
-#define PIN_A7   (21)
+#define PIN_A0   (0)
+#define PIN_A1   (1)
+#define PIN_A2   (2)
+#define PIN_A3   (3)
+#define PIN_A4   (4)
+#define PIN_A5   (5)
+#define PIN_A6   (6)
+#define PIN_A7   (7)
 
 static const uint8_t A0 = PIN_A0;
 static const uint8_t A1 = PIN_A1;
