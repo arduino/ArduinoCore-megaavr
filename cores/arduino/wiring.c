@@ -327,9 +327,7 @@ void init()
 
 /********************************* ADC ****************************************/
 
-//#if defined(ADC0)
-
-	/************* Need to double check no other init required for ADC ***************/
+#if defined(ADC0)
 
 	/* ADC clock between 50-200KHz */
 

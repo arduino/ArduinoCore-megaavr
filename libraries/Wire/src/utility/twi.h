@@ -85,8 +85,8 @@ register8_t master_trans_status;                       /*!< Status of transactio
 register8_t master_result;                             /*!< Result of transaction */
 
 /* Slave variables */
-static void (*TWI_onSlaveTransmit)(void);
-static void (*TWI_onSlaveReceive)(uint8_t*, int);
+static void (*TWI_onSlaveTransmit)(void) __attribute__((unused));
+static void (*TWI_onSlaveReceive)(volatile uint8_t*, int) __attribute__((unused));
 register8_t slave_writeData[TWI_BUFFER_SIZE];
 register8_t slave_readData[TWI_BUFFER_SIZE];
 register8_t slave_bytesToWrite;
@@ -135,7 +135,7 @@ void TWI_SlaveStopHandler(void);
 void TWI_SlaveDataHandler(void);
 void TWI_SlaveWriteHandler(void);
 void TWI_SlaveReadHandler(void);
-void TWI_attachSlaveRxEvent( void (*function)(uint8_t*, int) );
+void TWI_attachSlaveRxEvent( void (*function)(volatile uint8_t*, int) );
 void TWI_attachSlaveTxEvent( void (*function)(void) );
 void TWI_SlaveTransactionFinished(uint8_t result);
 /*! TWI master interrupt service routine.

@@ -150,8 +150,9 @@ void TWI_MasterSetBaud(uint32_t frequency){
 
 //		Formula is: BAUD = ((F_CLKPER/frequency) - F_CLKPER*T_RISE - 10)/2;
 //		Where T_RISE varies depending on operating frequency...
-//			From 1617 DS: 1000ns @ 100kHz / 300ns @ 400kHz / 120ns @ 1MHz
-	uint8_t t_rise;
+//			From 1617 DS: 1000ns @ 100kHz / 300ns @ 400kHz / 120ns @ 1MHz
+
+	uint16_t t_rise;
 	
 	if(frequency < 200000){
 		frequency = 100000;
@@ -700,7 +701,7 @@ void TWI_SlaveReadHandler(){
  * Input    function: callback function to use
  * Output   none
  */
-void TWI_attachSlaveRxEvent( void (*function)(uint8_t*, int) ){
+void TWI_attachSlaveRxEvent( void (*function)(volatile uint8_t*, int) ){
   TWI_onSlaveReceive = function;
 }
 

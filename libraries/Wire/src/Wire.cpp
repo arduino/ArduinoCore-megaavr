@@ -306,7 +306,7 @@ void TwoWire::flush(void)
 }
 
 // behind the scenes function that is called when data is received
-void TwoWire::onReceiveService(uint8_t* inBytes, int numBytes)
+void TwoWire::onReceiveService(volatile uint8_t* inBytes, int numBytes)
 {
 	// don't bother if user hasn't registered a callback
 	if(!user_onReceive){
