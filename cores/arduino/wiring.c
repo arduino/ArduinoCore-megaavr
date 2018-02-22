@@ -434,11 +434,6 @@ void init()
 
 //#endif
 
-/****************************** TWI *******************************************/
-
-// 	PORTMUX.TWISPIROUTEA = (PORTMUX_TWI0_ALT1_gc | PORTMUX_SPI0_ALT2_gc);
-
-
 /****************************** USART *****************************************/
 
 #ifdef REV_A_ENGINEERING_SAMPLE

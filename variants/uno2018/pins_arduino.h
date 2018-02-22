@@ -349,4 +349,6 @@ const uint8_t PROGMEM digital_pin_to_timer[] = {
 #define SERIAL_PORT_USBVIRTUAL		Serial1
 #define SERIAL_PORT_HARDWARE_OPEN	Serial2
 
+#define TWI_MUX		PORTMUX_TWI0_DEFAULT_gc //PORTMUX_TWI0_ALT1_gc
+
 #endif
