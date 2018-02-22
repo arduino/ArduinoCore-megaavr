@@ -20,14 +20,6 @@ uno2018.menu.revision.rev2.build.extra_flags=
 uno2018.menu.revision.rev1=RevA (Engineering sample)
 uno2018.menu.revision.rev1.build.extra_flags=-DREV_A_ENGINEERING_SAMPLE
 
-uno2018.bootloader.tool=avrdude
-uno2018.bootloader.low_fuses=0xFF
-uno2018.bootloader.high_fuses=0xDE
-uno2018.bootloader.extended_fuses=0xFD
-uno2018.bootloader.unlock_bits=0x3F
-uno2018.bootloader.lock_bits=0x0F
-uno2018.bootloader.file=optiboot/optiboot_atmega4809.hex
-
 uno2018.build.mcu=atmega4809
 uno2018.build.f_cpu=16000000L
 uno2018.build.board=AVR_UNO_2018
