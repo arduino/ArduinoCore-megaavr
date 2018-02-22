@@ -55,7 +55,7 @@ ISR(HWSERIAL3_DRE_VECTOR)
 #endif
 
 #if defined(HWSERIAL3)
-  UartClass Serial3(HWSERIAL3, PIN_WIRE_HWSERIAL3_RX, PIN_WIRE_HWSERIAL3_TX, HWSERIAL3_DRE_VECTOR_NUM);
+  UartClass Serial3(HWSERIAL3, PIN_WIRE_HWSERIAL3_RX, PIN_WIRE_HWSERIAL3_TX, HWSERIAL3_DRE_VECTOR_NUM, HWSERIAL3_MUX);
 #endif
 
 // Function that can be weakly referenced by serialEventRun to prevent

@@ -131,6 +131,9 @@ void UartClass::begin(unsigned long baud, uint16_t config)
 	  this->end();
   }
 
+  // Setup port mux
+  PORTMUX.USARTROUTEA |= _uart_mux;
+
   //uint16_t baud_setting = 0;
   int32_t baud_setting = 0;
   uint8_t error = 0;
