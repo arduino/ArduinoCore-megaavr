@@ -379,3 +379,5 @@ void init()
 
 	sei();
 }
+
+void setup_timers(void)  __attribute__((weak));

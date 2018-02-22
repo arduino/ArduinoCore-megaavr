@@ -26,20 +26,13 @@
 #include "wiring_private.h"
 #include "pins_arduino.h"
 
+bool isDoubleBondedActive(uint8_t pin)  __attribute__((weak));
+
 void pinMode(uint8_t pin, PinMode mode)
 {
 	uint8_t bit_pos = digitalPinToBitPosition(pin);
 
-	if ((bit_pos == NOT_A_PIN)||(mode > INPUT_PULLUP)) return;
-	
-	/* Check if TWI is operating on double bonded pin (Master Enable is high 
-	in both Master and Slave mode for bus error detection, so this can 
-	indicate an active state for Wire) */
-	if(((pin == PIN_A4) || (pin == PIN_A5)) && (TWI0.MCTRLA & TWI_ENABLE_bm)) return;
-	
-	/* Special check for SPI_SS double bonded pin -- no action if SPI is active 
-		(Using SPI Enable bit as indicator of SPI activity) */
-	if((pin == 10) && (SPI0.CTRLA & SPI_ENABLE_bm)) return;
+	if ((bit_pos == NOT_A_PIN) || (mode > INPUT_PULLUP) || isDoubleBondedActive(pin)) return;
 
 	PORT_t* port = digitalPinToPortStruct(pin);
 	if(port == NULL) return;
@@ -145,16 +138,7 @@ void digitalWrite(uint8_t pin, PinStatus val)
 {
 	/* Get bit mask for pin */
 	uint8_t bit_mask = digitalPinToBitMask(pin);
-	if(bit_mask == NOT_A_PIN) return;
-	
-	/* Check if TWI is operating on double bonded pin (Master Enable is high 
-	in both Master and Slave mode for bus error detection, so this can 
-	indicate an active state for Wire) */
-	if(((pin == PIN_A4) || (pin == PIN_A5)) && (TWI0.MCTRLA & TWI_ENABLE_bm)) return;
-	
-	/* Special check for SPI_SS double bonded pin -- no action if SPI is active 
-		(Using SPI Enable bit as indicator of SPI activity) */
-	if((pin == 10) && (SPI0.CTRLA & SPI_ENABLE_bm)) return;
+	if(bit_mask == NOT_A_PIN || isDoubleBondedActive(pin)) return;
 
 	/* Turn off PWM if applicable */
 
@@ -189,7 +173,6 @@ void digitalWrite(uint8_t pin, PinStatus val)
 		/* Restore system status */
 		SREG = status;
 
-
 	/* Input direction */
 	} else {
 		/* Old implementation has side effect when pin set as input -
@@ -218,7 +201,6 @@ void digitalWrite(uint8_t pin, PinStatus val)
 
 		/* Restore system status */
 		SREG = status;
-
 	}
 
 }
@@ -227,16 +209,7 @@ PinStatus digitalRead(uint8_t pin)
 {
 	/* Get bit mask and check valid pin */
 	uint8_t bit_mask = digitalPinToBitMask(pin);
-	if(bit_mask == NOT_A_PIN) return LOW;
-	
-	/* Check if TWI is operating on double bonded pin (Master Enable is high 
-	in both Master and Slave mode for bus error detection, so this can 
-	indicate an active state for Wire) */
-	if(((pin == PIN_A4) || (pin == PIN_A5)) && (TWI0.MCTRLA & TWI_ENABLE_bm)) return LOW;
-	
-	/* Special check for SPI_SS double bonded pin -- no action if SPI is active 
-		(Using SPI Enable bit as indicator of SPI activity) */
-	if((pin == 10) && (SPI0.CTRLA & SPI_ENABLE_bm)) return;
+	if(bit_mask == NOT_A_PIN || isDoubleBondedActive(pin)) return LOW;
 
 	// If the pin that support PWM output, we need to turn it off
 	// before getting a digital reading.
