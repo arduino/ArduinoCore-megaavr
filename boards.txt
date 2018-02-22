@@ -11,8 +11,8 @@ uno2018.pid.0=0x2145
 
 uno2018.upload.tool=avrdude
 uno2018.upload.protocol=xplainedmini_updi
-uno2018.upload.maximum_size=32256
-uno2018.upload.maximum_data_size=2048
+uno2018.upload.maximum_size=37168
+uno2018.upload.maximum_data_size=6144
 uno2018.upload.speed=115200
 
 uno2018.menu.revision.rev2=RevB
