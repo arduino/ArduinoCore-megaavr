@@ -24,14 +24,10 @@
 
 // the prescaler is set so that timerb3 ticks every 64 clock cycles, and the
 // the overflow handler is called every 256 ticks.
-uint16_t microseconds_per_timerb3_overflow;
+volatile uint16_t microseconds_per_timerb3_overflow;
+volatile uint16_t microseconds_per_timerb3_tick;
 
 uint32_t F_CPU_CORRECTED = F_CPU;
-
-#define TIME_TRACKING_TIMER_PERIOD		0xFF
-#define TIME_TRACKING_TICKS_PER_OVF		(TIME_TRACKING_TIMER_PERIOD + 1)	/* Timer ticks per overflow of TCB3 */
-#define TIME_TRACKING_TIMER_DIVIDER		64		/* Clock divider for TCB3 */
-#define TIME_TRACKING_CYCLES_PER_OVF	(TIME_TRACKING_TICKS_PER_OVF * TIME_TRACKING_TIMER_DIVIDER)
 
 // the whole number of milliseconds per timerb3 overflow
 uint16_t millis_inc;
@@ -41,7 +37,6 @@ uint16_t fract_inc;
 #define FRACT_MAX (1000)
 
 // whole number of microseconds per timerb3 tick
-uint16_t microseconds_per_timerb3_tick;
 
 volatile uint32_t timerb3_overflow_count = 0;
 volatile uint32_t timerb3_millis = 0;
@@ -329,83 +324,6 @@ void init()
 	/* Apply calculated value to F_CPU_CORRECTED */
 	F_CPU_CORRECTED = (uint32_t)cpu_freq;
 
-/***************************** TIMERS FOR PWM *********************************/
-
-
-
-							/*  TYPE A TIMER   */
-
-	/* PORTMUX setting for TCA -> all outputs [0:2] point to PORTB pins [0:2] */
-	PORTMUX.TCAROUTEA	= PORTMUX_TCA0_PORTB_gc;
-
-	/* Setup timers for single slope PWM, but do not enable, will do in analogWrite() */
-	TCA0.SINGLE.CTRLB = TCA_SINGLE_WGMODE_SINGLESLOPE_gc;
-
-	/* Period setting, 16 bit register but val resolution is 8 bit */
-	TCA0.SINGLE.PER	= PWM_TIMER_PERIOD;
-
-	/* Default duty 50%, will re-assign in analogWrite() */
-	TCA0.SINGLE.CMP0BUF = PWM_TIMER_COMPARE;
-	TCA0.SINGLE.CMP1BUF = PWM_TIMER_COMPARE;
-	TCA0.SINGLE.CMP2BUF = PWM_TIMER_COMPARE;
-
-	/* Use DIV64 prescaler (giving 250kHz clock), enable TCA timer */
-	TCA0.SINGLE.CTRLA = (TCA_SINGLE_CLKSEL_DIV64_gc) | (TCA_SINGLE_ENABLE_bm);
-
-
-						    /*	TYPE B TIMERS  */
-
-	/* PORTMUX alternate location needed for TCB0 & 1, TCB2 is default location */
-	PORTMUX.TCBROUTEA	|= (PORTMUX_TCB0_bm | PORTMUX_TCB1_bm);
-
-	/* Start with TCB0 */
-	TCB_t *timer_B = (TCB_t *)&TCB0;
-
-	/* Timer B Setup loop for TCB[0:2] */
-	do{
-		/* 8 bit PWM mode, but do not enable output yet, will do in analogWrite() */
-		timer_B->CTRLB = (TCB_CNTMODE_PWM8_gc);
-
-		/* Assign 8-bit period */
-		timer_B->CCMPL = PWM_TIMER_PERIOD;
-
-		/* default duty 50%, set when output enabled */
-		timer_B->CCMPH = PWM_TIMER_COMPARE;
-
-		/* Use TCA clock (250kHz) and enable */
-		/* (sync update commented out, might try to synchronize later */
-		timer_B->CTRLA = (TCB_CLKSEL_CLKTCA_gc)
-						//|(TCB_SYNCUPD_bm)
-						|(TCB_ENABLE_bm);
-
-		/* Increment pointer to next TCB instance */
-		timer_B++;
-
-	/* Stop when pointing to TCB3 */
-	} while (timer_B < (TCB_t *)&TCB3);
-
-
-
-/* Stuff for synchronizing PWM timers */
-// 	/* Restart TCA to sync TCBs */
-// 	/* should not be needed		*/
-// 	TCA0.SINGLE.CTRLESET = TCA_SINGLE_CMD_RESTART_gc;
-// 	TCA0.SINGLE.CTRLECLR = TCA_SINGLE_CMD_RESTART_gc;
-//
-// 	timer_B = (TCB_t *)&TCB0;
-//
-// 	/* TCB are sync to TCA, remove setting	*/
-// 	for (uint8_t digitial_pin_timer = (TIMERB0 - TIMERB0);
-// 	digitial_pin_timer < (TIMERB3 - TIMERB0);
-// 	digitial_pin_timer++)
-// 	{
-// 		/* disable sync with tca */
-// 		timer_B->CTRLA &= ~ (TCB_SYNCUPD_bm);
-//
-// 		/* Add offset to register	*/
-// 		timer_B++;
-//
-// 	}
 
 /********************************* ADC ****************************************/
 

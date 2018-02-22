@@ -24,6 +24,7 @@
 #define Pins_Arduino_h
 
 #include <avr/pgmspace.h>
+#include "timers.h"
 
 #define NUM_DIGITAL_PINS            20
 #define NUM_ANALOG_INPUTS           6

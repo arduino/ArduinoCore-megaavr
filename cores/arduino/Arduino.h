@@ -117,8 +117,7 @@ extern const uint8_t PROGMEM digital_pin_to_interrupt[];
 #define TIMERB2 4
 #define TIMERB3 5
 
-#define PWM_TIMER_PERIOD	0xFF	/* For frequency */
-#define PWM_TIMER_COMPARE	0x80	/* For duty cycle */
+void setup_timers() __attribute__((weak));
 
 #define digitalPinToPort(pin) ( (pin < NUM_TOTAL_PINS) ? pgm_read_byte(digital_pin_to_port + pin) : NOT_A_PIN )
 #define digitalPinToBitPosition(pin) ( (pin < NUM_TOTAL_PINS) ? pgm_read_byte(digital_pin_to_bit_position + pin) : NOT_A_PIN )
