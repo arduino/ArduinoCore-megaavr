@@ -316,7 +316,7 @@ void init()
 
  	#if (PERFORM_SIGROW_CORRECTION_F_CPU == 1)
  	/* Calculate actual F_CPU with error values from signature row */
-	uint8_t sigrow_val = SIGROW.OSC16ERR5V;
+	int8_t sigrow_val = SIGROW.OSC16ERR5V;
  	cpu_freq *= (1024 + sigrow_val);
  	cpu_freq /= 1024; 	
  	#endif /* (CORRECT_F_CPU == 1) */
