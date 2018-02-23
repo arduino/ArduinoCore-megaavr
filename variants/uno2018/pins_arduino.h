@@ -37,10 +37,19 @@
 
 #define digitalPinHasPWM(p)         ((p) == 3 || (p) == 5 || (p) == 6 || (p) == 9 || (p) == 10 || (p) == 11)
 
-#define PIN_SPI_SS    (10)
-#define PIN_SPI_MOSI  (11)
-#define PIN_SPI_MISO  (12)
-#define PIN_SPI_SCK   (13)
+#ifdef REV_A_ENGINEERING_SAMPLE
+#define SPI_MUX		  	(PORTMUX_SPI0_DEFAULT_gc)
+#define PIN_SPI_MISO	(23)
+#define PIN_SPI_SCK		(28)
+#define PIN_SPI_MOSI	(24)
+#define PIN_SPI_SS		(29)
+#else
+#define SPI_MUX		  	(PORTMUX_SPI0_ALT1_gc)
+#define PIN_SPI_MISO	(12)
+#define PIN_SPI_SCK		(13)
+#define PIN_SPI_MOSI	(11)
+#define PIN_SPI_SS		(10)
+#endif
 
 static const uint8_t SS   = PIN_SPI_SS;
 static const uint8_t MOSI = PIN_SPI_MOSI;
@@ -94,6 +103,9 @@ static const uint8_t SCL = PIN_WIRE_SCL;
 
 #define HWSERIAL3_MUX (PORTMUX_USART2_NONE_gc)
 #define TWI_MUX		  (PORTMUX_TWI0_DEFAULT_gc) //PORTMUX_TWI0_ALT1_gc
+
+#define MUX_SPI			(SPI_MUX)
+#define SPI_INTERFACES_COUNT	1
 
 #define LED_BUILTIN 25
 

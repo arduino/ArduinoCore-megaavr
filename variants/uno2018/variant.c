@@ -86,7 +86,7 @@ FORCE_INLINE bool isDoubleBondedActive(uint8_t pin) {
 
 	/* Special check for SPI_SS double bonded pin -- no action if SPI is active 
 		(Using SPI Enable bit as indicator of SPI activity) */
-	if((pin == 10) && (SPI0.CTRLA & SPI_ENABLE_bm)) return true;
+	//if((pin == 10) && (SPI0.CTRLA & SPI_ENABLE_bm)) return true;
 
 	return false;
 }

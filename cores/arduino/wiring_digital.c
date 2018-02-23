@@ -26,7 +26,7 @@
 #include "wiring_private.h"
 #include "pins_arduino.h"
 
-bool isDoubleBondedActive(uint8_t pin)  __attribute__((weak));
+__attribute__((weak))  bool isDoubleBondedActive(uint8_t pin) {};
 
 void pinMode(uint8_t pin, PinMode mode)
 {
