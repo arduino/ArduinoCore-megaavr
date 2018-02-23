@@ -90,8 +90,6 @@ extern const uint8_t PROGMEM digital_pin_to_port[];
 extern const uint8_t PROGMEM digital_pin_to_bit_mask[];
 extern const uint8_t PROGMEM digital_pin_to_bit_position[];
 extern const uint8_t PROGMEM digital_pin_to_timer[];
-extern const uint8_t PROGMEM port_interrupt_offset[];
-extern const uint8_t PROGMEM digital_pin_to_interrupt[];
 
 // Get the bit location within the hardware port of the given virtual pin.
 // This comes from the pins_*.c file for the active board configuration.
@@ -132,8 +130,7 @@ bool isDoubleBondedActive(uint8_t pin);
 #define portToPortStruct(port) ( (port < NUM_TOTAL_PORTS) ? ((PORT_t *)&PORTA + port) : NULL)
 #define digitalPinToPortStruct(pin) ( (pin < NUM_TOTAL_PINS) ? ((PORT_t *)&PORTA + digitalPinToPort(pin)) : NULL)
 #define getPINnCTRLregister(port, bit_pos) ( ((port != NULL) && (bit_pos < NOT_A_PIN)) ? ((uint8_t *)&(port->PIN0CTRL) + bit_pos) : NULL )
-#define digitalPinToInterrupt(p) ( pgm_read_byte(digital_pin_to_interrupt + p) )
-#define portPinToInterrupt(port, bit_pos) ( pgm_read_byte(port_interrupt_offset + port) + bit_pos )
+#define digitalPinToInterrupt(p) ( digitalPinToPort(p) * 8 + digitalPinToBitPosition(p) )
 
 #ifdef __cplusplus
 } // extern "C"

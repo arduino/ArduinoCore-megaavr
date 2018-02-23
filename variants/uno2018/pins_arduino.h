@@ -160,59 +160,6 @@ static const uint8_t A7 = PIN_A7;
 //				   (10~*)		   (1)	(0)	 (4)	   (A0) (A1) (A2) (A3) (A4)
 //
 
-const uint8_t PROGMEM digital_pin_to_interrupt[] = {
-	19, //0	USART1_Rx PC5
-	18, //1	USART1_Tx PC4
-	0, //2 PA0
-	39, //3 PF5
-	20, //4 PC6
-	10, //5 PB2
-	38, //6 PF4
-	1, //7 PA1
-	33, //8 PE3
-	8, //9 PB0
-	9, //10 PB1
-	14, //11 PC0
-	15, //12 PC1
-	16, //13 PC2
-	22, //14 AI0 PD0
-	23, //15 AI1 PD1
-	24, //16 AI2 PD2
-	25, //17 AI3 PD3
-	26, //18 AI4 PD4
-	27, //19 AI5 PD5
-	2, //20 TWI_SDA PA2
-	3, //21 TWI_SCL PA3
-	17, //22 SPI SS PC3
-	5, //23 USART0_Rx PA5
-	4, //24 USART0_Tx PA4
-	28, //25 LED_BUILTIN PD6
-	13, //26 USART3_Rx PB5
-	12, //27 USART3_Tx PB4
-	6, // 28 PA6
-	7, // 29 PA7
-	11, // 30 PB3
-	21, // 31 PC7
-	30, // 32 PE0
-	31, // 33 PE1
-	32, // 34 PE2
-	36, // 35 PF2
-	37, // 36 PF3
-	34, // 37 PF0 TOSC 1
-	35, // 38 PF1 TOSC 2
-	29, // 39 PD7 VREF
-	40 // 40 PF6 RESET
-	};
-
-const uint8_t PROGMEM port_interrupt_offset[] = {
-	0, //PA
-	8, //PB
-	14, //PC
-	22, //PD
-	30, //PE
-	34, //PF
-};
-
 const uint8_t PROGMEM digital_pin_to_port[] = {
 	PC, //0 USART1_Rx PC5
 	PC, //1 USART1_Tx PC4

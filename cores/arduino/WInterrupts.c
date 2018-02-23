@@ -121,7 +121,7 @@ static void port_interrupt_handler(uint8_t port) {
     if(int_flags & bit_mask){
 
     /* Get interrupt */
-    uint8_t interrupt_num = portPinToInterrupt(port, bit_pos);
+    uint8_t interrupt_num = port*8 + bit_pos;
 
       /* Check if function defined */
       if(intFunc[interrupt_num] != 0){
