@@ -182,7 +182,8 @@ class SPIClass {
   bool initialized;
   uint8_t interruptMode;
   char interruptSave;
-  unsigned long long interruptMask;
+  uint32_t interruptMask_lo;
+  uint32_t interruptMask_hi;
   uint8_t* irqMap = NULL;
 };
 

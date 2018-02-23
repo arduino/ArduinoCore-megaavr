@@ -62,7 +62,8 @@ void SPIClass::init()
     return;
   interruptMode = SPI_IMODE_NONE;
   interruptSave = 0;
-  interruptMask = 0;
+  interruptMask_lo = 0;
+  interruptMask_hi = 0;
   initialized = true;
 }
 
@@ -91,7 +92,11 @@ void SPIClass::usingInterrupt(int interruptNumber)
       irqMap = (uint8_t*)malloc(EXTERNAL_NUM_INTERRUPTS);
     }
     interruptMode |= SPI_IMODE_EXTINT;
-    interruptMask |= (1 << interruptNumber);
+    if (interruptNumber < 32) {
+      interruptMask_lo |= 1 << interruptNumber;
+    } else {
+      interruptMask_hi |= 1 << (interruptNumber - 32);
+    }
   }
 }
 
@@ -103,9 +108,13 @@ void SPIClass::notUsingInterrupt(int interruptNumber)
   if (interruptMode & SPI_IMODE_GLOBAL)
     return; // can't go back, as there is no reference count
 
-  interruptMask &= ~(1 << interruptNumber);
+  if (interruptNumber < 32) {
+    interruptMask_lo &= ~(1 << interruptNumber);
+  } else {
+    interruptMask_hi &= ~(1 << (interruptNumber - 32));
+  }
 
-  if (interruptMask == 0) {
+  if (interruptMask_lo == 0 && interruptMask_hi == 0) {
     interruptMode = SPI_IMODE_NONE;
     free(irqMap);
     irqMap = NULL;
@@ -113,8 +122,19 @@ void SPIClass::notUsingInterrupt(int interruptNumber)
 }
 
 void SPIClass::detachMaskedInterrupts() {
-  unsigned long long temp = interruptMask;
+  uint64_t temp = interruptMask_lo;
   uint8_t shift = 0;
+  while (temp != 0) {
+    if (temp & 1) {
+      uint8_t* pin_ctrl_reg = getPINnCTRLregister(portToPortStruct(shift/8), shift%8);
+      irqMap[shift] = *pin_ctrl_reg;
+      *pin_ctrl_reg &= ~(PORT_ISC_gm);
+    }
+    temp = temp >> 1;
+    shift++;
+  }
+  temp = interruptMask_hi;
+  shift = 32;
   while (temp != 0) {
     if (temp & 1) {
       uint8_t* pin_ctrl_reg = getPINnCTRLregister(portToPortStruct(shift/8), shift%8);
@@ -127,8 +147,18 @@ void SPIClass::detachMaskedInterrupts() {
 }
 
 void SPIClass::reattachMaskedInterrupts() {
-  unsigned long long temp = interruptMask;
+  uint64_t temp = interruptMask_lo;
   uint8_t shift = 0;
+  while (temp != 0) {
+    if (temp & 1) {
+      uint8_t* pin_ctrl_reg = getPINnCTRLregister(portToPortStruct(shift/8), shift%8);
+      *pin_ctrl_reg |= irqMap[shift];
+    }
+    temp = temp >> 1;
+    shift++;
+  }
+  temp = interruptMask_hi;
+  shift = 32;
   while (temp != 0) {
     if (temp & 1) {
       uint8_t* pin_ctrl_reg = getPINnCTRLregister(portToPortStruct(shift/8), shift%8);
