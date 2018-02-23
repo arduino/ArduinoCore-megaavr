@@ -182,7 +182,8 @@ class SPIClass {
   bool initialized;
   uint8_t interruptMode;
   char interruptSave;
-  uint32_t interruptMask;
+  unsigned long long interruptMask;
+  uint8_t* irqMap = NULL;
 };
 
 #if SPI_INTERFACES_COUNT > 0

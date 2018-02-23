@@ -87,6 +87,9 @@ void SPIClass::usingInterrupt(int interruptNumber)
     interruptMode = SPI_IMODE_GLOBAL;
   else
   {
+    if (irqMap == NULL) {
+      irqMap = (uint8_t*)malloc(EXTERNAL_NUM_INTERRUPTS);
+    }
     interruptMode |= SPI_IMODE_EXTINT;
     interruptMask |= (1 << interruptNumber);
   }
@@ -102,16 +105,38 @@ void SPIClass::notUsingInterrupt(int interruptNumber)
 
   interruptMask &= ~(1 << interruptNumber);
 
-  if (interruptMask == 0)
+  if (interruptMask == 0) {
     interruptMode = SPI_IMODE_NONE;
+    free(irqMap);
+    irqMap = NULL;
+  }
 }
 
-
 void SPIClass::detachMaskedInterrupts() {
+  unsigned long long temp = interruptMask;
+  uint8_t shift = 0;
+  while (temp != 0) {
+    if (temp & 1) {
+      uint8_t* pin_ctrl_reg = getPINnCTRLregister(portToPortStruct(shift/8), shift%8);
+      irqMap[shift] = *pin_ctrl_reg;
+      *pin_ctrl_reg &= ~(PORT_ISC_gm);
+    }
+    temp = temp >> 1;
+    shift++;
+  }
 }
 
 void SPIClass::reattachMaskedInterrupts() {
-
+  unsigned long long temp = interruptMask;
+  uint8_t shift = 0;
+  while (temp != 0) {
+    if (temp & 1) {
+      uint8_t* pin_ctrl_reg = getPINnCTRLregister(portToPortStruct(shift/8), shift%8);
+      *pin_ctrl_reg |= irqMap[shift];
+    }
+    temp = temp >> 1;
+    shift++;
+  }
 }
 
 void SPIClass::beginTransaction(SPISettings settings)
