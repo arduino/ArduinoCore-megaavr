@@ -23,7 +23,7 @@
 #include <Arduino.h>
 
 #ifndef USE_MALLOC_FOR_IRQ_MAP
-#define USE_MALLOC_FOR_IRQ_MAP  1
+#define USE_MALLOC_FOR_IRQ_MAP  0
 #endif
 
 // SPI_HAS_TRANSACTION means SPI has

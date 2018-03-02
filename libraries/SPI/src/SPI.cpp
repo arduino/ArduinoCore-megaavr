@@ -88,7 +88,7 @@ void SPIClass::usingInterrupt(int interruptNumber)
     interruptMode = SPI_IMODE_GLOBAL;
   else
   {
-    #ifdef USE_MALLOC_FOR_IRQ_MAP
+    #if USE_MALLOC_FOR_IRQ_MAP
       if (irqMap == NULL) {
         irqMap = (uint8_t*)malloc(EXTERNAL_NUM_INTERRUPTS);
       }
@@ -119,7 +119,7 @@ void SPIClass::notUsingInterrupt(int interruptNumber)
 
   if (interruptMask_lo == 0 && interruptMask_hi == 0) {
     interruptMode = SPI_IMODE_NONE;
-    #ifdef USE_MALLOC_FOR_IRQ_MAP
+    #if USE_MALLOC_FOR_IRQ_MAP
       free(irqMap);
       irqMap = NULL;
     #endif
