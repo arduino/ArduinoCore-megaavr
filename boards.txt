@@ -1,7 +1,5 @@
 # See: http://code.google.com/p/arduino/wiki/Platforms
 
-menu.revision=Revision
-
 ##############################################################
 
 uno2018.name=Arduino Uno 2018
@@ -14,11 +12,6 @@ uno2018.upload.protocol=xplainedmini_updi
 uno2018.upload.maximum_size=37168
 uno2018.upload.maximum_data_size=6144
 uno2018.upload.speed=115200
-
-uno2018.menu.revision.rev2=RevB
-uno2018.menu.revision.rev2.build.extra_flags=
-uno2018.menu.revision.rev1=RevA (Engineering sample)
-uno2018.menu.revision.rev1.build.extra_flags=-DREV_A_ENGINEERING_SAMPLE
 
 uno2018.build.mcu=atmega4809
 uno2018.build.f_cpu=16000000L

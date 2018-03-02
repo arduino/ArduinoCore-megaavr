@@ -350,6 +350,7 @@ void init()
 
 #endif
 
+	PORTMUX.USARTROUTEA = 0;
 
 	setup_timers();
 

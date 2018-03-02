@@ -65,30 +65,24 @@ static const uint8_t SCL = PIN_WIRE_SCL;
 // Uno2 Main USART available on Arduino header pins
 // USART1 on mega4809 (alternative pins)
 // Mapped to HWSERIAL0 in Serial library
-#define HWSERIAL0 (&USART1)
-#define HWSERIAL0_DRE_VECTOR (USART1_DRE_vect)
-#define HWSERIAL0_DRE_VECTOR_NUM (USART1_DRE_vect_num)
-#define HWSERIAL0_RXC_VECTOR (USART1_RXC_vect)
-#ifdef REV_A_ENGINEERING_SAMPLE
-#define HWSERIAL0_MUX		  (PORTMUX_USART1_DEFAULT_gc)
-#define PIN_WIRE_HWSERIAL0_RX (12)
-#define PIN_WIRE_HWSERIAL0_TX (11)
-#else
-#define HWSERIAL0_MUX		  (PORTMUX_USART1_ALT1_gc)
-#define PIN_WIRE_HWSERIAL0_RX (0)
-#define PIN_WIRE_HWSERIAL0_TX (1)
-#endif
+#define HWSERIAL1 (&USART1)
+#define HWSERIAL1_DRE_VECTOR (USART1_DRE_vect)
+#define HWSERIAL1_DRE_VECTOR_NUM (USART1_DRE_vect_num)
+#define HWSERIAL1_RXC_VECTOR (USART1_RXC_vect)
+#define HWSERIAL1_MUX		  (PORTMUX_USART1_ALT1_gc)
+#define PIN_WIRE_HWSERIAL1_RX (0)
+#define PIN_WIRE_HWSERIAL1_TX (1)
 
 // Uno2 Debug USART (not available on headers, only via the EDGB virtual COM port)
 // USART3 on mega4809 (alternative pins)
 // Mapped to HWSERIAL1 in Serial library
-#define HWSERIAL1 (&USART3)
-#define HWSERIAL1_DRE_VECTOR (USART3_DRE_vect)
-#define HWSERIAL1_DRE_VECTOR_NUM (USART3_DRE_vect_num)
-#define HWSERIAL1_RXC_VECTOR (USART3_RXC_vect)
-#define HWSERIAL1_MUX (PORTMUX_USART3_ALT1_gc)
-#define PIN_WIRE_HWSERIAL1_RX (26)
-#define PIN_WIRE_HWSERIAL1_TX (27)
+#define HWSERIAL0 (&USART3)
+#define HWSERIAL0_DRE_VECTOR (USART3_DRE_vect)
+#define HWSERIAL0_DRE_VECTOR_NUM (USART3_DRE_vect_num)
+#define HWSERIAL0_RXC_VECTOR (USART3_RXC_vect)
+#define HWSERIAL0_MUX (PORTMUX_USART3_ALT1_gc)
+#define PIN_WIRE_HWSERIAL0_RX (26)
+#define PIN_WIRE_HWSERIAL0_TX (27)
 
 // Uno2 Spare USART available on testpoints
 // USART0 on mega4809 (alternative pins)
@@ -312,8 +306,8 @@ const uint8_t PROGMEM digital_pin_to_timer[] = {
 // SERIAL_PORT_HARDWARE_OPEN  Hardware serial ports which are open for use.  Their RX & TX
 //                            pins are NOT connected to anything by default.
 #define SERIAL_PORT_MONITOR			Serial
-#define SERIAL_PORT_HARDWARE		Serial
-#define SERIAL_PORT_USBVIRTUAL		Serial1
+#define SERIAL_PORT_HARDWARE		Serial1
+#define SERIAL_PORT_USBVIRTUAL		Serial
 #define SERIAL_PORT_HARDWARE_OPEN	Serial2
 
 #endif
