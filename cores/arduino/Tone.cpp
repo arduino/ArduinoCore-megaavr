@@ -87,7 +87,7 @@ void tone(uint8_t pin, unsigned int frequency, unsigned long duration)
     long toggle_count = 0;
     uint32_t compare_val = 0;
 
-    if (_pin == NOT_A_PIN) {
+    if (_pin != pin) {
         pinMode(pin, OUTPUT);
         _pin = pin;
     }
