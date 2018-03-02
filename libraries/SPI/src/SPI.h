@@ -22,6 +22,10 @@
 
 #include <Arduino.h>
 
+#ifndef USE_MALLOC_FOR_IRQ_MAP
+#define USE_MALLOC_FOR_IRQ_MAP  1
+#endif
+
 // SPI_HAS_TRANSACTION means SPI has
 //   - beginTransaction()
 //   - endTransaction()
@@ -161,6 +165,7 @@ class SPIClass {
   void setClockDivider(uint8_t uc_div);
 
   private:
+
   void init();
   void config(SPISettings settings);
 
@@ -184,8 +189,14 @@ class SPIClass {
   char interruptSave;
   uint32_t interruptMask_lo;
   uint32_t interruptMask_hi;
-  uint8_t* irqMap = NULL;
+
+  #if USE_MALLOC_FOR_IRQ_MAP
+    uint8_t* irqMap = NULL;
+  #else
+    volatile uint8_t irqMap[EXTERNAL_NUM_INTERRUPTS];
+  #endif
 };
+
 
 #if SPI_INTERFACES_COUNT > 0
   extern SPIClass SPI;

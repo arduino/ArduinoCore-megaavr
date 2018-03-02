@@ -88,9 +88,12 @@ void SPIClass::usingInterrupt(int interruptNumber)
     interruptMode = SPI_IMODE_GLOBAL;
   else
   {
-    if (irqMap == NULL) {
-      irqMap = (uint8_t*)malloc(EXTERNAL_NUM_INTERRUPTS);
-    }
+    #ifdef USE_MALLOC_FOR_IRQ_MAP
+      if (irqMap == NULL) {
+        irqMap = (uint8_t*)malloc(EXTERNAL_NUM_INTERRUPTS);
+      }
+    #endif
+
     interruptMode |= SPI_IMODE_EXTINT;
     if (interruptNumber < 32) {
       interruptMask_lo |= 1 << interruptNumber;
@@ -116,8 +119,10 @@ void SPIClass::notUsingInterrupt(int interruptNumber)
 
   if (interruptMask_lo == 0 && interruptMask_hi == 0) {
     interruptMode = SPI_IMODE_NONE;
-    free(irqMap);
-    irqMap = NULL;
+    #ifdef USE_MALLOC_FOR_IRQ_MAP
+      free(irqMap);
+      irqMap = NULL;
+    #endif
   }
 }
 
@@ -181,8 +186,8 @@ void SPIClass::beginTransaction(SPISettings settings)
     {
       detachMaskedInterrupts();
     }
-  config(settings);
   }
+  config(settings);
 }
 
 void SPIClass::endTransaction(void)
