@@ -347,6 +347,7 @@ void init()
 
 	/* Enable ADC */
 	ADC0.CTRLA |= ADC_ENABLE_bm;
+	analogReference(VDD);
 
 #endif
 
