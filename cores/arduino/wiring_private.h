@@ -36,8 +36,6 @@ extern "C"{
 
 uint32_t countPulseASM(volatile uint8_t *port, uint8_t bit, uint8_t stateMask, unsigned long maxloops);
 
-#define EXTERNAL_NUM_INTERRUPTS NUM_TOTAL_PINS
-
 typedef void (*voidFuncPtr)(void);
 
 #ifdef __cplusplus

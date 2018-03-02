@@ -35,6 +35,8 @@
 #define ANALOG_INPUT_OFFSET			14
 #define analogInputToDigitalPin(p)  ((p < NUM_ANALOG_INPUTS) ? (p) + ANALOG_INPUT_OFFSET : NOT_A_PIN)
 
+#define EXTERNAL_NUM_INTERRUPTS 	48
+
 #define digitalPinHasPWM(p)         ((p) == 3 || (p) == 5 || (p) == 6 || (p) == 9 || (p) == 10 || (p) == 11)
 
 #ifdef REV_A_ENGINEERING_SAMPLE
