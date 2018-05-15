@@ -82,7 +82,7 @@ FORCE_INLINE bool isDoubleBondedActive(uint8_t pin) {
 	/* Check if TWI is operating on double bonded pin (Master Enable is high 
 	in both Master and Slave mode for bus error detection, so this can 
 	indicate an active state for Wire) */
-	if(((pin == PIN_A4) || (pin == PIN_A5)) && (TWI0.MCTRLA & TWI_ENABLE_bm)) return true;
+	//if(((pin == PIN_A4) || (pin == PIN_A5)) && (TWI0.MCTRLA & TWI_ENABLE_bm)) return true;
 
 	/* Special check for SPI_SS double bonded pin -- no action if SPI is active 
 		(Using SPI Enable bit as indicator of SPI activity) */

@@ -123,6 +123,17 @@ static const uint8_t A5 = PIN_A5;
 static const uint8_t A6 = PIN_A6;
 static const uint8_t A7 = PIN_A7;
 
+#define PINS_COUNT		(38u)
+
+//NINA
+#define NINA_GPIO0		(28u)
+#define NINA_RESETN		(29u)
+#define NINA_ACK		(36u)
+
+#define SPIWIFI_SS		(35u)
+#define SPIWIFI_ACK		NINA_ACK
+#define SPIWIFI_RESET	(~NINA_RESETN)
+
 #ifdef ARDUINO_MAIN
 
 // On the Arduino board, digital pins are also used
