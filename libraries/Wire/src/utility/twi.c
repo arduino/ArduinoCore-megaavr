@@ -273,7 +273,9 @@ uint8_t TWI_MasterWriteRead(uint8_t slave_address,
 		master_bytesRead = 0;
 		master_sendStop = send_stop;
 		master_slaveAddress = slave_address<<1;
-		
+
+trigger_action:
+
 		/* If write command, send the START condition + Address +
 		 * 'R/_W = 0'
 		 */
@@ -300,6 +302,11 @@ uint8_t TWI_MasterWriteRead(uint8_t slave_address,
 
 		/* Arduino requires blocking function */
 		while(master_result == TWIM_RESULT_UNKNOWN) {}
+
+		// in case of arbitration lost, retry sending
+		if (master_result == TWIM_RESULT_ARBITRATION_LOST) {
+			goto trigger_action;
+		}
 
 		uint8_t ret = 0;
 		if (master_bytesToRead > 0) {
