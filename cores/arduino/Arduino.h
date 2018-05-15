@@ -70,7 +70,7 @@ extern "C"{
 
 /* Allows performing a correction on the CPU value using the signature row 
 	values indicating oscillator error provided from the device manufacturer */
-#define PERFORM_SIGROW_CORRECTION_F_CPU 0
+#define PERFORM_SIGROW_CORRECTION_F_CPU 1
 
 /* Variable containing corrected F_CPU value, after checks for safe operating
 	frequency vs supply voltage, oscillator fuse setting and MCLK divider.
