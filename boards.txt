@@ -2,7 +2,7 @@
 
 ##############################################################
 
-uno2018.name=Arduino Uno 2018
+uno2018.name=Arduino Uno WiFi Rev2
 
 uno2018.vid.0=0x03eb
 uno2018.pid.0=0x2145
@@ -15,7 +15,7 @@ uno2018.upload.speed=115200
 
 uno2018.build.mcu=atmega4809
 uno2018.build.f_cpu=16000000L
-uno2018.build.board=AVR_UNO_2018
+uno2018.build.board=AVR_UNO_WIFI_REV2
 uno2018.build.core=arduino
 uno2018.build.variant=uno2018
 #uno2018.build.extra_flags=-B{runtime.tools.atpack.path}/gcc/dev/{build.mcu}
