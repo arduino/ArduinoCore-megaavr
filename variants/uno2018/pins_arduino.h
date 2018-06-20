@@ -179,9 +179,9 @@ const uint8_t PROGMEM digital_pin_to_port[] = {
 	PE, //8 PE3
 	PB, //9 PB0
 	PB, //10 PB1
-	PC, //11 PC0
-	PC, //12 PC1
-	PC, //13 PC2
+	PE, //11 PE0
+	PE, //12 PE1
+	PE, //13 PE2
 	PD, //14 AI0 PD0
 	PD, //15 AI1 PD1
 	PD, //16 AI2 PD2
@@ -200,9 +200,9 @@ const uint8_t PROGMEM digital_pin_to_port[] = {
 	PA,	// 29 PA7
 	PB,	// 30 PB3
 	PC,	// 31 PC7
-	PE,	// 32 PE0
-	PE,	// 33 PE1
-	PE,	// 34 PE2
+	PC,	// 32 PC0
+	PC,	// 33 PC1
+	PC,	// 34 PC2
 	PF,	// 35 PF2
 	PF,	// 36 PF3
 	PF,	// 37 PF0 TOSC 1
@@ -224,9 +224,9 @@ const uint8_t PROGMEM digital_pin_to_bit_position[] = {
 	PIN3_bp,	//8 PE3
 	PIN0_bp,	//9 PB0
 	PIN1_bp,	//10 PB1
-	PIN0_bp,	//11 PC0
-	PIN1_bp,	//12 PC1
-	PIN2_bp,	//13 PC2
+	PIN0_bp,	//11 PE0
+	PIN1_bp,	//12 PE1
+	PIN2_bp,	//13 PE2
 	PIN0_bp,	//14 AI0 PD0
 	PIN1_bp,	//15 AI1 PD1
 	PIN2_bp,	//16 AI2 PD2
@@ -245,9 +245,9 @@ const uint8_t PROGMEM digital_pin_to_bit_position[] = {
 	PIN7_bp,	// 29 PA7
 	PIN3_bp,	// 30 PB3
 	PIN7_bp,	// 31 PC7
-	PIN0_bp,	// 32 PE0
-	PIN1_bp,	// 33 PE1
-	PIN2_bp,	// 34 PE2
+	PIN0_bp,	// 32 PC0
+	PIN1_bp,	// 33 PC1
+	PIN2_bp,	// 34 PC2
 	PIN2_bp,	// 35 PF2
 	PIN3_bp,	// 36 PF3
 	PIN0_bp,	// 37 PF0 TOSC 1
