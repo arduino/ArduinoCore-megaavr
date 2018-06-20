@@ -68,6 +68,7 @@ void analogReference(uint8_t mode)
 
 int analogRead(uint8_t pin)
 {
+	pin = digitalPinToAnalogInput(pin);
 	if(pin > NUM_ANALOG_INPUTS) return NOT_A_PIN;
 	
 	/* Check if TWI is operating on double bonded pin (Master Enable is high 

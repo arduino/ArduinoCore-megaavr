@@ -33,25 +33,17 @@
 #define NUM_TOTAL_FREE_PINS			(NUM_DIGITAL_PINS + NUM_ANALOG_INPUTS + NUM_TESTPOINT_PINS)
 #define NUM_TOTAL_PINS				(NUM_DIGITAL_PINS + NUM_ANALOG_INPUTS + NUM_TESTPOINT_PINS + NUM_OCCUPIED_PINS)
 #define ANALOG_INPUT_OFFSET			14
-#define analogInputToDigitalPin(p)  ((p < NUM_ANALOG_INPUTS) ? (p) + ANALOG_INPUT_OFFSET : NOT_A_PIN)
+#define digitalPinToAnalogInput(p)  ((p < NUM_ANALOG_INPUTS) ? (p) : (p) - ANALOG_INPUT_OFFSET)
 
 #define EXTERNAL_NUM_INTERRUPTS 	48
 
-#define digitalPinHasPWM(p)         ((p) == 3 || (p) == 5 || (p) == 6 || (p) == 9 || (p) == 10 || (p) == 11)
+#define digitalPinHasPWM(p)         ((p) == 3 || (p) == 5 || (p) == 6 || (p) == 9 || (p) == 10)
 
-#ifdef REV_A_ENGINEERING_SAMPLE
-#define SPI_MUX		  	(PORTMUX_SPI0_DEFAULT_gc)
-#define PIN_SPI_MISO	(23)
-#define PIN_SPI_SCK		(28)
-#define PIN_SPI_MOSI	(24)
-#define PIN_SPI_SS		(29)
-#else
 #define SPI_MUX		  	(PORTMUX_SPI0_ALT1_gc)
-#define PIN_SPI_MISO	(12)
-#define PIN_SPI_SCK		(13)
-#define PIN_SPI_MOSI	(11)
+#define PIN_SPI_MISO	(33)
+#define PIN_SPI_SCK		(34)
+#define PIN_SPI_MOSI	(32)
 #define PIN_SPI_SS		(10)
-#endif
 
 static const uint8_t SS   = PIN_SPI_SS;
 static const uint8_t MOSI = PIN_SPI_MOSI;
@@ -105,14 +97,12 @@ static const uint8_t SCL = PIN_WIRE_SCL;
 
 #define LED_BUILTIN 25
 
-#define PIN_A0   (0)
-#define PIN_A1   (1)
-#define PIN_A2   (2)
-#define PIN_A3   (3)
-#define PIN_A4   (4)
-#define PIN_A5   (5)
-#define PIN_A6   (6)
-#define PIN_A7   (7)
+#define PIN_A0   (14)
+#define PIN_A1   (15)
+#define PIN_A2   (16)
+#define PIN_A3   (17)
+#define PIN_A4   (18)
+#define PIN_A5   (19)
 
 static const uint8_t A0 = PIN_A0;
 static const uint8_t A1 = PIN_A1;
@@ -120,10 +110,8 @@ static const uint8_t A2 = PIN_A2;
 static const uint8_t A3 = PIN_A3;
 static const uint8_t A4 = PIN_A4;
 static const uint8_t A5 = PIN_A5;
-static const uint8_t A6 = PIN_A6;
-static const uint8_t A7 = PIN_A7;
 
-#define PINS_COUNT		(38u)
+#define PINS_COUNT		(40u)
 
 //NINA
 #define NINA_GPIO0		(28u)
@@ -168,43 +156,43 @@ static const uint8_t A7 = PIN_A7;
 //
 
 const uint8_t PROGMEM digital_pin_to_port[] = {
-	PC, //0 USART1_Rx PC5
-	PC, //1 USART1_Tx PC4
-	PA, //2 PA0
-	PF, //3 PF5
-	PC, //4 PC6
-	PB, //5 PB2
-	PF, //6 PF4
-	PA, //7 PA1
-	PE, //8 PE3
-	PB, //9 PB0
-	PB, //10 PB1
-	PE, //11 PE0
-	PE, //12 PE1
-	PE, //13 PE2
-	PD, //14 AI0 PD0
-	PD, //15 AI1 PD1
-	PD, //16 AI2 PD2
-	PD, //17 AI3 PD3
-	PD, //18 AI4 PD4
-	PD, //19 AI5 PD5
-	PA, //20 TWI_SDA PA2
-	PA, //21 TWI_SCL PA3
-	PC, //22 SPI SS PC3
-	PA, //23 USART0_Rx PA5
-	PA, //24 USART0_Tx PA4
-	PD, //25 LED_BUILTIN PD6
-	PB, //26 USART3_Rx PB5
-	PB, //27 USART3_Tx PB4
-	PA,	// 28 PA6
-	PA,	// 29 PA7
-	PB,	// 30 PB3
-	PC,	// 31 PC7
-	PC,	// 32 PC0
-	PC,	// 33 PC1
-	PC,	// 34 PC2
-	PF,	// 35 PF2
-	PF,	// 36 PF3
+	PC, // 0 PC5/USART1_Rx
+	PC, // 1 PC4/USART1_Tx
+	PA, // 2 PA0
+	PF, // 3 PF5
+	PC, // 4 PC6
+	PB, // 5 PB2
+	PF, // 6 PF4
+	PA, // 7 PA1
+	PE, // 8 PE3
+	PB, // 9 PB0
+	PB, // 10 PB1
+	PE, // 11 PE0
+	PE, // 12 PE1
+	PE, // 13 PE2
+	PD, // 14 PD0/AI0
+	PD, // 15 PD1AI1
+	PD, // 16 PD2/AI2
+	PD, // 17 PD3/AI3
+	PD, // 18 PD4/AI4
+	PD, // 19 PD5/AI5
+	PA, // 20 PA2/TWI_SDA
+	PA, // 21 PA3/TWI_SCL
+	PC, // 22 PC3
+	PA, // 23 PA5/NINA TX
+	PA, // 24 PA4/NINA RX
+	PD, // 25 PD6/LED_BUILTIN
+	PB, // 26 PB5/USART3_Rx
+	PB, // 27 PB4/USART3_Tx
+	PA,	// 28 PA6/NINA GPIO0
+	PA,	// 29 PA7/NINA RST
+	PB,	// 30 PB3/IMU CS
+	PC,	// 31 PC7/IMU INT
+	PC,	// 32 PC0/MOSI
+	PC,	// 33 PC1/MISO
+	PC,	// 34 PC2/SCK
+	PF,	// 35 PF2/NINA CS
+	PF,	// 36 PF3/NINA ACK
 	PF,	// 37 PF0 TOSC 1
 	PF,	// 38 PF1 TOSC 2
 	PD,	// 39 PD7 VREF
@@ -213,43 +201,43 @@ const uint8_t PROGMEM digital_pin_to_port[] = {
 
 /* Use this for accessing PINnCTRL register */
 const uint8_t PROGMEM digital_pin_to_bit_position[] = {
-	PIN5_bp,	//0 USART1_Rx PC5
-	PIN4_bp,	//1 USART1_Tx PC4
-	PIN0_bp,	//2 PA0
-	PIN5_bp,	//3 PF5
-	PIN6_bp,	//4 PC6
-	PIN2_bp,	//5 PB2
-	PIN4_bp,	//6 PF4
-	PIN1_bp,	//7 PA1
-	PIN3_bp,	//8 PE3
-	PIN0_bp,	//9 PB0
-	PIN1_bp,	//10 PB1
-	PIN0_bp,	//11 PE0
-	PIN1_bp,	//12 PE1
-	PIN2_bp,	//13 PE2
-	PIN0_bp,	//14 AI0 PD0
-	PIN1_bp,	//15 AI1 PD1
-	PIN2_bp,	//16 AI2 PD2
-	PIN3_bp,	//17 AI3 PD3
-	PIN4_bp,	//18 AI4 PD4
-	PIN5_bp,	//19 AI5 PD5
-	PIN2_bp,	//20 TWI_SDA PA2
-	PIN3_bp,	//21 TWI_SCL PA3
-	PIN3_bp,	//22 SPI SS PC3
-	PIN5_bp,	//23 USART0_Rx PA5
-	PIN4_bp,	//24 USART0_Tx PA4
-	PIN6_bp,	//25 LED_BUILTIN PD6
-	PIN5_bp,	//26 USART3_Rx PB5
-	PIN4_bp,	//27 USART3_Tx PB4
-	PIN6_bp,	// 28 PA6
-	PIN7_bp,	// 29 PA7
-	PIN3_bp,	// 30 PB3
-	PIN7_bp,	// 31 PC7
-	PIN0_bp,	// 32 PC0
-	PIN1_bp,	// 33 PC1
-	PIN2_bp,	// 34 PC2
-	PIN2_bp,	// 35 PF2
-	PIN3_bp,	// 36 PF3
+	PIN5_bp,	// 0 PC5/USART1_Rx
+	PIN4_bp,	// 1 PC4/USART1_Tx
+	PIN0_bp,	// 2 PA0
+	PIN5_bp,	// 3 PF5
+	PIN6_bp,	// 4 PC6
+	PIN2_bp,	// 5 PB2
+	PIN4_bp,	// 6 PF4
+	PIN1_bp,	// 7 PA1
+	PIN3_bp,	// 8 PE3
+	PIN0_bp,	// 9 PB0
+	PIN1_bp,	// 10 PB1
+	PIN0_bp,	// 11 PE0
+	PIN1_bp,	// 12 PE1
+	PIN2_bp,	// 13 PE2
+	PIN0_bp,	// 14 PD0/AI0
+	PIN1_bp,	// 15 PD1AI1
+	PIN2_bp,	// 16 PD2/AI2
+	PIN3_bp,	// 17 PD3/AI3
+	PIN4_bp,	// 18 PD4/AI4
+	PIN5_bp,	// 19 PD5/AI5
+	PIN2_bp,	// 20 PA2/TWI_SDA
+	PIN3_bp,	// 21 PA3/TWI_SCL
+	PIN3_bp,	// 22 PC3
+	PIN5_bp,	// 23 PA5/NINA TX
+	PIN4_bp,	// 24 PA4/NINA RX
+	PIN6_bp,	// 25 PD6/LED_BUILTIN
+	PIN5_bp,	// 26 PB5/USART3_Rx
+	PIN4_bp,	// 27 PB4/USART3_Tx
+	PIN6_bp,	// 28 PA6/NINA GPIO0
+	PIN7_bp,	// 29 PA7/NINA RST
+	PIN3_bp,	// 30 PB3/IMU CS
+	PIN7_bp,	// 31 PC7/IMU INT
+	PIN0_bp,	// 32 PC0/MOSI
+	PIN1_bp,	// 33 PC1/MISO
+	PIN2_bp,	// 34 PC2/SCK
+	PIN2_bp,	// 35 PF2/NINA CS
+	PIN3_bp,	// 36 PF3/NINA ACK
 	PIN0_bp,	// 37 PF0 TOSC 1
 	PIN1_bp,	// 38 PF1 TOSC 2
 	PIN7_bp,	// 39 PD7 VREF
@@ -257,43 +245,43 @@ const uint8_t PROGMEM digital_pin_to_bit_position[] = {
 };
 
 const uint8_t PROGMEM digital_pin_to_timer[] = {
-	NOT_ON_TIMER,	//0 USART1_Tx PC5
-	NOT_ON_TIMER,	//1 USART1_Tx PC4
-	NOT_ON_TIMER,	//2 PA0
-	TIMERB1,		//3 PF5	// TCB1 WO
-	NOT_ON_TIMER,	//4 PC6
-	TIMERA0,		//5 PB2	// TCA0 WO2
-	TIMERB0,		//6 PF4	// TCB0 WO
-	NOT_ON_TIMER,	//7 PA1
-	NOT_ON_TIMER,	//8 PE3
-	TIMERA0,		//9 PB0		// TCA0 WO0
-	TIMERA0,		//10 PB1	// TCA0 WO1
-	TIMERB2,		//11 PC0	// TCB2 WO2
-	NOT_ON_TIMER,	//12 PC1
-	NOT_ON_TIMER,	//13 PC2
-	NOT_ON_TIMER,	//14 AI0 PD0
-	NOT_ON_TIMER,	//15 AI1 PD1
-	NOT_ON_TIMER,	//16 AI2 PD2
-	NOT_ON_TIMER,	//17 AI3 PD3
-	NOT_ON_TIMER,	//18 AI4 PD4
-	NOT_ON_TIMER,	//19 AI5 PD5
-	NOT_ON_TIMER,	//20 TWI_SDA PA2
-	NOT_ON_TIMER,	//21 TWI_SCL PA3
-	NOT_ON_TIMER,	//22 SPI SS PC3
-	NOT_ON_TIMER,	//23 USART0_Rx PA5
-	NOT_ON_TIMER,	//24 USART0_Tx PA4
-	NOT_ON_TIMER,	//25 LED_BUILTIN PD6
-	NOT_ON_TIMER,	//26 USART3_Rx PB5
-	NOT_ON_TIMER,	//27 USART3_Tx PB4
-	NOT_ON_TIMER,	// 28 PA6
-	NOT_ON_TIMER,	// 29 PA7
-	NOT_ON_TIMER,	// 30 PB3
-	NOT_ON_TIMER,	// 31 PC7
-	NOT_ON_TIMER,	// 32 PE0
-	NOT_ON_TIMER,	// 33 PE1
-	NOT_ON_TIMER,	// 34 PE2
-	NOT_ON_TIMER,	// 35 PF2
-	NOT_ON_TIMER,	// 36 PF3
+	NOT_ON_TIMER,	// 0 PC5/USART1_Rx
+	NOT_ON_TIMER,	// 1 PC4/USART1_Tx
+	NOT_ON_TIMER,	// 2 PA0
+	TIMERB1,		// 3 PF5
+	NOT_ON_TIMER,	// 4 PC6
+	TIMERA0,		// 5 PB2
+	TIMERB0,		// 6 PF4
+	NOT_ON_TIMER,	// 7 PA1
+	NOT_ON_TIMER,	// 8 PE3
+	TIMERA0,		// 9 PB0
+	TIMERA0,		// 10 PB1
+	TIMERB2,		// 11 PE0
+	NOT_ON_TIMER,	// 12 PE1
+	NOT_ON_TIMER,	// 13 PE2
+	NOT_ON_TIMER,	// 14 PD0/AI0
+	NOT_ON_TIMER,	// 15 PD1AI1
+	NOT_ON_TIMER,	// 16 PD2/AI2
+	NOT_ON_TIMER,	// 17 PD3/AI3
+	NOT_ON_TIMER,	// 18 PD4/AI4
+	NOT_ON_TIMER,	// 19 PD5/AI5
+	NOT_ON_TIMER,	// 20 PA2/TWI_SDA
+	NOT_ON_TIMER,	// 21 PA3/TWI_SCL
+	NOT_ON_TIMER,	// 22 PC3
+	NOT_ON_TIMER,	// 23 PA5/NINA TX
+	NOT_ON_TIMER,	// 24 PA4/NINA RX
+	NOT_ON_TIMER,	// 25 PD6/LED_BUILTIN
+	NOT_ON_TIMER,	// 26 PB5/USART3_Rx
+	NOT_ON_TIMER,	// 27 PB4/USART3_Tx
+	NOT_ON_TIMER,	// 28 PA6/NINA GPIO0
+	NOT_ON_TIMER,	// 29 PA7/NINA RST
+	NOT_ON_TIMER,	// 30 PB3/IMU CS
+	NOT_ON_TIMER,	// 31 PC7/IMU INT
+	NOT_ON_TIMER,	// 32 PC0/MOSI
+	NOT_ON_TIMER,	// 33 PC1/MISO
+	NOT_ON_TIMER,	// 34 PC2/SCK
+	NOT_ON_TIMER,	// 35 PF2/NINA CS
+	NOT_ON_TIMER,	// 36 PF3/NINA ACK
 	NOT_ON_TIMER,	// 37 PF0 TOSC 1
 	NOT_ON_TIMER,	// 38 PF1 TOSC 2
 	NOT_ON_TIMER,	// 39 PD7 VREF
