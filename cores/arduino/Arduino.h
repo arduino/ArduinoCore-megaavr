@@ -132,6 +132,8 @@ bool isDoubleBondedActive(uint8_t pin);
 #define getPINnCTRLregister(port, bit_pos) ( ((port != NULL) && (bit_pos < NOT_A_PIN)) ? ((uint8_t *)&(port->PIN0CTRL) + bit_pos) : NULL )
 #define digitalPinToInterrupt(p) ( digitalPinToPort(p) * 8 + digitalPinToBitPosition(p) )
 
+#define portOutputRegister(P) ( (volatile uint8_t *)( &portToPortStruct(P)->OUT ) )
+
 #ifdef __cplusplus
 } // extern "C"
 #endif
