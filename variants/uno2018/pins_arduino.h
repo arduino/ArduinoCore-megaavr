@@ -122,6 +122,10 @@ static const uint8_t A5 = PIN_A5;
 #define SPIWIFI_ACK		NINA_ACK
 #define SPIWIFI_RESET	(~NINA_RESETN)
 
+//IMU
+#define SPIIMU_SS		(30u)
+#define SPIIMU_INT		(31u)
+
 #ifdef ARDUINO_MAIN
 
 // On the Arduino board, digital pins are also used
