@@ -34,7 +34,7 @@ A5	        PC5     	PD5
 
 #define PORTD_OFFSET    0
 #define PORTB_OFFSET    8
-#define PORTC_OFFSET    16
+#define PORTC_OFFSET    14
 
 #undef PORTA
 #undef PORTB
@@ -94,9 +94,9 @@ pinPort mapping[20] = {
 /** DDR Classes**/
 class DDRClass {
     public:
-        DDRClass(uint8_t _offset):offset(_offset){}
+        DDRClass(uint8_t _offset, uint8_t _limit):offset(_offset),limit(_limit){}
         DDRClass& operator=(int value){
-            for (int i=0; i<6; i++) {
+            for (int i=0; i<limit; i++) {
                 if (value & (1 << i)) {
                     mapping[i + offset].port->DIR |= ( 1 << mapping[i + offset].pin);
                 } else {
@@ -106,19 +106,19 @@ class DDRClass {
             return *this; 
         }
     private:
-        uint8_t offset;
+        uint8_t offset, limit;
 };
 
-DDRClass DDRB(PORTB_OFFSET);
-DDRClass DDRC(PORTC_OFFSET);
-DDRClass DDRD(PORTD_OFFSET);
+DDRClass DDRB(PORTB_OFFSET, 6);
+DDRClass DDRC(PORTC_OFFSET, 6);
+DDRClass DDRD(PORTD_OFFSET, 8);
 
 /** PORT Classes**/
 class PORTClass {
     public:
-    PORTClass(uint8_t _offset):offset(_offset){}
+    PORTClass(uint8_t _offset, uint8_t _limit):offset(_offset),limit(_limit){}
     PORTClass& operator=(int value){
-        for (int i=0; i<6; i++) {
+        for (int i=0; i<limit; i++) {
             if (value & (1 << i)) {
 #ifdef COMPATIBILITY_DEBUG
                 printPortAndPin((int) mapping[i + offset].port, mapping[i + offset].pin, true);
@@ -134,9 +134,9 @@ class PORTClass {
         return *this; 
     }
     private:
-        uint8_t offset;
+        uint8_t offset, limit;
 };
 
-PORTClass PORTB(PORTB_OFFSET);
-PORTClass PORTC(PORTC_OFFSET);
-PORTClass PORTD(PORTD_OFFSET);
+PORTClass PORTB(PORTB_OFFSET, 6);
+PORTClass PORTC(PORTC_OFFSET, 6);
+PORTClass PORTD(PORTD_OFFSET, 8);
