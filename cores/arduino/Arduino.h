@@ -142,6 +142,7 @@ bool isDoubleBondedActive(uint8_t pin);
 #include "USBCore.h"
 #include "CDC.h"
 #include "MSC.h"
+#include <UNO_compat.h>
 #if defined(HAVE_HWSERIAL0) && defined(HAVE_CDCSERIAL)
 #error "Targets with both UART0 and CDC serial not supported"
 #endif
@@ -149,5 +150,4 @@ bool isDoubleBondedActive(uint8_t pin);
 #endif
 
 #include "pins_arduino.h"
-
 #endif
