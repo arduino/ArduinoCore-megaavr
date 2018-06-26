@@ -1,7 +1,29 @@
 #pragma once
 #include "Arduino.h"
 
-//#define COMPATIBILITY_DEBUG true
+/*
+  ARDUINO PIN  ATMEGA 328  ATMEGA 4809
+  0            PD0         PC5
+  1            PD1         PC4
+  2            PD2         PA0
+  3            PD3         PF5
+  4            PD4         PC6
+  5            PD5         PB2
+  6            PD6         PF4
+  7            PD7         PA1
+  8            PB0         PE3
+  9            PB1         PB0
+  10           PB2         PB1
+  11           PB3         PE0
+  12           PB4         PE1
+  13           PB5         PE2
+  A0           PC0         PD0
+  A1           PC1         PD1
+  A2           PC2         PD2
+  A3           PC3         PD3
+  A4           PC4         PD4
+  A5           PC5         PD5
+*/
 
 #define PORTA_ARDUINO        (*(PORT_t *) 0x0400) /* I/O Ports */
 #define PORTB_ARDUINO        (*(PORT_t *) 0x0420) /* I/O Ports */
@@ -10,32 +32,18 @@
 #define PORTE_ARDUINO        (*(PORT_t *) 0x0480) /* I/O Ports */
 #define PORTF_ARDUINO        (*(PORT_t *) 0x04A0) /* I/O Ports */
 
-#define PORTD_OFFSET    0
-#define PORTB_OFFSET    8
-#define PORTC_OFFSET    14
-
 #undef PORTB
 #undef PORTC
 #undef PORTD
 
-#ifdef COMPATIBILITY_DEBUG
-static inline void printPortAndPin(int port, uint8_t pin, bool value) {
-  Serial.print("Writing ");
-  Serial.print(value);
-  Serial.print(" on ");
+#define SET_PORT_REGISTER(inPosition, port, position) if ((1 << inPosition) & (uint8_t)value) { port.OUTSET = (1 << position);}
+#define CLEAR_PORT_REGISTER(inPosition, port, position) if ((uint8_t)~(1 << inPosition) == (uint8_t)value) { port.OUTCLR = (1 << position);}
+#define SET_OR_CLEAR_PORT_REGISTER(inPosition, port, position) if ((uint8_t)~(1 << inPosition) & (uint8_t)value) { port.OUTSET = (1 << position); } else {port.OUTCLR = (1 << position); }
 
-  switch (port) {
-    case (int) &PORTA_ARDUINO: Serial.print("PORTA"); break;
-    case (int) &PORTB_ARDUINO: Serial.print("PORTB"); break;
-    case (int) &PORTC_ARDUINO: Serial.print("PORTC"); break;
-    case (int) &PORTD_ARDUINO: Serial.print("PORTD"); break;
-    case (int) &PORTE_ARDUINO: Serial.print("PORTE"); break;
-    case (int) &PORTF_ARDUINO: Serial.print("PORTF"); break;
-  }
+#define SET_DIR_REGISTER(inPosition, port, position) if ((1 << inPosition) & (uint8_t)value) { port.DIRSET = (1 << position);}
+#define CLEAR_DIR_REGISTER(inPosition, port, position) if ((uint8_t)~(1 << inPosition) == (uint8_t)value) { port.DIRCLR = (1 << position);}
+#define SET_OR_CLEAR_DIR_REGISTER(inPosition, port, position) if ((uint8_t)~(1 << inPosition) & (uint8_t)value) { port.DIRSET = (1 << position); } else {port.DIRCLR = (1 << position); }
 
-  Serial.println(pin);
-}
-#endif
 
 typedef struct pinPort {
   volatile PORT_t*  port;
@@ -43,113 +51,225 @@ typedef struct pinPort {
 };
 
 /** DDR Classes**/
-class DDRClass {
+class DDRBClass {
   public:
-    DDRClass(uint8_t _offset, uint8_t _limit, pinPort* _mapping): offset(_offset), limit(_limit), mapping(_mapping) {}
-    DDRClass& operator=(uint8_t value) {
-      for (int i = 0; i < limit; i++) {
-        if (value & (1 << i)) {
-          mapping[i + offset].port->DIR |= ( 1 << mapping[i + offset].pin);
-        } else {
-          mapping[i + offset].port->DIR &= ~( 1 << mapping[i + offset].pin);
-        }
-      }
-      registerValue = value;
+    DDRBClass() {}
+    DDRBClass& operator=(uint8_t value) {
+      SET_OR_CLEAR_DIR_REGISTER(0, PORTE_ARDUINO, 3);
+      SET_OR_CLEAR_DIR_REGISTER(1, PORTB_ARDUINO, 0);
+      SET_OR_CLEAR_DIR_REGISTER(2, PORTB_ARDUINO, 1);
+      SET_OR_CLEAR_DIR_REGISTER(3, PORTE_ARDUINO, 0);
+      SET_OR_CLEAR_DIR_REGISTER(4, PORTE_ARDUINO, 1);
+      SET_OR_CLEAR_DIR_REGISTER(5, PORTE_ARDUINO, 2);
       return *this;
     }
-    DDRClass& operator&=(uint8_t value) {
-      registerValue &= value;
-      for (int i = 0; i < limit; i++) {
-        if (registerValue & (1 << i)) {
-          mapping[i + offset].port->DIR |= ( 1 << mapping[i + offset].pin);
-        } else {
-          mapping[i + offset].port->DIR &= ~( 1 << mapping[i + offset].pin);
-        }
-      }
+
+    DDRBClass& operator&=(uint8_t value) {
+      CLEAR_DIR_REGISTER(0, PORTE_ARDUINO, 3);
+      CLEAR_DIR_REGISTER(1, PORTB_ARDUINO, 0);
+      CLEAR_DIR_REGISTER(2, PORTB_ARDUINO, 1);
+      CLEAR_DIR_REGISTER(3, PORTE_ARDUINO, 0);
+      CLEAR_DIR_REGISTER(4, PORTE_ARDUINO, 1);
+      CLEAR_DIR_REGISTER(5, PORTE_ARDUINO, 2);
       return *this;
     }
-    DDRClass& operator|=(uint8_t value) {
-      registerValue |= value;
-      for (int i = 0; i < limit; i++) {
-        if (registerValue & (1 << i)) {
-          mapping[i + offset].port->DIR |= ( 1 << mapping[i + offset].pin);
-        } else {
-          mapping[i + offset].port->DIR &= ~( 1 << mapping[i + offset].pin);
-        }
-      }
+
+    DDRBClass& operator|=(uint8_t value) {
+      SET_DIR_REGISTER(0, PORTE_ARDUINO, 3);
+      SET_DIR_REGISTER(1, PORTB_ARDUINO, 0);
+      SET_DIR_REGISTER(2, PORTB_ARDUINO, 1);
+      SET_DIR_REGISTER(3, PORTE_ARDUINO, 0);
+      SET_DIR_REGISTER(4, PORTE_ARDUINO, 1);
+      SET_DIR_REGISTER(5, PORTE_ARDUINO, 2);
       return *this;
     }
-  private:
-    uint8_t offset, limit, registerValue = 0;
-    pinPort* mapping;
 };
 
-extern DDRClass DDRB;
-extern DDRClass DDRC;
-extern DDRClass DDRD;
+class DDRCClass {
+  public:
+    DDRCClass() {}
+    DDRCClass& operator=(uint8_t value) {
+      SET_OR_CLEAR_DIR_REGISTER(0, PORTD_ARDUINO, 0);
+      SET_OR_CLEAR_DIR_REGISTER(1, PORTD_ARDUINO, 1);
+      SET_OR_CLEAR_DIR_REGISTER(2, PORTD_ARDUINO, 2);
+      SET_OR_CLEAR_DIR_REGISTER(3, PORTD_ARDUINO, 3);
+      SET_OR_CLEAR_DIR_REGISTER(4, PORTD_ARDUINO, 4);
+      SET_OR_CLEAR_DIR_REGISTER(5, PORTD_ARDUINO, 5);
+      return *this;
+    }
 
+    DDRCClass& operator&=(uint8_t value) {
+      CLEAR_DIR_REGISTER(0, PORTD_ARDUINO, 0);
+      CLEAR_DIR_REGISTER(1, PORTD_ARDUINO, 1);
+      CLEAR_DIR_REGISTER(2, PORTD_ARDUINO, 2);
+      CLEAR_DIR_REGISTER(3, PORTD_ARDUINO, 3);
+      CLEAR_DIR_REGISTER(4, PORTD_ARDUINO, 4);
+      CLEAR_DIR_REGISTER(5, PORTD_ARDUINO, 5);
+      return *this;
+    }
+
+    DDRCClass& operator|=(uint8_t value) {
+      SET_DIR_REGISTER(0, PORTD_ARDUINO, 0);
+      SET_DIR_REGISTER(1, PORTD_ARDUINO, 1);
+      SET_DIR_REGISTER(2, PORTD_ARDUINO, 2);
+      SET_DIR_REGISTER(3, PORTD_ARDUINO, 3);
+      SET_DIR_REGISTER(4, PORTD_ARDUINO, 4);
+      SET_DIR_REGISTER(5, PORTD_ARDUINO, 5);
+      return *this;
+    }
+};
+
+class DDRDClass {
+  public:
+    DDRDClass() {}
+    DDRDClass& operator=(uint8_t value) {
+      SET_OR_CLEAR_DIR_REGISTER(0, PORTC_ARDUINO, 5);
+      SET_OR_CLEAR_DIR_REGISTER(1, PORTC_ARDUINO, 4);
+      SET_OR_CLEAR_DIR_REGISTER(2, PORTA_ARDUINO, 0);
+      SET_OR_CLEAR_DIR_REGISTER(3, PORTF_ARDUINO, 5);
+      SET_OR_CLEAR_DIR_REGISTER(4, PORTC_ARDUINO, 6);
+      SET_OR_CLEAR_DIR_REGISTER(5, PORTB_ARDUINO, 2);
+      SET_OR_CLEAR_DIR_REGISTER(6, PORTF_ARDUINO, 4);
+      SET_OR_CLEAR_DIR_REGISTER(7, PORTA_ARDUINO, 1);
+      return *this;
+    }
+
+    DDRDClass& operator&=(uint8_t value) {
+      CLEAR_DIR_REGISTER(0, PORTC_ARDUINO, 5);
+      CLEAR_DIR_REGISTER(1, PORTC_ARDUINO, 4);
+      CLEAR_DIR_REGISTER(2, PORTA_ARDUINO, 0);
+      CLEAR_DIR_REGISTER(3, PORTF_ARDUINO, 5);
+      CLEAR_DIR_REGISTER(4, PORTC_ARDUINO, 6);
+      CLEAR_DIR_REGISTER(5, PORTB_ARDUINO, 2);
+      CLEAR_DIR_REGISTER(6, PORTF_ARDUINO, 4);
+      CLEAR_DIR_REGISTER(7, PORTA_ARDUINO, 1);
+      return *this;
+    }
+
+    DDRDClass& operator|=(uint8_t value) {
+      SET_DIR_REGISTER(0, PORTC_ARDUINO, 5);
+      SET_DIR_REGISTER(1, PORTC_ARDUINO, 4);
+      SET_DIR_REGISTER(2, PORTA_ARDUINO, 0);
+      SET_DIR_REGISTER(3, PORTF_ARDUINO, 5);
+      SET_DIR_REGISTER(4, PORTC_ARDUINO, 6);
+      SET_DIR_REGISTER(5, PORTB_ARDUINO, 2);
+      SET_DIR_REGISTER(6, PORTF_ARDUINO, 4);
+      SET_DIR_REGISTER(7, PORTA_ARDUINO, 1);
+      return *this;
+    }
+};
 /** PORT Classes**/
-class PORTClass {
+class PORTBClass {
   public:
-    PORTClass(uint8_t _offset, uint8_t _limit, pinPort* _mapping): offset(_offset), limit(_limit), mapping(_mapping) {}
-    PORTClass& operator=(uint8_t value) {
-      registerValue = value;
-      for (int i = 0; i < limit; i++) {
-        if (value & (1 << i)) {
-#ifdef COMPATIBILITY_DEBUG
-          printPortAndPin((int) mapping[i + offset].port, mapping[i + offset].pin, true);
-#endif
-          mapping[i + offset].port->OUTSET =  ( 1 << mapping[i + offset].pin);
-        } else {
-#ifdef COMPATIBILITY_DEBUG
-          printPortAndPin((int) mapping[i + offset].port, mapping[i + offset].pin, false);
-#endif
-          mapping[i + offset].port->OUTCLR = ( 1 << mapping[i + offset].pin);
-        }
-      }
+    PORTBClass() {}
+    PORTBClass& operator=(uint8_t value) {
+      SET_OR_CLEAR_PORT_REGISTER(0, PORTE_ARDUINO, 3);
+      SET_OR_CLEAR_PORT_REGISTER(1, PORTB_ARDUINO, 0);
+      SET_OR_CLEAR_PORT_REGISTER(2, PORTB_ARDUINO, 1);
+      SET_OR_CLEAR_PORT_REGISTER(3, PORTE_ARDUINO, 0);
+      SET_OR_CLEAR_PORT_REGISTER(4, PORTE_ARDUINO, 1);
+      SET_OR_CLEAR_PORT_REGISTER(5, PORTE_ARDUINO, 2);
       return *this;
     }
 
-    PORTClass& operator&=(uint8_t value) {
-      registerValue &= value;
-      for (int i = 0; i < limit; i++) {
-        if (registerValue & (1 << i)) {
-#ifdef COMPATIBILITY_DEBUG
-          printPortAndPin((int) mapping[i + offset].port, mapping[i + offset].pin, true);
-#endif
-          mapping[i + offset].port->OUTSET =  ( 1 << mapping[i + offset].pin);
-        } else {
-#ifdef COMPATIBILITY_DEBUG
-          printPortAndPin((int) mapping[i + offset].port, mapping[i + offset].pin, false);
-#endif
-          mapping[i + offset].port->OUTCLR = ( 1 << mapping[i + offset].pin);
-        }
-      }
+    PORTBClass& operator&=(uint8_t value) {
+      CLEAR_PORT_REGISTER(0, PORTE_ARDUINO, 3);
+      CLEAR_PORT_REGISTER(1, PORTB_ARDUINO, 0);
+      CLEAR_PORT_REGISTER(2, PORTB_ARDUINO, 1);
+      CLEAR_PORT_REGISTER(3, PORTE_ARDUINO, 0);
+      CLEAR_PORT_REGISTER(4, PORTE_ARDUINO, 1);
+      CLEAR_PORT_REGISTER(5, PORTE_ARDUINO, 2);
       return *this;
     }
 
-    PORTClass& operator|=(uint8_t value) {
-      registerValue |= value;
-      for (int i = 0; i < limit; i++) {
-        if (registerValue & (1 << i)) {
-#ifdef COMPATIBILITY_DEBUG
-          printPortAndPin((int) mapping[i + offset].port, mapping[i + offset].pin, true);
-#endif
-          mapping[i + offset].port->OUTSET =  ( 1 << mapping[i + offset].pin);
-        } else {
-#ifdef COMPATIBILITY_DEBUG
-          printPortAndPin((int) mapping[i + offset].port, mapping[i + offset].pin, false);
-#endif
-          mapping[i + offset].port->OUTCLR = ( 1 << mapping[i + offset].pin);
-        }
-      }
+    PORTBClass& operator|=(uint8_t value) {
+      SET_PORT_REGISTER(0, PORTE_ARDUINO, 3);
+      SET_PORT_REGISTER(1, PORTB_ARDUINO, 0);
+      SET_PORT_REGISTER(2, PORTB_ARDUINO, 1);
+      SET_PORT_REGISTER(3, PORTE_ARDUINO, 0);
+      SET_PORT_REGISTER(4, PORTE_ARDUINO, 1);
+      SET_PORT_REGISTER(5, PORTE_ARDUINO, 2);
       return *this;
     }
-  private:
-    uint8_t offset, limit, registerValue = 0;
-    pinPort* mapping;
 };
 
-extern PORTClass PORTB;
-extern PORTClass PORTC;
-extern PORTClass PORTD;
+class PORTCClass {
+  public:
+    PORTCClass() {}
+    PORTCClass& operator=(uint8_t value) {
+      SET_OR_CLEAR_PORT_REGISTER(0, PORTD_ARDUINO, 0);
+      SET_OR_CLEAR_PORT_REGISTER(1, PORTD_ARDUINO, 1);
+      SET_OR_CLEAR_PORT_REGISTER(2, PORTD_ARDUINO, 2);
+      SET_OR_CLEAR_PORT_REGISTER(3, PORTD_ARDUINO, 3);
+      SET_OR_CLEAR_PORT_REGISTER(4, PORTD_ARDUINO, 4);
+      SET_OR_CLEAR_PORT_REGISTER(5, PORTD_ARDUINO, 5);
+      return *this;
+    }
+
+    PORTCClass& operator&=(uint8_t value) {
+      CLEAR_PORT_REGISTER(0, PORTD_ARDUINO, 0);
+      CLEAR_PORT_REGISTER(1, PORTD_ARDUINO, 1);
+      CLEAR_PORT_REGISTER(2, PORTD_ARDUINO, 2);
+      CLEAR_PORT_REGISTER(3, PORTD_ARDUINO, 3);
+      CLEAR_PORT_REGISTER(4, PORTD_ARDUINO, 4);
+      CLEAR_PORT_REGISTER(5, PORTD_ARDUINO, 5);
+      return *this;
+    }
+
+    PORTCClass& operator|=(uint8_t value) {
+      SET_PORT_REGISTER(0, PORTD_ARDUINO, 0);
+      SET_PORT_REGISTER(1, PORTD_ARDUINO, 1);
+      SET_PORT_REGISTER(2, PORTD_ARDUINO, 2);
+      SET_PORT_REGISTER(3, PORTD_ARDUINO, 3);
+      SET_PORT_REGISTER(4, PORTD_ARDUINO, 4);
+      SET_PORT_REGISTER(5, PORTD_ARDUINO, 5);
+      return *this;
+    }
+};
+
+class PORTDClass {
+  public:
+    PORTDClass() {}
+    PORTDClass& operator=(uint8_t value) {
+      SET_OR_CLEAR_PORT_REGISTER(0, PORTC_ARDUINO, 5);
+      SET_OR_CLEAR_PORT_REGISTER(1, PORTC_ARDUINO, 4);
+      SET_OR_CLEAR_PORT_REGISTER(2, PORTA_ARDUINO, 0);
+      SET_OR_CLEAR_PORT_REGISTER(3, PORTF_ARDUINO, 5);
+      SET_OR_CLEAR_PORT_REGISTER(4, PORTC_ARDUINO, 6);
+      SET_OR_CLEAR_PORT_REGISTER(5, PORTB_ARDUINO, 2);
+      SET_OR_CLEAR_PORT_REGISTER(6, PORTF_ARDUINO, 4);
+      SET_OR_CLEAR_PORT_REGISTER(7, PORTA_ARDUINO, 1);
+      return *this;
+    }
+
+    PORTDClass& operator&=(uint8_t value) {
+      CLEAR_PORT_REGISTER(0, PORTC_ARDUINO, 5);
+      CLEAR_PORT_REGISTER(1, PORTC_ARDUINO, 4);
+      CLEAR_PORT_REGISTER(2, PORTA_ARDUINO, 0);
+      CLEAR_PORT_REGISTER(3, PORTF_ARDUINO, 5);
+      CLEAR_PORT_REGISTER(4, PORTC_ARDUINO, 6);
+      CLEAR_PORT_REGISTER(5, PORTB_ARDUINO, 2);
+      CLEAR_PORT_REGISTER(6, PORTF_ARDUINO, 4);
+      CLEAR_PORT_REGISTER(7, PORTA_ARDUINO, 1);
+      return *this;
+    }
+
+    PORTDClass& operator|=(uint8_t value) {
+      SET_PORT_REGISTER(0, PORTC_ARDUINO, 5);
+      SET_PORT_REGISTER(1, PORTC_ARDUINO, 4);
+      SET_PORT_REGISTER(2, PORTA_ARDUINO, 0);
+      SET_PORT_REGISTER(3, PORTF_ARDUINO, 5);
+      SET_PORT_REGISTER(4, PORTC_ARDUINO, 6);
+      SET_PORT_REGISTER(5, PORTB_ARDUINO, 2);
+      SET_PORT_REGISTER(6, PORTF_ARDUINO, 4);
+      SET_PORT_REGISTER(7, PORTA_ARDUINO, 1);
+      return *this;
+    }
+};
+
+extern PORTBClass PORTB;
+extern PORTCClass PORTC;
+extern PORTDClass PORTD;
+extern DDRBClass DDRB;
+extern DDRCClass DDRC;
+extern DDRDClass DDRD;
