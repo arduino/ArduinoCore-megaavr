@@ -16,6 +16,8 @@
 #pragma once
 #include "Arduino.h"
 
+#warning "ATMEGA328 registers emulation is enabled. You may encounter some speed issue. Please consider to disable it in the Tools menu"
+
 /*
   ARDUINO PIN  ATMEGA 328  ATMEGA 4809
   0            PD0         PC5
@@ -59,11 +61,6 @@
 #define CLEAR_DIR_REGISTER(inPosition, port, position) if ((uint8_t)~(1 << inPosition) == (uint8_t)value) { port.DIRCLR = (1 << position);}
 #define SET_OR_CLEAR_DIR_REGISTER(inPosition, port, position) if ((uint8_t)~(1 << inPosition) & (uint8_t)value) { port.DIRSET = (1 << position); } else {port.DIRCLR = (1 << position); }
 
-
-typedef struct pinPort {
-  volatile PORT_t*  port;
-  uint8_t pin;
-};
 
 /** DDR Classes**/
 class DDRBClass {
