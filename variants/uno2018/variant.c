@@ -1,5 +1,7 @@
-#include "pins_arduino.h"
 #include <stdbool.h>
+
+#include "pins_arduino.h"
+#include "api/Common.h"
 
 #define FORCE_INLINE __attribute__((always_inline)) inline
 
@@ -89,4 +91,22 @@ FORCE_INLINE bool isDoubleBondedActive(uint8_t pin) {
 	//if((pin == 10) && (SPI0.CTRLA & SPI_ENABLE_bm)) return true;
 
 	return false;
+}
+
+void initVariant() {
+	// NINA - SPI boot
+	pinMode(NINA_GPIO0, OUTPUT);
+	digitalWrite(NINA_GPIO0, HIGH);
+
+	// disable the NINA
+	pinMode(NINA_RESETN, OUTPUT);
+	digitalWrite(NINA_RESETN, HIGH);
+
+	// NINA SS HIGH by default
+	pinMode(SPIWIFI_SS, OUTPUT);
+	digitalWrite(SPIWIFI_SS, HIGH);
+
+	// IMU SS HIGH by default
+	pinMode(SPIIMU_SS, OUTPUT);
+	digitalWrite(SPIIMU_SS, HIGH);
 }
