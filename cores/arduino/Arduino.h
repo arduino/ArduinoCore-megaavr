@@ -125,14 +125,13 @@ bool isDoubleBondedActive(uint8_t pin);
 #define analogPinToBitMask(pin) ( (pin < NUM_ANALOG_INPUTS) ? (1 << analogPinToBitPosition(pin)) : NOT_A_PIN )
 #define digitalPinToTimer(pin) ( (pin < NUM_TOTAL_PINS) ? pgm_read_byte(digital_pin_to_timer + pin) : NOT_ON_TIMER )
 
-#define portInputRegister(port) ( &(((PORT_t*)(&PORTA + port))->IN) )
-
 #define portToPortStruct(port) ( (port < NUM_TOTAL_PORTS) ? ((PORT_t *)&PORTA + port) : NULL)
 #define digitalPinToPortStruct(pin) ( (pin < NUM_TOTAL_PINS) ? ((PORT_t *)&PORTA + digitalPinToPort(pin)) : NULL)
-#define getPINnCTRLregister(port, bit_pos) ( ((port != NULL) && (bit_pos < NOT_A_PIN)) ? ((uint8_t *)&(port->PIN0CTRL) + bit_pos) : NULL )
+#define getPINnCTRLregister(port, bit_pos) ( ((port != NULL) && (bit_pos < NOT_A_PIN)) ? ((volatile uint8_t *)&(port->PIN0CTRL) + bit_pos) : NULL )
 #define digitalPinToInterrupt(p) ( digitalPinToPort(p) * 8 + digitalPinToBitPosition(p) )
 
 #define portOutputRegister(P) ( (volatile uint8_t *)( &portToPortStruct(P)->OUT ) )
+#define portInputRegister(P) ( (volatile uint8_t *)( &portToPortStruct(P)->IN ) )
 
 #ifdef __cplusplus
 } // extern "C"
@@ -143,6 +142,9 @@ bool isDoubleBondedActive(uint8_t pin);
 #include "USBCore.h"
 #include "CDC.h"
 #include "MSC.h"
+#ifdef UNO_WIFI_REV2_328MODE
+#include <UNO_compat.h>
+#endif
 #if defined(HAVE_HWSERIAL0) && defined(HAVE_CDCSERIAL)
 #error "Targets with both UART0 and CDC serial not supported"
 #endif
@@ -150,5 +152,4 @@ bool isDoubleBondedActive(uint8_t pin);
 #endif
 
 #include "pins_arduino.h"
-
 #endif
