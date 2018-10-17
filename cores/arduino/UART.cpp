@@ -160,9 +160,9 @@ void UartClass::begin(unsigned long baud, uint16_t config)
             error = 1;
         }
 
-        // ********Check if desired baud rate is within the acceptable range for using normal RX-mode********
-        // Condition from datasheet
-        // This limits the minimum baud_setting value to 64 (0x0040)
+    // ********Check if desired baud rate is within the acceptable range for using normal RX-mode********
+    // Condition from datasheet
+    // This limits the minimum baud_setting value to 64 (0x0040)
     } else if ((16 * baud <= F_CPU_CORRECTED)) {
 
         // Check that the desired baud rate is not so low that it will
@@ -194,6 +194,10 @@ void UartClass::begin(unsigned long baud, uint16_t config)
         //Set up the tx pin
         digitalWrite(_hwserial_tx_pin, HIGH);
         pinMode(_hwserial_tx_pin, OUTPUT);
+
+        int8_t sigrow_val = SIGROW.OSC16ERR5V;
+        baud_setting *= (1024 + sigrow_val);
+        baud_setting /= 1024;
 
         // assign the baud_setting, a.k.a. BAUD (USART Baud Rate Register)
         (*_hwserial_module).BAUD = (int16_t) baud_setting;

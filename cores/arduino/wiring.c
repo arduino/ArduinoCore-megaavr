@@ -313,14 +313,6 @@ void init()
 		_PROTECTED_WRITE(CLKCTRL_MCLKCTRLB, 0x00);
 	#endif
 
-
- 	#if (PERFORM_SIGROW_CORRECTION_F_CPU == 1)
- 	/* Calculate actual F_CPU with error values from signature row */
-	int8_t sigrow_val = SIGROW.OSC16ERR5V;
- 	cpu_freq *= (1024 + sigrow_val);
- 	cpu_freq /= 1024; 	
- 	#endif /* (CORRECT_F_CPU == 1) */
-
 	/* Apply calculated value to F_CPU_CORRECTED */
 	F_CPU_CORRECTED = (uint32_t)cpu_freq;
 
