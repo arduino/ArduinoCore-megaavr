@@ -142,74 +142,34 @@ void UartClass::begin(unsigned long baud, uint16_t config)
     uint8_t oldSREG = SREG;
     cli();
 
-    // ********Check if desired baud rate is within the acceptable range for using CLK2X RX-mode********
-    // Condition from datasheet
-    // This limits the minimum baud_setting value to 64 (0x0040)
-    if((8 * baud) <= F_CPU_CORRECTED) {
+    baud_setting = (((8 * F_CPU_CORRECTED) / baud) ) / 2;
+    // Disable CLK2X
+    (*_hwserial_module).CTRLB &= (~USART_RXMODE_CLK2X_gc);
+    (*_hwserial_module).CTRLB |= USART_RXMODE_NORMAL_gc;
 
-        // Check that the desired baud rate is not so low that it will
-        // cause the BAUD register to overflow (1024 * 64 = 2^16)
-        if(baud > (F_CPU_CORRECTED / (8 * 1024))) {
-            // Datasheet formula for calculating the baud setting including trick to reduce rounding error ((2*(X/Y))+1)/2
-            // baud_setting = ( ( (2 * (64 * F_CPU_CORRECTED) / (8 * baud) ) + 1 ) / 2;
-            baud_setting = (((16 * F_CPU_CORRECTED) / baud) + 1 ) / 2;
-            // Enable CLK2X
-            (*_hwserial_module).CTRLB |= USART_RXMODE_CLK2X_gc;
-        } else {
-            // Invalid baud rate requested.
-            error = 1;
-        }
+    _written = false;
 
-    // ********Check if desired baud rate is within the acceptable range for using normal RX-mode********
-    // Condition from datasheet
-    // This limits the minimum baud_setting value to 64 (0x0040)
-    } else if ((16 * baud <= F_CPU_CORRECTED)) {
+    //Set up the rx pin
+    pinMode(_hwserial_rx_pin, INPUT_PULLUP);
 
-        // Check that the desired baud rate is not so low that it will
-        // cause the BAUD register to overflow (1024 * 64 = 2^16)
-        if(baud > (F_CPU_CORRECTED / (16 * 1024))) {
-            // Datasheet formula for calculating the baud setting including trick to reduce rounding error
-            // baud_setting = ( ( (2 * (64 * F_CPU_CORRECTED) / (16 * baud) ) + 1 ) / 2;
-            baud_setting = (((8 * F_CPU_CORRECTED) / baud) + 1 ) / 2;
-            // Make sure CLK2X is disabled
-            (*_hwserial_module).CTRLB &= (~USART_RXMODE_CLK2X_gc);
-        } else {
-            // Invalid baud rate requested.
-            error = 1;
-        }
+    //Set up the tx pin
+    digitalWrite(_hwserial_tx_pin, HIGH);
+    pinMode(_hwserial_tx_pin, OUTPUT);
 
-    } else {
-        // Invalid baud rate requested.
-        error = 1;
-    }
+    int8_t sigrow_val = SIGROW.OSC16ERR5V;
+    baud_setting *= (1024 + sigrow_val);
+    baud_setting /= (1024 - abs(sigrow_val));
 
-// Do nothing if an invalid baud rate is requested
-    if(!error) {
+    // assign the baud_setting, a.k.a. BAUD (USART Baud Rate Register)
+    (*_hwserial_module).BAUD = (int16_t) baud_setting;
 
-        _written = false;
+    // Set USART mode of operation
+    (*_hwserial_module).CTRLC = config;
 
-        //Set up the rx pin
-        pinMode(_hwserial_rx_pin, INPUT_PULLUP);
+    // Enable transmitter and receiver
+    (*_hwserial_module).CTRLB |= (USART_RXEN_bm | USART_TXEN_bm);
 
-        //Set up the tx pin
-        digitalWrite(_hwserial_tx_pin, HIGH);
-        pinMode(_hwserial_tx_pin, OUTPUT);
-
-        int8_t sigrow_val = SIGROW.OSC16ERR5V;
-        baud_setting *= (1024 + sigrow_val);
-        baud_setting /= (1024 - abs(sigrow_val));
-
-        // assign the baud_setting, a.k.a. BAUD (USART Baud Rate Register)
-        (*_hwserial_module).BAUD = (int16_t) baud_setting;
-
-        // Set USART mode of operation
-        (*_hwserial_module).CTRLC = config;
-
-        // Enable transmitter and receiver
-        (*_hwserial_module).CTRLB |= (USART_RXEN_bm | USART_TXEN_bm);
-
-        (*_hwserial_module).CTRLA |= USART_RXCIE_bm;
-    }
+    (*_hwserial_module).CTRLA |= USART_RXCIE_bm;
 
     // Restore SREG content
     SREG = oldSREG;
