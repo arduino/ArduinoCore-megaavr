@@ -314,5 +314,6 @@ const uint8_t PROGMEM digital_pin_to_timer[] = {
 #define SERIAL_PORT_HARDWARE		Serial1
 #define SERIAL_PORT_USBVIRTUAL		Serial
 #define SERIAL_PORT_HARDWARE_OPEN	Serial2
+#define SerialNina			Serial2
 
 #endif
