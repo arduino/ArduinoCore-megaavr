@@ -16,8 +16,6 @@
 #pragma once
 #include "Arduino.h"
 
-#warning "ATMEGA328 registers emulation is enabled. You may encounter some speed issue. Please consider to disable it in the Tools menu"
-
 /*
   ARDUINO PIN  ATMEGA 328  ATMEGA 4809
   0            PD0         PC5

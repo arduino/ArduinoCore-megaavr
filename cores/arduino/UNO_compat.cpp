@@ -13,7 +13,11 @@
   Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 */
 
+#ifdef UNO_WIFI_REV2_328MODE
+
 #include "UNO_compat.h"
+
+#warning "ATMEGA328 registers emulation is enabled. You may encounter some speed issue. Please consider to disable it in the Tools menu"
 
 PORTBClass PORTB;
 PORTCClass PORTC;
@@ -22,3 +26,5 @@ PORTDClass PORTD;
 DDRBClass DDRB;
 DDRCClass DDRC;
 DDRDClass DDRD;
+
+#endif
