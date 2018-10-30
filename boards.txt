@@ -20,6 +20,10 @@ uno2018.build.core=arduino
 uno2018.build.variant=uno2018
 #uno2018.build.extra_flags=-B{runtime.tools.atpack.path}/gcc/dev/{build.mcu}
 
+uno2018.bootloader.tool=avrdude
+uno2018.bootloader.SYSCFG0=0xC9
+uno2018.fuses.file=fuses_4809.bin
+
 menu.mode=Registers emulation
 uno2018.menu.mode.on=ATMEGA328
 uno2018.menu.mode.on.build.extra_flags=-DUNO_WIFI_REV2_328MODE
