@@ -134,9 +134,7 @@ void UartClass::begin(unsigned long baud, uint16_t config)
     // Setup port mux
     PORTMUX.USARTROUTEA |= _uart_mux;
 
-    //uint16_t baud_setting = 0;
     int32_t baud_setting = 0;
-    uint8_t error = 0;
 
     //Make sure global interrupts are disabled during initialization
     uint8_t oldSREG = SREG;
