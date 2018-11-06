@@ -81,6 +81,8 @@ void setup_timers() {
 }
 
 FORCE_INLINE bool isDoubleBondedActive(uint8_t pin) {
+	(void)pin;
+
 	/* Check if TWI is operating on double bonded pin (Master Enable is high 
 	in both Master and Slave mode for bus error detection, so this can 
 	indicate an active state for Wire) */
