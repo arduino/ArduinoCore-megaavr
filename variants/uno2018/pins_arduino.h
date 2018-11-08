@@ -26,16 +26,18 @@
 #include <avr/pgmspace.h>
 #include "timers.h"
 
-#define NUM_DIGITAL_PINS            20
+#define NUM_DIGITAL_PINS            20 // (14 on digital headers + 6 on analog headers)
 #define NUM_ANALOG_INPUTS           6
-#define NUM_TESTPOINT_PINS			9
-#define NUM_OCCUPIED_PINS			6 // (TOSC1/2, VREF, RESET, DEBUG USART Rx/Tx)
-#define NUM_TOTAL_FREE_PINS			(NUM_DIGITAL_PINS + NUM_ANALOG_INPUTS + NUM_TESTPOINT_PINS)
-#define NUM_TOTAL_PINS				(NUM_DIGITAL_PINS + NUM_ANALOG_INPUTS + NUM_TESTPOINT_PINS + NUM_OCCUPIED_PINS)
-#define ANALOG_INPUT_OFFSET			14
+#define NUM_RESERVED_PINS           6  // (TOSC1/2, VREF, RESET, DEBUG USART Rx/Tx)
+#define NUM_INTERNALLY_USED_PINS    10 // (2 x Chip select + 2 x UART + 4 x IO + LED_BUILTIN + 1 unused pin)
+#define NUM_I2C_PINS                2  // (SDA / SCL)
+#define NUM_SPI_PINS                3  // (MISO / MOSI / SCK)
+#define NUM_TOTAL_FREE_PINS         (NUM_DIGITAL_PINS)
+#define NUM_TOTAL_PINS              (NUM_DIGITAL_PINS + NUM_RESERVED_PINS + NUM_INTERNALLY_USED_PINS + NUM_I2C_PINS + NUM_SPI_PINS)
+#define ANALOG_INPUT_OFFSET         14
 #define digitalPinToAnalogInput(p)  ((p < NUM_ANALOG_INPUTS) ? (p) : (p) - ANALOG_INPUT_OFFSET)
 
-#define EXTERNAL_NUM_INTERRUPTS 	48
+#define EXTERNAL_NUM_INTERRUPTS     48
 
 #define digitalPinHasPWM(p)         ((p) == 3 || (p) == 5 || (p) == 6 || (p) == 9 || (p) == 10)
 
