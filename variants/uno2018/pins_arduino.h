@@ -250,6 +250,51 @@ const uint8_t PROGMEM digital_pin_to_bit_position[] = {
 	PIN6_bp 	// 40 PF6 RESET
 };
 
+/* Use this for accessing PINnCTRL register */
+const uint8_t PROGMEM digital_pin_to_bit_mask[] = {
+	PIN5_bm,	// 0 PC5/USART1_Rx
+	PIN4_bm,	// 1 PC4/USART1_Tx
+	PIN0_bm,	// 2 PA0
+	PIN5_bm,	// 3 PF5
+	PIN6_bm,	// 4 PC6
+	PIN2_bm,	// 5 PB2
+	PIN4_bm,	// 6 PF4
+	PIN1_bm,	// 7 PA1
+	PIN3_bm,	// 8 PE3
+	PIN0_bm,	// 9 PB0
+	PIN1_bm,	// 10 PB1
+	PIN0_bm,	// 11 PE0
+	PIN1_bm,	// 12 PE1
+	PIN2_bm,	// 13 PE2
+	PIN0_bm,	// 14 PD0/AI0
+	PIN1_bm,	// 15 PD1AI1
+	PIN2_bm,	// 16 PD2/AI2
+	PIN3_bm,	// 17 PD3/AI3
+	PIN4_bm,	// 18 PD4/AI4
+	PIN5_bm,	// 19 PD5/AI5
+	PIN2_bm,	// 20 PA2/TWI_SDA
+	PIN3_bm,	// 21 PA3/TWI_SCL
+	PIN3_bm,	// 22 PC3
+	PIN5_bm,	// 23 PA5/NINA TX
+	PIN4_bm,	// 24 PA4/NINA RX
+	PIN6_bm,	// 25 PD6/LED_BUILTIN
+	PIN5_bm,	// 26 PB5/USART3_Rx
+	PIN4_bm,	// 27 PB4/USART3_Tx
+	PIN6_bm,	// 28 PA6/NINA GPIO0
+	PIN7_bm,	// 29 PA7/NINA RST
+	PIN3_bm,	// 30 PB3/IMU CS
+	PIN7_bm,	// 31 PC7/IMU INT
+	PIN0_bm,	// 32 PC0/MOSI
+	PIN1_bm,	// 33 PC1/MISO
+	PIN2_bm,	// 34 PC2/SCK
+	PIN2_bm,	// 35 PF2/NINA CS
+	PIN3_bm,	// 36 PF3/NINA ACK
+	PIN0_bm,	// 37 PF0 TOSC 1
+	PIN1_bm,	// 38 PF1 TOSC 2
+	PIN7_bm,	// 39 PD7 VREF
+	PIN6_bm 	// 40 PF6 RESET
+};
+
 const uint8_t PROGMEM digital_pin_to_timer[] = {
 	NOT_ON_TIMER,	// 0 PC5/USART1_Rx
 	NOT_ON_TIMER,	// 1 PC4/USART1_Tx

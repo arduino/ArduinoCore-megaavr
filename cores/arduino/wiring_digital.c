@@ -32,14 +32,12 @@ __attribute__((weak))  bool isDoubleBondedActive(uint8_t pin __attribute__((unus
 
 void pinMode(uint8_t pin, PinMode mode)
 {
-	uint8_t bit_pos = digitalPinToBitPosition(pin);
+	uint8_t bit_mask = digitalPinToBitMask(pin);
 
-	if ((bit_pos == NOT_A_PIN) || (mode > INPUT_PULLUP) || isDoubleBondedActive(pin)) return;
+	if ((bit_mask == NOT_A_PIN) || (mode > INPUT_PULLUP) || isDoubleBondedActive(pin)) return;
 
 	PORT_t* port = digitalPinToPortStruct(pin);
 	if(port == NULL) return;
-
-	uint8_t bit_mask = (1 << bit_pos);
 
 	if(mode == OUTPUT){
 
@@ -55,6 +53,7 @@ void pinMode(uint8_t pin, PinMode mode)
 
 	} else { /* mode == INPUT or INPUT_PULLUP */
 
+		uint8_t bit_pos = digitalPinToBitPosition(pin);
 		/* Calculate where pin control register is */
 		uint8_t* pin_ctrl_reg = getPINnCTRLregister(port, bit_pos);
 
