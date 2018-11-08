@@ -30,9 +30,6 @@
 extern "C"{
 #endif
 
-#define TOGGLE          0x2
-#define PINCTRL_OFFSET  0x10
-
 /* Analog reference options */
 
 /* Change in mega4809: two places to define analog reference

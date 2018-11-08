@@ -164,7 +164,7 @@ void digitalWrite(uint8_t pin, PinStatus val)
 		if (val == LOW) { /* If LOW */
 			port->OUTCLR = bit_mask;
 
-		} else if (val == TOGGLE) { /* If TOGGLE */
+		} else if (val == CHANGE) { /* If TOGGLE */
 			port->OUTTGL = bit_mask;
 									/* If HIGH OR  > TOGGLE  */
 		} else {
