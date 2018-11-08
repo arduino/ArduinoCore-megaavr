@@ -119,6 +119,8 @@ static const uint8_t A5 = PIN_A5;
 #define NINA_GPIO0		(28u)
 #define NINA_RESETN		(29u)
 #define NINA_ACK		(36u)
+#define NINA_CTS		NINA_ACK
+#define NINA_RTS		NINA_GPIO0
 
 #define SPIWIFI_SS		(35u)
 #define SPIWIFI_ACK		NINA_ACK
