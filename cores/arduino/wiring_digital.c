@@ -41,15 +41,8 @@ void pinMode(uint8_t pin, PinMode mode)
 
 	if(mode == OUTPUT){
 
-		/* Save state */
-		uint8_t status = SREG;
-		cli();
-
 		/* Configure direction as output */
 		port->DIRSET = bit_mask;
-
-		/* Restore state */
-		SREG = status;
 
 	} else { /* mode == INPUT or INPUT_PULLUP */
 
@@ -151,14 +144,9 @@ void digitalWrite(uint8_t pin, PinStatus val)
 
 	/* Get port */
 	PORT_t *port = digitalPinToPortStruct(pin);
-	if(port == NULL) return;
 
 	/* Output direction */
 	if(port->DIR & bit_mask){
-
-		/* Save system status and disable interrupts */
-		uint8_t status = SREG;
-		cli();
 
 		/* Set output to value */
 		if (val == LOW) { /* If LOW */
@@ -170,9 +158,6 @@ void digitalWrite(uint8_t pin, PinStatus val)
 		} else {
 			port->OUTSET = bit_mask;
 		}
-
-		/* Restore system status */
-		SREG = status;
 
 	/* Input direction */
 	} else {
@@ -218,7 +203,6 @@ PinStatus digitalRead(uint8_t pin)
 
 	/* Get port and check valid port */
 	PORT_t *port = digitalPinToPortStruct(pin);
-	if(port == NULL) return LOW;
 
 	/* Read pin value from PORTx.IN register */
 	if(port->IN & bit_mask){
