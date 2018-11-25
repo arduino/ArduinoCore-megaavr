@@ -111,4 +111,13 @@ void initVariant() {
 	// IMU SS HIGH by default
 	pinMode(SPIIMU_SS, OUTPUT);
 	digitalWrite(SPIIMU_SS, HIGH);
+	
+	pinMode(LED_BUILTIN, OUTPUT);
+	//BLINK THE LED 3 TIMES (JUST AS THE UNO DOES)
+	for(int i=0;i<3;i++){
+		digitalWrite(LED_BUILTIN, HIGH);
+		delay(100);
+		digitalWrite(LED_BUILTIN, LOW);
+		delay(100);
+	}
 }
