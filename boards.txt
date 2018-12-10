@@ -22,6 +22,7 @@ uno2018.build.extra_flags={build.328emulation} -DMILLIS_USE_TIMERB3
 #uno2018.build.extra_flags=-B{runtime.tools.atpack.path}/gcc/dev/{build.mcu}
 
 uno2018.bootloader.tool=avrdude
+uno2018.bootloader.file=atmega4809_uart_bl.hex
 uno2018.bootloader.SYSCFG0=0xC9
 uno2018.bootloader.BOOTEND=0x00
 uno2018.fuses.file=fuses_4809.bin
