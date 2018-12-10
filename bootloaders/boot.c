@@ -100,8 +100,6 @@ __attribute__((naked)) __attribute__((section(".ctors"))) void boot(void)
   init_uart();
   init_status_led();
 
-  VPORTD.OUT |= PIN6_bm;
-
   /*
    * Start programming at start for application section
    * Subtract MAPPED_PROGMEM_START in condition to handle overflow on large flash sizes
