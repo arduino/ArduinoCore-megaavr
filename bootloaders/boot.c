@@ -29,10 +29,10 @@
  * to disable standard startup files in Toolchain->AVR/GNU Linker->General.
  *
  * The example is written for ATtiny817 with the following pinout:
- * USART0 TxD PB2
- * USART0 RxD PB3
- * LED0       PB4
- * SW1        PC5 (external pull-up)
+ * USART0 TxD PA4
+ * USART0 RxD PA5
+ * LED0       PD6
+ * SW1        PC1 (external pull-up)
  */
 #define F_CPU_RESET (16E6/6)
 
@@ -100,6 +100,8 @@ __attribute__((naked)) __attribute__((section(".ctors"))) void boot(void)
   init_uart();
   init_status_led();
 
+  toggle_status_led();
+
   /*
    * Start programming at start for application section
    * Subtract MAPPED_PROGMEM_START in condition to handle overflow on large flash sizes
@@ -131,11 +133,16 @@ __attribute__((naked)) __attribute__((section(".ctors"))) void boot(void)
  */
 static bool is_bootloader_requested(void)
 {
-  /* Check if SW1 (PA0) is low */
-  if(VPORTA.IN & PIN0_bm) {
-    return false;
+  /* Check for boot request from firmware */
+  if (USERROW.USERROW31 == 0xEB) {
+    /* Clear boot request*/
+    USERROW.USERROW31 = 0xff;
+    _PROTECTED_WRITE_SPM(NVMCTRL.CTRLA, NVMCTRL_CMD_PAGEERASEWRITE_gc);
+    while(NVMCTRL.STATUS & NVMCTRL_EEBUSY_bm);
+
+    return true;
   }
-  return true;
+  return false;
 }
 
 /*
@@ -144,7 +151,7 @@ static bool is_bootloader_requested(void)
 static void init_uart(void)
 {
   /* Configure UART */
-  USART1.CTRLB = USART_RXEN_bm | USART_TXEN_bm;
+  USART0.CTRLB = USART_RXEN_bm | USART_TXEN_bm;
 
   /* From datasheet:
    * Baud rate compensated with factory stored frequency error
@@ -157,35 +164,35 @@ static void init_uart(void)
   baud_reg_val *= (1024 + sigrow_val);    // sum resolution + error
   baud_reg_val += 512;                    // compensate for rounding error
   baud_reg_val /= 1024;                   // divide by resolution
-  USART1.BAUD = (int16_t) baud_reg_val;   // set adjusted baud rate
+  USART0.BAUD = (int16_t) baud_reg_val;   // set adjusted baud rate
 
-  PORTMUX.USARTROUTEA |= PORTMUX_USART1_ALT1_gc;
+  PORTMUX.USARTROUTEA |= PORTMUX_USART0_ALT1_gc;
 
-  /* Set TxD (PB2) as output */
-  VPORTC.DIR |= PIN4_bm;
+  /* Set TxD (PA4) as output */
+  VPORTA.DIR |= PIN4_bm;
 }
 
 static uint8_t uart_receive(void)
 {
   /* Poll for data received */
-  while(!(USART1.STATUS & USART_RXCIF_bm));
-  return USART1.RXDATAL;
+  while(!(USART0.STATUS & USART_RXCIF_bm));
+  return USART0.RXDATAL;
 }
 
 static void uart_send(uint8_t byte)
 {
   /* Data will be sent when TXDATA is written */
-  USART1.TXDATAL = byte;
+  USART0.TXDATAL = byte;
 }
 
 static void init_status_led(void)
 {
-  /* Set LED0 (PB4) as output */
+  /* Set LED0 (PD6) as output */
   VPORTD.DIR |= PIN6_bm;
 }
 
 static void toggle_status_led(void)
 {
-  /* Toggle LED0 (PB4) */
+  /* Toggle LED0 (PD6) */
   VPORTD.OUT ^= PIN6_bm;
 }
