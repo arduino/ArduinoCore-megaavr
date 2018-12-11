@@ -43,6 +43,8 @@
 /* Baud rate configuration */
 #define BOOT_BAUD (115200)
 
+#define BAUD_REG_VAL (F_CPU_RESET * 64) / (BOOT_BAUD * 16)
+
 /* Memory configuration
  * BOOTEND_FUSE * 256 must be above Bootloader Program Memory Usage,
  * this is 194 bytes at optimization level -O3, so BOOTEND_FUSE = 0x01
@@ -69,12 +71,12 @@ FUSES = {
 typedef void (*const app_t)(void);
 
 /* Interface function prototypes */
-static bool is_bootloader_requested(void);
-static void init_uart(void);
-static uint8_t uart_receive(void);
-static void uart_send(uint8_t byte);
-static void init_status_led(void);
-static void toggle_status_led(void);
+static inline bool is_bootloader_requested(void);
+static inline void init_uart(void);
+static inline uint8_t uart_receive(void);
+static inline void uart_send(uint8_t byte);
+static inline void init_status_led(void);
+static inline void toggle_status_led(void);
 
 /*
  * Main boot function
@@ -100,7 +102,8 @@ __attribute__((naked)) __attribute__((section(".ctors"))) void boot(void)
   init_uart();
   init_status_led();
 
-  toggle_status_led();
+  /* HACK: esp32 seems to send an extra byte at the beginning */
+  uart_receive();
 
   /*
    * Start programming at start for application section
@@ -110,6 +113,12 @@ __attribute__((naked)) __attribute__((section(".ctors"))) void boot(void)
   while(app_ptr - MAPPED_PROGMEM_START <= (uint8_t *)PROGMEM_END) {
     /* Receive and echo data before loading to memory */
     uint8_t rx_data = uart_receive();
+#if 0
+    if (app_ptr == (uint8_t *)MAPPED_APPLICATION_START && rx_data == 0) {
+      // skip first character if 0x00
+      continue;
+    }
+#endif
     uart_send(rx_data);
 
     /* Incremental load to page buffer before writing to Flash */
@@ -131,7 +140,7 @@ __attribute__((naked)) __attribute__((section(".ctors"))) void boot(void)
 /*
  * Boot access request function
  */
-static bool is_bootloader_requested(void)
+static inline bool is_bootloader_requested(void)
 {
   /* Check for boot request from firmware */
   if (USERROW.USERROW31 == 0xEB) {
@@ -148,7 +157,7 @@ static bool is_bootloader_requested(void)
 /*
  * Communication interface functions
  */
-static void init_uart(void)
+static inline void init_uart(void)
 {
   /* Configure UART */
   USART0.CTRLB = USART_RXEN_bm | USART_TXEN_bm;
@@ -158,8 +167,7 @@ static void init_uart(void)
    * Asynchronous communication without Auto-baud (Sync Field)
    * 20MHz Clock, 3V
    */
-  int32_t baud_reg_val  = (F_CPU_RESET * 64) / (BOOT_BAUD * 16);  // ideal BAUD register value
-  assert(baud_reg_val >= 0x4A);           // Verify legal min BAUD register value with max neg comp
+  int32_t baud_reg_val  = BAUD_REG_VAL;  // ideal BAUD register value
   int8_t sigrow_val = SIGROW.OSC16ERR5V;  // read signed error
   baud_reg_val *= (1024 + sigrow_val);    // sum resolution + error
   baud_reg_val += 512;                    // compensate for rounding error
@@ -172,26 +180,26 @@ static void init_uart(void)
   VPORTA.DIR |= PIN4_bm;
 }
 
-static uint8_t uart_receive(void)
+static inline uint8_t uart_receive(void)
 {
   /* Poll for data received */
   while(!(USART0.STATUS & USART_RXCIF_bm));
   return USART0.RXDATAL;
 }
 
-static void uart_send(uint8_t byte)
+static inline void uart_send(uint8_t byte)
 {
   /* Data will be sent when TXDATA is written */
   USART0.TXDATAL = byte;
 }
 
-static void init_status_led(void)
+static inline void init_status_led(void)
 {
   /* Set LED0 (PD6) as output */
   VPORTD.DIR |= PIN6_bm;
 }
 
-static void toggle_status_led(void)
+static inline void toggle_status_led(void)
 {
   /* Toggle LED0 (PD6) */
   VPORTD.OUT ^= PIN6_bm;
