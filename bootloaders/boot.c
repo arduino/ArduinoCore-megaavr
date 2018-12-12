@@ -28,7 +28,7 @@
  * For the code to be placed in the constructors section it is necessary
  * to disable standard startup files in Toolchain->AVR/GNU Linker->General.
  *
- * The example is written for ATtiny817 with the following pinout:
+ * This file is targeted to UNO WiFi REV2 (ATmega4809)
  * USART0 TxD PA4
  * USART0 RxD PA5
  * LED0       PD6
@@ -49,7 +49,7 @@
  * BOOTEND_FUSE * 256 must be above Bootloader Program Memory Usage,
  * this is 194 bytes at optimization level -O3, so BOOTEND_FUSE = 0x01
  */
-#define BOOTEND_FUSE               (0x01)
+#define BOOTEND_FUSE               (0x02)
 #define BOOT_SIZE                  (BOOTEND_FUSE * 0x100)
 #define MAPPED_APPLICATION_START   (MAPPED_PROGMEM_START + BOOT_SIZE)
 #define MAPPED_APPLICATION_SIZE    (MAPPED_PROGMEM_SIZE - BOOT_SIZE)
@@ -102,9 +102,6 @@ __attribute__((naked)) __attribute__((section(".ctors"))) void boot(void)
   init_uart();
   init_status_led();
 
-  /* HACK: esp32 seems to send an extra byte at the beginning */
-  uart_receive();
-
   /*
    * Start programming at start for application section
    * Subtract MAPPED_PROGMEM_START in condition to handle overflow on large flash sizes
@@ -113,12 +110,10 @@ __attribute__((naked)) __attribute__((section(".ctors"))) void boot(void)
   while(app_ptr - MAPPED_PROGMEM_START <= (uint8_t *)PROGMEM_END) {
     /* Receive and echo data before loading to memory */
     uint8_t rx_data = uart_receive();
-#if 0
     if (app_ptr == (uint8_t *)MAPPED_APPLICATION_START && rx_data == 0) {
       // skip first character if 0x00
       continue;
     }
-#endif
     uart_send(rx_data);
 
     /* Incremental load to page buffer before writing to Flash */
