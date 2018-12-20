@@ -77,6 +77,7 @@ static inline uint8_t uart_receive(void);
 static inline void uart_send(uint8_t byte);
 static inline void init_status_led(void);
 static inline void toggle_status_led(void);
+static inline void wait_50_ms(void);
 
 /*
  * Main boot function
@@ -87,6 +88,13 @@ __attribute__((naked)) __attribute__((section(".ctors"))) void boot(void)
 {
   /* Initialize system for AVR GCC support, expects r1 = 0 */
   asm volatile("clr r1");
+
+  /* 3 very fast blinks (to match optiboot behaviour) */
+  init_status_led();
+  for (uint8_t i = 0; i < 6; i++) {
+    wait_50_ms();
+    toggle_status_led();
+  }
 
   /* Check if entering application or continuing to bootloader */
   if(!is_bootloader_requested()) {
@@ -100,7 +108,6 @@ __attribute__((naked)) __attribute__((section(".ctors"))) void boot(void)
 
   /* Initialize communication interface */
   init_uart();
-  init_status_led();
 
   /*
    * Start programming at start for application section
@@ -198,4 +205,11 @@ static inline void toggle_status_led(void)
 {
   /* Toggle LED0 (PD6) */
   VPORTD.OUT ^= PIN6_bm;
+}
+
+static inline void wait_50_ms(void)
+{
+  for (uint16_t i = 160000; i--; i != 0) {
+    asm volatile ("nop");
+  }
 }

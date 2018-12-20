@@ -15,4 +15,4 @@ ${AVR_GCC_PATH}/avr-objcopy -O ihex -R .fuses boot.elf boot.hex
 echo Moving hex
 mv boot.hex atmega4809_uart_bl.hex
 
-${AVR_GCC_PATH}/../avrdude/6.3.0-arduino14/bin/avrdude -C${AVR_GCC_PATH}/../avrdude/6.3.0-arduino14/etc/avrdude.conf -v -patmega4809 -cxplainedmini_updi -Pusb -Ufuses:w:boot.fuses:r  -Uflash:w:boot.bin:r
+#${AVR_GCC_PATH}/../avrdude/6.3.0-arduino14/bin/avrdude -C${AVR_GCC_PATH}/../avrdude/6.3.0-arduino14/etc/avrdude.conf -v -patmega4809 -cxplainedmini_updi -Pusb -Ufuses:w:boot.fuses:r  -Uflash:w:boot.bin:r
