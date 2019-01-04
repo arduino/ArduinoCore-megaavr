@@ -52,9 +52,9 @@
 #define EXTERNAL_NUM_INTERRUPTS   NUM_TOTAL_PINS
 #endif
 
-class SPISettings {
+class SPISettingsMegaAVR : public arduino::SPISettings {
   public:
-  SPISettings(uint32_t clock, BitOrder bitOrder, uint8_t dataMode) {
+  SPISettingsMegaAVR(uint32_t clock, BitOrder bitOrder, uint8_t dataMode) {
     if (__builtin_constant_p(clock)) {
       init_AlwaysInline(clock, bitOrder, dataMode);
     } else {
@@ -63,7 +63,9 @@ class SPISettings {
   }
 
   // Default speed set to 4MHz, SPI mode set to MODE 0 and Bit order set to MSB first.
-  SPISettings() { init_AlwaysInline(4000000, MSBFIRST, SPI_MODE0); }
+  SPISettingsMegaAVR() { init_AlwaysInline(4000000, MSBFIRST, SPI_MODE0); }
+
+  SPISettingsMegaAVR(SPISettings& x) { SPISettingsMegaAVR(x.getClockFreq(), x.getBitOrder(), x.getDataMode()); }
 
   private:
   void init_MightInline(uint32_t clock, BitOrder bitOrder, uint8_t dataMode) {
@@ -142,12 +144,12 @@ class SPISettings {
   /* member variables containing the desired SPI settings */
   uint8_t ctrla;
   uint8_t ctrlb;
-  friend class SPIClass;
+  friend class SPIClassMegaAVR;
 };
 
-class SPIClass {
+class SPIClassMegaAVR : public arduino::HardwareSPI {
   public:
-  SPIClass(uint8_t uc_pinMISO, uint8_t uc_pinSCK, uint8_t uc_pinMOSI, uint8_t uc_pinSS, uint8_t uc_mux);
+  SPIClassMegaAVR(uint8_t uc_pinMISO, uint8_t uc_pinSCK, uint8_t uc_pinMOSI, uint8_t uc_pinSS, uint8_t uc_mux);
 
   byte transfer(uint8_t data);
   uint16_t transfer16(uint16_t data);
@@ -156,7 +158,10 @@ class SPIClass {
   // Transaction Functions
   void usingInterrupt(int interruptNumber);
   void notUsingInterrupt(int interruptNumber);
-  void beginTransaction(SPISettings settings);
+  void beginTransaction(SPISettingsMegaAVR settings);
+  void beginTransaction(SPISettings settings) {
+    beginTransaction(SPISettingsMegaAVR(settings));
+  }
   void endTransaction(void);
 
   void begin();
@@ -169,13 +174,16 @@ class SPIClass {
   private:
 
   void init();
-  void config(SPISettings settings);
+  void config(SPISettingsMegaAVR settings);
+  void config(SPISettings settings) {
+    config(SPISettingsMegaAVR(settings));
+  }
 
   // These undocumented functions should not be used.  SPI.transfer()
   // polls the hardware flag which is automatically cleared as the
   // AVR responds to SPI's interrupt
-  inline static void attachInterrupt() { SPI0.INTCTRL |= (SPI_IE_bm); }
-  inline static void detachInterrupt() { SPI0.INTCTRL &= ~(SPI_IE_bm); }
+  inline void attachInterrupt() { SPI0.INTCTRL |= (SPI_IE_bm); }
+  inline void detachInterrupt() { SPI0.INTCTRL &= ~(SPI_IE_bm); }
 
   void detachMaskedInterrupts();
   void reattachMaskedInterrupts();
@@ -199,6 +207,7 @@ class SPIClass {
   #endif
 };
 
+#define SPIClass SPIClassMegaAVR
 
 #if SPI_INTERFACES_COUNT > 0
   extern SPIClass SPI;
