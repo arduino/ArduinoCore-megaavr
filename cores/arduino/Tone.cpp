@@ -120,6 +120,8 @@ void tone(uint8_t pin, unsigned int frequency, unsigned long duration)
     }
 
     // Timer settings -- will be type B
+    uint8_t status = SREG;
+    cli();
 
     // Disable for now, set clk according to 'prescaler_needed'
     // (Prescaled clock will come from TCA --
@@ -147,6 +149,8 @@ void tone(uint8_t pin, unsigned int frequency, unsigned long duration)
 
     // Enable timer
     _timer->CTRLA |= TCB_ENABLE_bm;
+
+    SREG = status;
 }
 
 // pin which currently is being used for a tone
