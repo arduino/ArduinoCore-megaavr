@@ -129,6 +129,7 @@ bool isDoubleBondedActive(uint8_t pin);
 
 #define portOutputRegister(P) ( (volatile uint8_t *)( &portToPortStruct(P)->OUT ) )
 #define portInputRegister(P) ( (volatile uint8_t *)( &portToPortStruct(P)->IN ) )
+#define portModeRegister(P) ( (volatile uint8_t *)( &portToPortStruct(P)->DIR ) )
 
 #ifdef __cplusplus
 } // extern "C"
