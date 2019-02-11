@@ -6,7 +6,7 @@
 # https://github.com/arduino/Arduino/wiki/Arduino-IDE-1.5-3rd-party-Hardware-specification
 
 name=Arduino megaAVR Boards
-version=1.6.24
+version=1.6.25
 
 # AVR compile variables
 # ---------------------
