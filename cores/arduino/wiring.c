@@ -274,13 +274,13 @@ void init()
 
  	int64_t cpu_freq;
  	
-	#elif (F_CPU == 20000000)
+	#if (F_CPU == 20000000)
 		cpu_freq = 20000000;
 		
 		/* No division on clock */
 		_PROTECTED_WRITE(CLKCTRL_MCLKCTRLB, 0x00);
 	
-	#if (F_CPU == 16000000)
+	#elif (F_CPU == 16000000)
 		cpu_freq = 16000000;
 		
 		/* No division on clock */
