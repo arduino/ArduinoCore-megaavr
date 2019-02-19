@@ -274,7 +274,13 @@ void init()
 
  	int64_t cpu_freq;
  	
-	#if (F_CPU == 16000000)
+	#if (F_CPU == 20000000)
+		cpu_freq = 20000000;
+		
+		/* No division on clock */
+		_PROTECTED_WRITE(CLKCTRL_MCLKCTRLB, 0x00);
+	
+	#elif (F_CPU == 16000000)
 		cpu_freq = 16000000;
 		
 		/* No division on clock */
@@ -321,19 +327,21 @@ void init()
 
 #if defined(ADC0)
 
-	/* ADC clock between 50-200KHz */
+	/* ADC clock between 50-200 kHz */
 
-	#if F_CPU >= 16000000 // 16 MHz / 128 = 125 KHz
+	#if F_CPU >= 20000000 // 20 MHz / 128 = 156.250 kHz
 		ADC0.CTRLC |= ADC_PRESC_DIV128_gc;
-	#elif F_CPU >= 8000000 // 8 MHz / 64 = 125 KHz
+	#elif F_CPU >= 16000000 // 16 MHz / 128 = 125 kHz
+		ADC0.CTRLC |= ADC_PRESC_DIV128_gc;
+	#elif F_CPU >= 8000000 // 8 MHz / 64 = 125 kHz
 		ADC0.CTRLC |= ADC_PRESC_DIV64_gc;
-	#elif F_CPU >= 4000000 // 4 MHz / 32 = 125 KHz
+	#elif F_CPU >= 4000000 // 4 MHz / 32 = 125 kHz
 		ADC0.CTRLC |= ADC_PRESC_DIV32_gc;
-	#elif F_CPU >= 2000000 // 2 MHz / 16 = 125 KHz
+	#elif F_CPU >= 2000000 // 2 MHz / 16 = 125 kHz
 		ADC0.CTRLC |= ADC_PRESC_DIV16_gc;
-	#elif F_CPU >= 1000000 // 1 MHz / 8 = 125 KHz
+	#elif F_CPU >= 1000000 // 1 MHz / 8 = 125 kHz
 		ADC0.CTRLC |= ADC_PRESC_DIV8_gc;
-	#else // 128 kHz / 2 = 64 KHz -> This is the closest you can get, the prescaler is 2
+	#else // 128 kHz / 2 = 64 kHz -> This is the closest you can get, the prescaler is 2
 		ADC0.CTRLC |= ADC_PRESC_DIV2_gc;
 	#endif
 
