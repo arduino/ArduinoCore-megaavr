@@ -341,7 +341,7 @@ void TwoWire::onRequestService(void)
 		return;
 	}
 	
-	// reset slave buffer iterator var
+	// reset slave write buffer iterator var
 	slave_bytesToWrite = 0;
   
 	// alert user program
