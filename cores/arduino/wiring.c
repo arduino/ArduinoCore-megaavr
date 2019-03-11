@@ -65,8 +65,11 @@ static volatile TCB_t* _timer =
 &TCB1;
 #elif defined(MILLIS_USE_TIMERB2)
 &TCB2;
-#else
+#elif defined(MILLIS_USE_TIMERB3)
 &TCB3;
+#else
+// fallback to TCB0 (every platform has it)
+&TCB0;
 #endif
 
 #if defined(MILLIS_USE_TIMERB0)
@@ -75,8 +78,11 @@ ISR(TCB0_INT_vect)
 ISR(TCB1_INT_vect)
 #elif defined(MILLIS_USE_TIMERB2)
 ISR(TCB2_INT_vect)
-#else
+#elif defined(MILLIS_USE_TIMERB3)
 ISR(TCB3_INT_vect)
+#else
+// fallback to TCB0 (every platform has it)
+ISR(TCB0_INT_vect)
 #endif
 {
 	// copy these to local variables so they can be stored in registers
