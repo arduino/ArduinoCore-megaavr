@@ -18,6 +18,7 @@ uno2018.build.f_cpu=16000000L
 uno2018.build.board=AVR_UNO_WIFI_REV2
 uno2018.build.core=arduino
 uno2018.build.variant=uno2018
+uno2018.build.extra_flags={build.328emulation} -DMILLIS_USE_TIMERB3
 #uno2018.build.extra_flags=-B{runtime.tools.atpack.path}/gcc/dev/{build.mcu}
 
 uno2018.bootloader.tool=avrdude
@@ -26,6 +27,7 @@ uno2018.fuses.file=fuses_4809.bin
 
 menu.mode=Registers emulation
 uno2018.menu.mode.on=ATMEGA328
-uno2018.menu.mode.on.build.extra_flags=-DUNO_WIFI_REV2_328MODE
+uno2018.menu.mode.on.build.328emulation=-DUNO_WIFI_REV2_328MODE
 uno2018.menu.mode.off=None (ATMEGA4809)
+uno2018.menu.mode.off.build.328emulation=
 ##############################################################
