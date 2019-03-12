@@ -66,7 +66,7 @@ typedef enum TWI_MODE_enum {
 } TWI_MODE_t;
 
 /*! Buffer size define */
-#define TWI_BUFFER_SIZE         32
+#define TWI_BUFFER_SIZE         128
 
 /*! For adding R/_W bit to address */
 #define ADD_READ_BIT(address)	(address | 0x01)
