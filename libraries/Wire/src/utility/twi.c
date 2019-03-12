@@ -578,9 +578,6 @@ void TWI_SlaveAddressMatchHandler(){
 	slave_trans_status = TWIS_STATUS_BUSY;
 	slave_result = TWIS_RESULT_UNKNOWN;
 	
-	/* Disable address & stop interrupt */
-	TWI0.SCTRLA &= ~(TWI_APIEN_bm | TWI_PIEN_bm);
-	
 	/* Send ACK, wait for data interrupt */
 	TWI0.SCTRLB = TWI_SCMD_RESPONSE_gc;	
 	
