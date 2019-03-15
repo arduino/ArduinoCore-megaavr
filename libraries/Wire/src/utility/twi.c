@@ -23,6 +23,35 @@
 #include "twi.h"
 #include "Arduino.h"
 
+/* Master variables */
+static register8_t  master_slaveAddress;                       /*!< Slave address */
+static register8_t* master_writeData;                          /*!< Data to write */
+static register8_t* master_readData;                           /*!< Read data */
+static register8_t  master_bytesToWrite;                       /*!< Number of bytes to write */
+static register8_t  master_bytesToRead;                        /*!< Number of bytes to read */
+static register8_t  master_bytesWritten;                       /*!< Number of bytes written */
+static register8_t  master_bytesRead;                          /*!< Number of bytes read */
+static register8_t  master_sendStop;                           /*!< To send a stop at the end of the transaction or not */
+static register8_t  master_trans_status;                       /*!< Status of transaction */
+static register8_t  master_result;                             /*!< Result of transaction */
+
+/* Slave variables */
+static uint8_t (*TWI_onSlaveTransmit)(void) __attribute__((unused));
+static void (*TWI_onSlaveReceive)(int) __attribute__((unused));
+static register8_t* slave_writeData;
+static register8_t* slave_readData;
+static register8_t  slave_bytesToWrite;
+static register8_t  slave_bytesWritten;
+static register8_t  slave_bytesToRead;
+static register8_t  slave_bytesRead;
+static register8_t  slave_trans_status;
+static register8_t  slave_result;
+static register8_t  slave_callUserReceive;
+static register8_t  slave_callUserRequest;
+
+/* TWI module mode */
+static volatile TWI_MODE_t twi_mode;
+
 /*! \brief Initialize the TWI module as a master.
  *
  *  TWI master initialization function.
