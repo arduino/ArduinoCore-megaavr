@@ -95,19 +95,14 @@ void TwoWire::setClock(uint32_t clock)
 	TWI_MasterSetBaud(clock);
 }
 
-uint8_t TwoWire::requestFrom(uint8_t address, uint8_t quantity, uint32_t iaddress, uint8_t isize, uint8_t sendStop)
-{
-	if(isize > 3) {
-		isize = 3;
-	}
-	
+uint8_t TwoWire::requestFrom(uint8_t address, size_t quantity, bool sendStop) {	
 	if(quantity > BUFFER_LENGTH){
 		quantity = BUFFER_LENGTH;
 	}
 	
 	uint8_t bytes_read = TWI_MasterWriteRead(address,
-											(uint8_t *) &iaddress,
-											isize,
+											(uint8_t *)0,
+											0,
 											quantity,
 											sendStop);
 	
@@ -121,10 +116,6 @@ uint8_t TwoWire::requestFrom(uint8_t address, uint8_t quantity, uint32_t iaddres
 	rxBufferLength = bytes_read;
 
 	return bytes_read;
-}
-
-uint8_t TwoWire::requestFrom(uint8_t address, size_t quantity, bool sendStop) {
-	return requestFrom((uint8_t)address, (uint8_t)quantity, (uint32_t)0, (uint8_t)0, (uint8_t)sendStop);
 }
 
 uint8_t TwoWire::requestFrom(uint8_t address, size_t quantity)
