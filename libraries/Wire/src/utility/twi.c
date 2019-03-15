@@ -250,11 +250,6 @@ uint8_t TWI_MasterWriteRead(uint8_t slave_address,
 						 uint8_t send_stop)
 {
 	if(twi_mode != TWI_MODE_MASTER) return false;
-	
-	/* Parameter sanity check. */
-	if (bytes_to_write > TWI_BUFFER_SIZE) {
-		return 1;
-	}
 
 	/*Initiate transaction if bus is ready. */
 	if (master_trans_status == TWIM_STATUS_READY) {
@@ -262,10 +257,7 @@ uint8_t TWI_MasterWriteRead(uint8_t slave_address,
 		master_trans_status = TWIM_STATUS_BUSY;
 		master_result = TWIM_RESULT_UNKNOWN;
 
-		/* Fill write data buffer. */
-		for (uint8_t bufferIndex=0; bufferIndex < bytes_to_write; bufferIndex++) {
-			master_writeData[bufferIndex] = write_data[bufferIndex];
-		}
+		master_writeData = write_data;
 
 		master_bytesToWrite = bytes_to_write;
 		master_bytesToRead = bytes_to_read;
