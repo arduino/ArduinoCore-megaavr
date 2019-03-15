@@ -100,12 +100,7 @@ uint8_t TwoWire::requestFrom(uint8_t address, size_t quantity, bool sendStop) {
 		quantity = BUFFER_LENGTH;
 	}
 	
-	uint8_t bytes_read = TWI_MasterRead(address, quantity, sendStop);
-	
-	/* Copy read buffer from lower layer */
-	for(uint8_t i = 0; i < bytes_read; i++){
-		rxBuffer[i] = master_readData[i];
-	}
+	uint8_t bytes_read = TWI_MasterRead(address, rxBuffer, quantity, sendStop);
 	
 	/* Initialize read variables */
 	rxBufferIndex = 0;

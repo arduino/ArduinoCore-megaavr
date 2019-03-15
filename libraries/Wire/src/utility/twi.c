@@ -213,9 +213,12 @@ uint8_t TWI_MasterWrite(uint8_t slave_address,
  *  \retval false If transaction could not be started.
  */
 uint8_t TWI_MasterRead(uint8_t slave_address,
-                    uint8_t bytes_to_read,
+					uint8_t* read_data,
+					uint8_t bytes_to_read,
 					uint8_t send_stop)
 {
+	master_readData = read_data;
+
 	uint8_t bytes_read = TWI_MasterWriteRead(slave_address, 
 										  0, 
 										  0, 
@@ -251,9 +254,6 @@ uint8_t TWI_MasterWriteRead(uint8_t slave_address,
 	/* Parameter sanity check. */
 	if (bytes_to_write > TWI_BUFFER_SIZE) {
 		return 1;
-	}
-	if (bytes_to_read > TWI_BUFFER_SIZE) {
-		return 0;
 	}
 
 	/*Initiate transaction if bus is ready. */
@@ -443,7 +443,7 @@ void TWI_MasterWriteHandler()
 void TWI_MasterReadHandler()
 {
 	/* Fetch data if bytes to be read. */
-	if (master_bytesRead < TWI_BUFFER_SIZE) {
+	if (master_bytesRead < master_bytesToRead) {
 		uint8_t data = TWI0.MDATA;
 		master_readData[master_bytesRead] = data;
 		master_bytesRead++;
