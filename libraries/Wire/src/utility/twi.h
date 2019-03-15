@@ -65,9 +65,6 @@ typedef enum TWI_MODE_enum {
 	TWI_MODE_SLAVE_RECEIVE = 6
 } TWI_MODE_t;
 
-/*! Buffer size define */
-#define TWI_BUFFER_SIZE         128
-
 /*! For adding R/_W bit to address */
 #define ADD_READ_BIT(address)	(address | 0x01)
 #define ADD_WRITE_BIT(address)  (address & ~0x01)
@@ -86,11 +83,12 @@ register8_t master_result;                             /*!< Result of transactio
 
 /* Slave variables */
 static void (*TWI_onSlaveTransmit)(void) __attribute__((unused));
-static void (*TWI_onSlaveReceive)(volatile uint8_t*, int) __attribute__((unused));
+static void (*TWI_onSlaveReceive)(int) __attribute__((unused));
 register8_t* slave_writeData;
-register8_t slave_readData[TWI_BUFFER_SIZE];
+register8_t* slave_readData;
 register8_t slave_bytesToWrite;
 register8_t slave_bytesWritten;
+register8_t slave_bytesToRead;
 register8_t slave_bytesRead;
 register8_t slave_trans_status;
 register8_t slave_result;
@@ -136,7 +134,7 @@ void TWI_SlaveStopHandler(void);
 void TWI_SlaveDataHandler(void);
 void TWI_SlaveWriteHandler(void);
 void TWI_SlaveReadHandler(void);
-void TWI_attachSlaveRxEvent( void (*function)(volatile uint8_t*, int) );
+void TWI_attachSlaveRxEvent( void (*function)(int), uint8_t *read_data, uint8_t bytes_to_read );
 void TWI_attachSlaveTxEvent( void (*function)(void) );
 void TWI_SlaveTransactionFinished(uint8_t result);
 /*! TWI master interrupt service routine.

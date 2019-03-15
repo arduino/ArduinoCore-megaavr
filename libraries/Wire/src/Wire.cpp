@@ -76,7 +76,7 @@ void TwoWire::begin(uint8_t address)
 	TWI_SlaveInit(address);
 	
 	TWI_attachSlaveTxEvent(onRequestService); // default callback must exist
-	TWI_attachSlaveRxEvent(onReceiveService); // default callback must exist
+	TWI_attachSlaveRxEvent(onReceiveService, rxBuffer, BUFFER_LENGTH); // default callback must exist
 	
 }
 
@@ -269,7 +269,7 @@ void TwoWire::flush(void)
 }
 
 // behind the scenes function that is called when data is received
-void TwoWire::onReceiveService(volatile uint8_t* inBytes, int numBytes)
+void TwoWire::onReceiveService(int numBytes)
 {
 	// don't bother if user hasn't registered a callback
 	if(!user_onReceive){
@@ -281,13 +281,7 @@ void TwoWire::onReceiveService(volatile uint8_t* inBytes, int numBytes)
 	if(rxBufferIndex < rxBufferLength){
 		return;
 	}
-	
-	// copy twi rx buffer into local read buffer
-	// this enables new reads to happen in parallel
-	for(uint8_t i = 0; i < numBytes; ++i){
-		rxBuffer[i] = inBytes[i];    
-	}
-	
+
 	// set rx iterator vars
 	rxBufferIndex = 0;
 	rxBufferLength = numBytes;

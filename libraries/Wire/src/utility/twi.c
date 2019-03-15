@@ -512,7 +512,7 @@ void TWI_SlaveInterruptHandler(){
 		 * This should be hit when there is a STOP or REPSTART 
 		 */
 		if(slave_callUserReceive == 1){
-			TWI_onSlaveReceive(slave_readData, slave_bytesRead);
+			TWI_onSlaveReceive(slave_bytesRead);
 			slave_callUserReceive = 0;
 		}
 		
@@ -673,7 +673,7 @@ void TWI_SlaveWriteHandler(){
 void TWI_SlaveReadHandler(){
 		
 	/* If free space in buffer */
-	if(slave_bytesRead < TWI_BUFFER_SIZE){
+	if(slave_bytesRead < slave_bytesToRead){
 		
 		/* Fetch data */
 		uint8_t data = TWI0.SDATA;
@@ -697,8 +697,10 @@ void TWI_SlaveReadHandler(){
  * Input    function: callback function to use
  * Output   none
  */
-void TWI_attachSlaveRxEvent( void (*function)(volatile uint8_t*, int) ){
+void TWI_attachSlaveRxEvent( void (*function)(int), uint8_t *read_data, uint8_t bytes_to_read ){
   TWI_onSlaveReceive = function;
+  slave_readData = read_data;
+  slave_bytesToRead = bytes_to_read;
 }
 
 /* 
