@@ -45,7 +45,7 @@ class TwoWire : public HardwareI2C
     static void (*user_onRequest)(void);
     static void (*user_onReceive)(int);
     static void onRequestService(void);
-    static void onReceiveService(volatile uint8_t*, int);
+    static void onReceiveService(int);
   public:
     TwoWire();
     void begin();
