@@ -74,7 +74,7 @@ typedef enum TWI_MODE_enum {
 
 /* Master variables */
 register8_t master_slaveAddress;                      /*!< Slave address */
-register8_t master_writeData[TWI_BUFFER_SIZE];  /*!< Data to write */
+register8_t* master_writeData;                         /*!< Data to write */
 register8_t* master_readData;                          /*!< Read data */
 register8_t master_bytesToWrite;                       /*!< Number of bytes to write */
 register8_t master_bytesToRead;                        /*!< Number of bytes to read */
