@@ -87,7 +87,7 @@ register8_t master_result;                             /*!< Result of transactio
 /* Slave variables */
 static void (*TWI_onSlaveTransmit)(void) __attribute__((unused));
 static void (*TWI_onSlaveReceive)(volatile uint8_t*, int) __attribute__((unused));
-register8_t slave_writeData[TWI_BUFFER_SIZE];
+register8_t* slave_writeData;
 register8_t slave_readData[TWI_BUFFER_SIZE];
 register8_t slave_bytesToWrite;
 register8_t slave_bytesWritten;
