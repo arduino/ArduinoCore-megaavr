@@ -181,39 +181,20 @@ uint8_t TwoWire::endTransmission(void)
 // or after beginTransmission(address)
 size_t TwoWire::write(uint8_t data)
 {
-	/* If master transmitter */
-	if(transmitting){
-
-		/* Check if buffer is full */
-		if(txBufferLength >= BUFFER_LENGTH){
-		  setWriteError();
-		  return 0;
-		}
-	
-		/* Put byte in txBuffer */
-		txBuffer[txBufferIndex] = data;
-		txBufferIndex++;
-	
-		/* Update buffer length */
-		txBufferLength = txBufferIndex;
-	
+	/* Check if buffer is full */
+	if(txBufferLength >= BUFFER_LENGTH){
+	  setWriteError();
+	  return 0;
 	}
-  
-	/* If slave transmitter */
-	else{
 
-		/* Check if buffer full */
-		if(slave_bytesToWrite >= TWI_BUFFER_SIZE){
-			setWriteError();
-			return 0;
-		}
+	/* Put byte in txBuffer */
+	txBuffer[txBufferIndex] = data;
+	txBufferIndex++;
 
-		slave_writeData[slave_bytesToWrite] = data;
-		slave_bytesToWrite++;
-
-	}
+	/* Update buffer length */
+	txBufferLength = txBufferIndex;
 	 
-	 return 1;
+	return 1;
 }
 
 // must be called in:
@@ -324,10 +305,14 @@ void TwoWire::onRequestService(void)
 	}
 	
 	// reset slave write buffer iterator var
-	slave_bytesToWrite = 0;
+	txBufferIndex = 0;
+	txBufferLength = 0;
   
 	// alert user program
 	user_onRequest();
+
+	slave_bytesToWrite = txBufferLength;
+	slave_writeData = txBuffer;
 }
 
 // sets function called on slave write

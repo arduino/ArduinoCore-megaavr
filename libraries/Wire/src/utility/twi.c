@@ -644,7 +644,7 @@ void TWI_SlaveWriteHandler(){
 	/* If ACK, master expects more data */
 	else {		
 
-		if(slave_bytesWritten < TWI_BUFFER_SIZE){
+		if(slave_bytesWritten < slave_bytesToWrite){
 			uint8_t data = slave_writeData[slave_bytesWritten];
 			TWI0.SDATA = data;
 			slave_bytesWritten++;	
