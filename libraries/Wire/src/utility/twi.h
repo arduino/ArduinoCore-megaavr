@@ -82,7 +82,7 @@ register8_t master_trans_status;                       /*!< Status of transactio
 register8_t master_result;                             /*!< Result of transaction */
 
 /* Slave variables */
-static void (*TWI_onSlaveTransmit)(void) __attribute__((unused));
+static uint8_t (*TWI_onSlaveTransmit)(void) __attribute__((unused));
 static void (*TWI_onSlaveReceive)(int) __attribute__((unused));
 register8_t* slave_writeData;
 register8_t* slave_readData;
@@ -135,7 +135,7 @@ void TWI_SlaveDataHandler(void);
 void TWI_SlaveWriteHandler(void);
 void TWI_SlaveReadHandler(void);
 void TWI_attachSlaveRxEvent( void (*function)(int), uint8_t *read_data, uint8_t bytes_to_read );
-void TWI_attachSlaveTxEvent( void (*function)(void) );
+void TWI_attachSlaveTxEvent( uint8_t (*function)(void), uint8_t *write_data );
 void TWI_SlaveTransactionFinished(uint8_t result);
 /*! TWI master interrupt service routine.
  *
