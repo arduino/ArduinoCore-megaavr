@@ -75,7 +75,7 @@ void TwoWire::begin(uint8_t address)
   
 	TWI_SlaveInit(address);
 	
-	TWI_attachSlaveTxEvent(onRequestService); // default callback must exist
+	TWI_attachSlaveTxEvent(onRequestService, txBuffer); // default callback must exist
 	TWI_attachSlaveRxEvent(onReceiveService, rxBuffer, BUFFER_LENGTH); // default callback must exist
 	
 }
@@ -291,11 +291,11 @@ void TwoWire::onReceiveService(int numBytes)
 }
 
 // behind the scenes function that is called when data is requested
-void TwoWire::onRequestService(void)
+uint8_t TwoWire::onRequestService(void)
 {
 	// don't bother if user hasn't registered a callback
 	if(!user_onRequest){
-		return;
+		return 0;
 	}
 	
 	// reset slave write buffer iterator var
@@ -305,8 +305,7 @@ void TwoWire::onRequestService(void)
 	// alert user program
 	user_onRequest();
 
-	slave_bytesToWrite = txBufferLength;
-	slave_writeData = txBuffer;
+	return txBufferLength;
 }
 
 // sets function called on slave write

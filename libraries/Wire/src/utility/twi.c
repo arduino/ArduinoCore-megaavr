@@ -577,7 +577,7 @@ void TWI_SlaveAddressMatchHandler(){
 	if(TWI0.SSTATUS & TWI_DIR_bm){
 		slave_bytesWritten = 0;
 		/* Call user function  */
-		TWI_onSlaveTransmit();	
+		slave_bytesToWrite = TWI_onSlaveTransmit();	
 		twi_mode = TWI_MODE_SLAVE_TRANSMIT;
 	} 
 	/* If Master Write/Slave Read */
@@ -709,8 +709,9 @@ void TWI_attachSlaveRxEvent( void (*function)(int), uint8_t *read_data, uint8_t 
  * Input    function: callback function to use
  * Output   none
  */
-void TWI_attachSlaveTxEvent( void (*function)(void) ){
+void TWI_attachSlaveTxEvent( uint8_t (*function)(void), uint8_t* write_data ){
   TWI_onSlaveTransmit = function;
+  slave_writeData = write_data;
 }
 
 
