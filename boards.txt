@@ -31,4 +31,16 @@ uno2018.menu.mode.on=ATMEGA328
 uno2018.menu.mode.on.build.328emulation=-DUNO_WIFI_REV2_328MODE
 uno2018.menu.mode.off=None (ATMEGA4809)
 uno2018.menu.mode.off.build.328emulation=
+
+##############################################################
+
+# Preeliminary entry
+# nano4809.name=Arduino Nano 4809
+
+# menu.mode=Registers emulation
+# nano4809.menu.mode.on=ATMEGA328
+# nano4809.menu.mode.on.build.328emulation=-DAVR_NANO_4809_328MODE
+# nano4809.menu.mode.off=None (ATMEGA4809)
+# nano4809.menu.mode.off.build.328emulation=
+
 ##############################################################
