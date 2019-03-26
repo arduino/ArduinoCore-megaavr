@@ -16,6 +16,8 @@
 #pragma once
 #include "Arduino.h"
 
+#ifdef UNO_WIFI_REV2_328MODE
+
 /*
   ARDUINO PIN  ATMEGA 328  ATMEGA 4809
   0            PD0         PC5
@@ -283,3 +285,5 @@ extern PORTDClass PORTD;
 extern DDRBClass DDRB;
 extern DDRCClass DDRC;
 extern DDRDClass DDRD;
+
+#endif /* #ifdef UNO_WIFI_REV2_328MODE */
