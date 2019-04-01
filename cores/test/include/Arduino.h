@@ -21,6 +21,6 @@
 
 /* This is a Arduino.h mockup for test purposes only */
 
-#include <test/port/megaavr/PORT_t.h>
+#include <vireg/port/megaAVR-0/PORT_t.h>
 
 #endif /* ARDUINO_H_ */
