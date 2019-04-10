@@ -35,13 +35,35 @@ uno2018.menu.mode.off.build.328emulation=
 
 ##############################################################
 
-# Preeliminary entry
-# nano4809.name=Arduino Nano 4809
+nona4809.name=Arduino NONA 4809
 
-# menu.mode=Registers emulation
-# nano4809.menu.mode.on=ATMEGA328
-# nano4809.menu.mode.on.build.328emulation=-DAVR_NANO_4809_328MODE
-# nano4809.menu.mode.off=None (ATMEGA4809)
-# nano4809.menu.mode.off.build.328emulation=
+nona4809.vid.0=0x2341
+nona4809.pid.0=0x0058
+
+nona4809.upload.tool=avrdude
+nona4809.upload.protocol=jtag2updi
+nona4809.upload.maximum_size=49152
+nona4809.upload.maximum_data_size=6144
+nona4809.upload.speed=115200
+
+nona4809.build.mcu=atmega4809
+nona4809.build.f_cpu=16000000L
+nona4809.build.board=AVR_UNO_WIFI_REV2
+nona4809.build.core=arduino
+nona4809.build.variant=nona4809
+nona4809.build.extra_flags={build.328emulation} -DMILLIS_USE_TIMERB3
+#nona4809.build.extra_flags=-B{runtime.tools.atpack.path}/gcc/dev/{build.mcu}
+
+nona4809.bootloader.tool=avrdude
+nona4809.bootloader.file=atmega4809_uart_bl.hex
+nona4809.bootloader.SYSCFG0=0xC9
+nona4809.bootloader.BOOTEND=0x00
+nona4809.fuses.file=fuses_4809.bin
+
+menu.mode=Registers emulation
+nona4809.menu.mode.on=ATMEGA328
+nona4809.menu.mode.on.build.328emulation=-DAVR_NANO_4809_328MODE
+nona4809.menu.mode.off=None (ATMEGA4809)
+nona4809.menu.mode.off.build.328emulation=
 
 ##############################################################
