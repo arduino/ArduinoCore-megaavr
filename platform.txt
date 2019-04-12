@@ -21,7 +21,7 @@ compiler.warning_flags.all=-Wall -Wextra
 compiler.path={runtime.tools.avr-gcc-5.4.0-atmel3.6.1-arduino2.path}/bin/
 compiler.c.cmd=avr-gcc
 compiler.c.flags=-c -g -Os {compiler.warning_flags} -std=gnu11 -ffunction-sections -fdata-sections -MMD -flto -fno-fat-lto-objects
-compiler.c.elf.flags={compiler.warning_flags} -Os -g -flto -fuse-linker-plugin -Wl,--gc-sections -Wl,--section-start=.text=0x200
+compiler.c.elf.flags={compiler.warning_flags} -Os -g -flto -fuse-linker-plugin -Wl,--gc-sections -Wl,--section-start={build.text_section_start}
 compiler.c.elf.cmd=avr-gcc
 compiler.S.flags=-c -g -x assembler-with-cpp -flto -MMD
 compiler.cpp.cmd=avr-g++
@@ -104,14 +104,14 @@ tools.avrdude.upload.params.quiet=-q -q
 # tools.avrdude.upload.verify is needed for backwards compatibility with IDE 1.6.8 or older, IDE 1.6.9 or newer overrides this value
 tools.avrdude.upload.verify=
 tools.avrdude.upload.params.noverify=-V
-tools.avrdude.upload.pattern="{cmd.path}" "-C{config.path}" {upload.verbose} {upload.verify} -p{build.mcu} -c{upload.protocol} -Pusb -b{upload.speed} -e -D "-Uflash:w:{build.path}/{build.project_name}.hex:i" "-Ufuse5:w:{bootloader.SYSCFG0}:m" "-Ufuse8:w:{bootloader.BOOTEND}:m" "-Uflash:w:{runtime.platform.path}/bootloaders/{bootloader.file}:i"
+tools.avrdude.upload.pattern="{cmd.path}" "-C{config.path}" {upload.verbose} {upload.verify} -p{build.mcu} -c{upload.protocol} {upload.extra_params}  -b{upload.speed} -e -D "-Uflash:w:{build.path}/{build.project_name}.hex:i" "-Ufuse2:w:{bootloader.OSCCFG}:m" "-Ufuse5:w:{bootloader.SYSCFG0}:m" "-Ufuse8:w:{bootloader.BOOTEND}:m" {upload.extra_files}
 
 tools.avrdude.program.params.verbose=-v
 tools.avrdude.program.params.quiet=-q -q
 # tools.avrdude.program.verify is needed for backwards compatibility with IDE 1.6.8 or older, IDE 1.6.9 or newer overrides this value
 tools.avrdude.program.verify=
 tools.avrdude.program.params.noverify=-V
-tools.avrdude.program.pattern="{cmd.path}" "-C{config.path}" {program.verbose} {program.verify} -p{build.mcu} -c{protocol} {program.extra_params} "-Uflash:w:{build.path}/{build.project_name}.hex:i" "-Ufuse5:w:{bootloader.SYSCFG0}:m" "-Ufuse8:w:{bootloader.BOOTEND}:m" "-Uflash:w:{runtime.platform.path}/bootloaders/{bootloader.file}:i"
+tools.avrdude.program.pattern="{cmd.path}" "-C{config.path}" {program.verbose} {program.verify} -p{build.mcu} -c{protocol} {program.extra_params} "-Uflash:w:{build.path}/{build.project_name}.hex:i" "-Ufuse2:w:{bootloader.OSCCFG}:m" "-Ufuse5:w:{bootloader.SYSCFG0}:m" "-Ufuse8:w:{bootloader.BOOTEND}:m" {upload.extra_files}
 
 tools.avrdude.erase.params.verbose=-v
 tools.avrdude.erase.params.quiet=-q -q
@@ -119,7 +119,7 @@ tools.avrdude.erase.pattern=
 
 tools.avrdude.bootloader.params.verbose=-v
 tools.avrdude.bootloader.params.quiet=-q -q
-tools.avrdude.bootloader.pattern="{cmd.path}" "-C{config.path}" {bootloader.verbose} -p{build.mcu} -c{protocol} {program.extra_params} "-Ufuse5:w:{bootloader.SYSCFG0}:m" "-Ufuse8:w:{bootloader.BOOTEND}:m" "-Uflash:w:{runtime.platform.path}/bootloaders/{bootloader.file}:i"
+tools.avrdude.bootloader.pattern="{cmd.path}" "-C{config.path}" {bootloader.verbose} -p{build.mcu} -c{protocol} {program.extra_params} "-Ufuse2:w:{bootloader.OSCCFG}:m" "-Ufuse5:w:{bootloader.SYSCFG0}:m" "-Ufuse8:w:{bootloader.BOOTEND}:m" "-Uflash:w:{runtime.platform.path}/bootloaders/{bootloader.file}:i"
 
 tools.avrdude_remote.upload.pattern=/usr/bin/run-avrdude /tmp/sketch.hex {upload.verbose} -p{build.mcu}
 
