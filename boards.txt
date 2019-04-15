@@ -42,7 +42,7 @@ uno2018.menu.mode.off.build.328emulation=
 nona4809.name=Arduino NONA 4809
 
 nona4809.vid.0=0x2341
-nona4809.pid.0=0x0557
+nona4809.pid.0=0x0058
 
 nona4809.upload.tool=avrdude
 nona4809.upload.protocol=jtag2updi
