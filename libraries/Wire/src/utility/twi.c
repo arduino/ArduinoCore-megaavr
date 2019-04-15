@@ -65,9 +65,10 @@ void TWI_MasterInit(uint32_t frequency)
 	if(twi_mode != TWI_MODE_UNKNOWN) return;
 	
 	// Enable pullups just in case, should have external ones though
-	//pinMode(PIN_WIRE_SDA, INPUT_PULLUP);
-	//pinMode(PIN_WIRE_SCL, INPUT_PULLUP);
-
+#ifdef NO_EXTERNAL_I2C_PULLUP
+	pinMode(PIN_WIRE_SDA, INPUT_PULLUP);
+	pinMode(PIN_WIRE_SCL, INPUT_PULLUP);
+#endif
 	PORTMUX.TWISPIROUTEA |= TWI_MUX;
 
 	twi_mode = TWI_MODE_MASTER;

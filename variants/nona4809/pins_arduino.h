@@ -94,8 +94,8 @@ static const uint8_t SCL = PIN_WIRE_SCL;
 #define PIN_A1   (16)
 #define PIN_A2   (15)
 #define PIN_A3   (14)
-#define PIN_A4   (20) // fixme
-#define PIN_A5   (21) // fixme
+#define PIN_A4   (26) // PF2 / AIN12
+#define PIN_A5   (27) // PF3 / AIN13
 #define PIN_A6   (18)
 #define PIN_A7   (19)
 
