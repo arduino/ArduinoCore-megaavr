@@ -39,7 +39,7 @@ uno2018.menu.mode.off.build.328emulation=
 
 ##############################################################
 
-nona4809.name=Arduino NONA 4809
+nona4809.name=Arduino Nano Every
 
 nona4809.vid.0=0x2341
 nona4809.pid.0=0x0058
@@ -54,7 +54,7 @@ nona4809.upload.extra_params=-P{serial.port}
 
 nona4809.build.mcu=atmega4809
 nona4809.build.f_cpu=16000000L
-nona4809.build.board=AVR_UNO_NONA_4809
+nona4809.build.board=AVR_NANO_EVERY
 nona4809.build.core=arduino
 nona4809.build.variant=nona4809
 nona4809.build.text_section_start=.text=0x0
