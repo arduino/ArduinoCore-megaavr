@@ -27,7 +27,7 @@
 #include "timers.h"
 
 #define NUM_DIGITAL_PINS            22 // (14 on digital headers + 8 on analog headers)
-#define NUM_ANALOG_INPUTS           8
+#define NUM_ANALOG_INPUTS           14
 #define NUM_RESERVED_PINS           6  // (TOSC1/2, VREF, RESET, DEBUG USART Rx/Tx)
 #define NUM_INTERNALLY_USED_PINS    10 // (2 x Chip select + 2 x UART + 4 x IO + LED_BUILTIN + 1 unused pin)
 #define NUM_I2C_PINS                2  // (SDA / SCL)
@@ -35,7 +35,6 @@
 #define NUM_TOTAL_FREE_PINS         (NUM_DIGITAL_PINS)
 #define NUM_TOTAL_PINS              (NUM_DIGITAL_PINS + NUM_RESERVED_PINS + NUM_INTERNALLY_USED_PINS + NUM_I2C_PINS + NUM_SPI_PINS)
 #define ANALOG_INPUT_OFFSET         14
-#define digitalPinToAnalogInput(p)  ((p < NUM_ANALOG_INPUTS) ? (p) : (p) - ANALOG_INPUT_OFFSET)
 
 #define EXTERNAL_NUM_INTERRUPTS     48
 
@@ -90,14 +89,14 @@ static const uint8_t SCL = PIN_WIRE_SCL;
 
 #define LED_BUILTIN   (13)
 
-#define PIN_A0   (17)
-#define PIN_A1   (16)
-#define PIN_A2   (15)
-#define PIN_A3   (14)
-#define PIN_A4   (26) // PF2 / AIN12
-#define PIN_A5   (27) // PF3 / AIN13
-#define PIN_A6   (18)
-#define PIN_A7   (19)
+#define PIN_A0   (0) // AIN3
+#define PIN_A1   (1) // AIN2
+#define PIN_A2   (2) // AIN1
+#define PIN_A3   (3) // AIN0
+#define PIN_A4   (4) // PF2 / AIN12
+#define PIN_A5   (5) // PF3 / AIN13
+#define PIN_A6   (6) // AIN5
+#define PIN_A7   (7) // AIN4
 
 static const uint8_t A0 = PIN_A0;
 static const uint8_t A1 = PIN_A1;
@@ -321,8 +320,21 @@ const uint8_t PROGMEM digital_pin_to_timer[] = {
   NOT_ON_TIMER   // 40 PF6 RESET
 };
 
+const uint8_t PROGMEM analog_pin_to_channel[] = {
+  3,
+  2,
+  1,
+  0,
+  12,
+  13,
+  5,
+  4
+};
 
 #endif
+
+extern const uint8_t analog_pin_to_channel[];
+#define digitalPinToAnalogInput(p)  ((p < NUM_ANALOG_INPUTS) ? pgm_read_byte(analog_pin_to_channel + p) : NOT_A_PIN )
 
 // These serial port names are intended to allow libraries and architecture-neutral
 // sketches to automatically default to the correct port name for a particular type
