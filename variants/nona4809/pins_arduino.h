@@ -44,7 +44,7 @@
 #define PIN_SPI_MISO  (12)
 #define PIN_SPI_SCK   (13)
 #define PIN_SPI_MOSI  (11)
-#define PIN_SPI_SS    (10)
+#define PIN_SPI_SS    (8)
 
 static const uint8_t SS   = PIN_SPI_SS;
 static const uint8_t MOSI = PIN_SPI_MOSI;

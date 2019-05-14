@@ -44,12 +44,11 @@ void SPIClass::begin()
 
   PORTMUX.TWISPIROUTEA |= _uc_mux;
 
-  // We don't need HW SS since salve/master mode is selected via registers, so make it simply INPUT
-  pinMode(_uc_pinSS, INPUT);
   pinMode(_uc_pinMosi, OUTPUT);
   pinMode(_uc_pinSCK, OUTPUT);
   // MISO is set to input by the controller
 
+  // We don't need HW SS since salve/master mode is selected via registers
   SPI0.CTRLB |= (SPI_SSD_bm);
   SPI0.CTRLA |= (SPI_ENABLE_bm | SPI_MASTER_bm);
 
