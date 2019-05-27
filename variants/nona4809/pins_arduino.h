@@ -51,8 +51,8 @@ static const uint8_t MOSI = PIN_SPI_MOSI;
 static const uint8_t MISO = PIN_SPI_MISO;
 static const uint8_t SCK  = PIN_SPI_SCK;
 
-#define PIN_WIRE_SDA  (20)
-#define PIN_WIRE_SCL  (21)
+#define PIN_WIRE_SDA  (22)
+#define PIN_WIRE_SCL  (23)
 
 static const uint8_t SDA = PIN_WIRE_SDA;
 static const uint8_t SCL = PIN_WIRE_SCL;
@@ -89,14 +89,14 @@ static const uint8_t SCL = PIN_WIRE_SCL;
 
 #define LED_BUILTIN   (13)
 
-#define PIN_A0   (0) // AIN3
-#define PIN_A1   (1) // AIN2
-#define PIN_A2   (2) // AIN1
-#define PIN_A3   (3) // AIN0
-#define PIN_A4   (4) // PF2 / AIN12
-#define PIN_A5   (5) // PF3 / AIN13
-#define PIN_A6   (6) // AIN5
-#define PIN_A7   (7) // AIN4
+#define PIN_A0   (14) // AIN3
+#define PIN_A1   (15) // AIN2
+#define PIN_A2   (16) // AIN1
+#define PIN_A3   (17) // AIN0
+#define PIN_A4   (18) // PF2 / AIN12
+#define PIN_A5   (19) // PF3 / AIN13
+#define PIN_A6   (20) // AIN5
+#define PIN_A7   (21) // AIN4
 
 static const uint8_t A0 = PIN_A0;
 static const uint8_t A1 = PIN_A1;
@@ -157,33 +157,16 @@ const uint8_t PROGMEM digital_pin_to_port[] = {
   PE, // 11 PE0
   PE, // 12 PE1
   PE, // 13 PE2
-  PD, // 14 PD0/AI0
-  PD, // 15 PD1AI1
-  PD, // 16 PD2/AI2
-  PD, // 17 PD3/AI3
-  PD, // 18 PD4/AI4
-  PD, // 19 PD5/AI5
-  PA, // 20 PA2/TWI_SDA
-  PA, // 21 PA3/TWI_SCL
-  PC, // 22 PC3
-  PA, // 23 PA5/NINA TX
-  PA, // 24 PA4/NINA RX
-  PD, // 25 PD6/LED_BUILTIN
-  PB, // 26 PB5/USART3_Rx
-  PB, // 27 PB4/USART3_Tx
-  PA,  // 28 PA6/NINA GPIO0
-  PA,  // 29 PA7/NINA RST
-  PB,  // 30 PB3/IMU CS
-  PC,  // 31 PC7/IMU INT
-  PC,  // 32 PC0/MOSI
-  PC,  // 33 PC1/MISO
-  PC,  // 34 PC2/SCK
-  PF,  // 35 PF2/NINA CS
-  PF,  // 36 PF3/NINA ACK
-  PF,  // 37 PF0 TOSC 1
-  PF,  // 38 PF1 TOSC 2
-  PD,  // 39 PD7 VREF
-  PF  // 40 PF6 RESET
+  PD, // 14 PD3/AI3
+  PD, // 15 PD2/AI2
+  PD, // 16 PD1/AI1
+  PD, // 17 PD0/AI0
+  PF, // 18 PF2/AI12
+  PF, // 19 PF3/AI13
+  PD, // 20 PD5/AI5
+  PD, // 21 PD4/AI4
+  PA, // 22 PA2/TWI_SDA
+  PA, // 23 PA3/TWI_SCL
 };
 
 /* Use this for accessing PINnCTRL register */
@@ -202,33 +185,16 @@ const uint8_t PROGMEM digital_pin_to_bit_position[] = {
   PIN0_bp,  // 11 PE0
   PIN1_bp,  // 12 PE1
   PIN2_bp,  // 13 PE2
-  PIN0_bp,  // 14 PD0/AI0
-  PIN1_bp,  // 15 PD1AI1
-  PIN2_bp,  // 16 PD2/AI2
-  PIN3_bp,  // 17 PD3/AI3
-  PIN4_bp,  // 18 PD4/AI4
-  PIN5_bp,  // 19 PD5/AI5
-  PIN2_bp,  // 20 PA2/TWI_SDA
-  PIN3_bp,  // 21 PA3/TWI_SCL
-  PIN3_bp,  // 22 PC3
-  PIN5_bp,  // 23 PA5/NINA TX
-  PIN4_bp,  // 24 PA4/NINA RX
-  PIN6_bp,  // 25 PD6/LED_BUILTIN
-  PIN5_bp,  // 26 PB5/USART3_Rx
-  PIN4_bp,  // 27 PB4/USART3_Tx
-  PIN6_bp,  // 28 PA6/NINA GPIO0
-  PIN7_bp,  // 29 PA7/NINA RST
-  PIN3_bp,  // 30 PB3/IMU CS
-  PIN7_bp,  // 31 PC7/IMU INT
-  PIN0_bp,  // 32 PC0/MOSI
-  PIN1_bp,  // 33 PC1/MISO
-  PIN2_bp,  // 34 PC2/SCK
-  PIN2_bp,  // 35 PF2/NINA CS
-  PIN3_bp,  // 36 PF3/NINA ACK
-  PIN0_bp,  // 37 PF0 TOSC 1
-  PIN1_bp,  // 38 PF1 TOSC 2
-  PIN7_bp,  // 39 PD7 VREF
-  PIN6_bp   // 40 PF6 RESET
+  PIN3_bp,  // 14 PD3/AI3
+  PIN2_bp,  // 15 PD2/AI2
+  PIN1_bp,  // 16 PD1/AI1
+  PIN0_bp,  // 17 PD0/AI0
+  PIN2_bp,  // 18 PF2/AI12
+  PIN3_bp,  // 19 PF3/AI13
+  PIN5_bp,  // 20 PD5/AI5
+  PIN4_bp,  // 21 PD4/AI4
+  PIN2_bp,  // 22 PA2/TWI_SDA
+  PIN3_bp,  // 23 PA3/TWI_SCL
 };
 
 /* Use this for accessing PINnCTRL register */
@@ -247,33 +213,16 @@ const uint8_t PROGMEM digital_pin_to_bit_mask[] = {
   PIN0_bm,  // 11 PE0
   PIN1_bm,  // 12 PE1
   PIN2_bm,  // 13 PE2
-  PIN0_bm,  // 14 PD0/AI0
-  PIN1_bm,  // 15 PD1AI1
-  PIN2_bm,  // 16 PD2/AI2
-  PIN3_bm,  // 17 PD3/AI3
-  PIN4_bm,  // 18 PD4/AI4
-  PIN5_bm,  // 19 PD5/AI5
-  PIN2_bm,  // 20 PA2/TWI_SDA
-  PIN3_bm,  // 21 PA3/TWI_SCL
-  PIN3_bm,  // 22 PC3
-  PIN5_bm,  // 23 PA5/NINA TX
-  PIN4_bm,  // 24 PA4/NINA RX
-  PIN6_bm,  // 25 PD6/LED_BUILTIN
-  PIN5_bm,  // 26 PB5/USART3_Rx
-  PIN4_bm,  // 27 PB4/USART3_Tx
-  PIN6_bm,  // 28 PA6/NINA GPIO0
-  PIN7_bm,  // 29 PA7/NINA RST
-  PIN3_bm,  // 30 PB3/IMU CS
-  PIN7_bm,  // 31 PC7/IMU INT
-  PIN0_bm,  // 32 PC0/MOSI
-  PIN1_bm,  // 33 PC1/MISO
-  PIN2_bm,  // 34 PC2/SCK
-  PIN2_bm,  // 35 PF2/NINA CS
-  PIN3_bm,  // 36 PF3/NINA ACK
-  PIN0_bm,  // 37 PF0 TOSC 1
-  PIN1_bm,  // 38 PF1 TOSC 2
-  PIN7_bm,  // 39 PD7 VREF
-  PIN6_bm   // 40 PF6 RESET
+  PIN3_bm,  // 14 PD3/AI3
+  PIN2_bm,  // 15 PD2/AI2
+  PIN1_bm,  // 16 PD1/AI1
+  PIN0_bm,  // 17 PD0/AI0
+  PIN2_bm,  // 18 PF2/AI12
+  PIN3_bm,  // 19 PF3/AI13
+  PIN5_bm,  // 20 PD5/AI5
+  PIN4_bm,  // 21 PD4/AI4
+  PIN2_bm,  // 22 PA2/TWI_SDA
+  PIN3_bm,  // 23 PA3/TWI_SCL
 };
 
 const uint8_t PROGMEM digital_pin_to_timer[] = {
@@ -291,33 +240,16 @@ const uint8_t PROGMEM digital_pin_to_timer[] = {
   NOT_ON_TIMER,  // 11 PE0
   NOT_ON_TIMER,  // 12 PE1
   NOT_ON_TIMER,  // 13 PE2
-  NOT_ON_TIMER,  // 14 PD0/AI0
-  NOT_ON_TIMER,  // 15 PD1AI1
-  NOT_ON_TIMER,  // 16 PD2/AI2
-  NOT_ON_TIMER,  // 17 PD3/AI3
-  NOT_ON_TIMER,  // 18 PD4/AI4
-  NOT_ON_TIMER,  // 19 PD5/AI5
-  NOT_ON_TIMER,  // 20 PA2/TWI_SDA
-  NOT_ON_TIMER,  // 21 PA3/TWI_SCL
-  NOT_ON_TIMER,  // 22 PC3
-  NOT_ON_TIMER,  // 23 PA5/NINA TX
-  NOT_ON_TIMER,  // 24 PA4/NINA RX
-  NOT_ON_TIMER,  // 25 PD6/LED_BUILTIN
-  NOT_ON_TIMER,  // 26 PB5/USART3_Rx
-  NOT_ON_TIMER,  // 27 PB4/USART3_Tx
-  NOT_ON_TIMER,  // 28 PA6/NINA GPIO0
-  NOT_ON_TIMER,  // 29 PA7/NINA RST
-  NOT_ON_TIMER,  // 30 PB3/IMU CS
-  NOT_ON_TIMER,  // 31 PC7/IMU INT
-  NOT_ON_TIMER,  // 32 PC0/MOSI
-  NOT_ON_TIMER,  // 33 PC1/MISO
-  NOT_ON_TIMER,  // 34 PC2/SCK
-  NOT_ON_TIMER,  // 35 PF2/NINA CS
-  NOT_ON_TIMER,  // 36 PF3/NINA ACK
-  NOT_ON_TIMER,  // 37 PF0 TOSC 1
-  NOT_ON_TIMER,  // 38 PF1 TOSC 2
-  NOT_ON_TIMER,  // 39 PD7 VREF
-  NOT_ON_TIMER   // 40 PF6 RESET
+  NOT_ON_TIMER,  // 14 PD3/AI3
+  NOT_ON_TIMER,  // 15 PD2/AI2
+  NOT_ON_TIMER,  // 16 PD1/AI1
+  NOT_ON_TIMER,  // 17 PD0/AI0
+  NOT_ON_TIMER,  // 18 PF2/AI12
+  NOT_ON_TIMER,  // 19 PF3/AI13
+  NOT_ON_TIMER,  // 20 PD5/AI5
+  NOT_ON_TIMER,  // 21 PD4/AI4
+  NOT_ON_TIMER,  // 22 PA2/TWI_SDA
+  NOT_ON_TIMER,  // 23 PA3/TWI_SCL
 };
 
 const uint8_t PROGMEM analog_pin_to_channel[] = {
@@ -334,7 +266,7 @@ const uint8_t PROGMEM analog_pin_to_channel[] = {
 #endif
 
 extern const uint8_t analog_pin_to_channel[];
-#define digitalPinToAnalogInput(p)  ((p < NUM_ANALOG_INPUTS) ? pgm_read_byte(analog_pin_to_channel + p) : NOT_A_PIN )
+#define digitalPinToAnalogInput(p)  ((p < ANALOG_INPUT_OFFSET) ? pgm_read_byte(analog_pin_to_channel + p) : pgm_read_byte(analog_pin_to_channel + p - ANALOG_INPUT_OFFSET) )
 
 // These serial port names are intended to allow libraries and architecture-neutral
 // sketches to automatically default to the correct port name for a particular type
