@@ -76,8 +76,8 @@ static const uint8_t SCL = PIN_WIRE_SCL;
 #define HWSERIAL0_DRE_VECTOR_NUM (USART3_DRE_vect_num)
 #define HWSERIAL0_RXC_VECTOR (USART3_RXC_vect)
 #define HWSERIAL0_MUX (PORTMUX_USART3_ALT1_gc)
-#define PIN_WIRE_HWSERIAL0_RX (26)
-#define PIN_WIRE_HWSERIAL0_TX (27)
+#define PIN_WIRE_HWSERIAL0_RX (24)
+#define PIN_WIRE_HWSERIAL0_TX (25)
 
 #define HWSERIAL2_MUX (PORTMUX_USART0_NONE_gc)
 #define HWSERIAL3_MUX (PORTMUX_USART2_NONE_gc)
@@ -167,6 +167,8 @@ const uint8_t PROGMEM digital_pin_to_port[] = {
   PD, // 21 PD4/AI4
   PA, // 22 PA2/TWI_SDA
   PA, // 23 PA3/TWI_SCL
+  PB, // 24 PB5/USART3_Rx
+  PB, // 25 PB4/USART3_Tx
 };
 
 /* Use this for accessing PINnCTRL register */
@@ -195,6 +197,8 @@ const uint8_t PROGMEM digital_pin_to_bit_position[] = {
   PIN4_bp,  // 21 PD4/AI4
   PIN2_bp,  // 22 PA2/TWI_SDA
   PIN3_bp,  // 23 PA3/TWI_SCL
+  PIN5_bp,  // 24 PB5/USART3_Rx
+  PIN4_bp,  // 25 PB4/USART3_Tx
 };
 
 /* Use this for accessing PINnCTRL register */
@@ -223,6 +227,8 @@ const uint8_t PROGMEM digital_pin_to_bit_mask[] = {
   PIN4_bm,  // 21 PD4/AI4
   PIN2_bm,  // 22 PA2/TWI_SDA
   PIN3_bm,  // 23 PA3/TWI_SCL
+  PIN5_bm,  // 24 PB5/USART3_Rx
+  PIN4_bm,  // 25 PB4/USART3_Tx
 };
 
 const uint8_t PROGMEM digital_pin_to_timer[] = {
@@ -250,6 +256,8 @@ const uint8_t PROGMEM digital_pin_to_timer[] = {
   NOT_ON_TIMER,  // 21 PD4/AI4
   NOT_ON_TIMER,  // 22 PA2/TWI_SDA
   NOT_ON_TIMER,  // 23 PA3/TWI_SCL
+  NOT_ON_TIMER,  // 24 PB5/USART3_Rx
+  NOT_ON_TIMER,  // 25 PB4/USART3_Tx
 };
 
 const uint8_t PROGMEM analog_pin_to_channel[] = {
