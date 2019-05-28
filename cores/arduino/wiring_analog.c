@@ -38,7 +38,7 @@ void analogReference(uint8_t mode)
 	if((mode == EXTERNAL) || (mode == VDD)) {
 
 		/* Set reference in ADC peripheral */
-		ADC0.CTRLC |= mode;
+		ADC0.CTRLC |= mode | ADC_SAMPCAP_bm;
 
 	/* If reference using internal reference from VREF */
 	} else if (
