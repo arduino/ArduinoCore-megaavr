@@ -3,9 +3,17 @@
 
    Created: 11-11-2017 22:29:58
    Author : JMR_2
+   Ported to generic Arduino framework by the Arduino Team - 2019
 */
 
-// fqbn=arduino:samd:muxto:float=default,config=enabled,clock=internal_usb,timer=timer_732Hz,bootloader=4kb,serial=two_uart,usb=cdc
+/*
+    Compile with
+    fqbn=arduino:samd:muxto:float=default,config=enabled,clock=internal_usb,timer=timer_732Hz,bootloader=4kb,serial=two_uart,usb=cdc
+    to obtain the binary for Serial-to-USB converter + UPDI programmer on the Arduino Nano Every (MuxTO for brevity)
+
+    Since the "sketch" is (almost) pure Arduino it can be ported easily to other architectures (on chips with two serial ports)
+    The bitbanged UPDI layer is being reworked to make it compatible with chips with just one UART (eg. atmega 32u4)
+*/
 
 // Includes
 #include "sys.h"
