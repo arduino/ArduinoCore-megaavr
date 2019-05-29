@@ -118,22 +118,30 @@ void loop() {
       }
     }
 
-    if ((Serial.baud() != baudrate || serialNeedReconfiguration) && (millis() - updi_mode_end > 200)) {
-      baudrate = Serial.baud();
-      Serial1.begin(baudrate, serial_mode);
-      serialNeedReconfiguration = false;
-      if (baudrate == 1200 && Serial.dtr() == 1) {
-        updi_mode = true;
-        updi_mode_start = millis();
+    if (baudrate == 1200 && Serial.dtr() == 0 && (millis() - updi_mode_end > 200)) {
+      // don't reenter here if you just finished flashing
+      updi_mode = true;
+      updi_mode_start = millis();
+      updi_mode_end = 0;
+    }
+
+    if (Serial.baud() != baudrate || serialNeedReconfiguration) {
+      if (Serial.dtr() == 1) {
+        baudrate = Serial.baud();
+        Serial1.end();
+        Serial1.begin(baudrate, serial_mode);
+        serialNeedReconfiguration = false;
       }
     }
+    return;
   }
 
   if (updi_mode == true) {
 
     // updi_mode cannot last more than 1 minute; in that case, break forcibly
-    if (millis() - updi_mode_start > 60000) {
+    if ((updi_mode_end != 0 && (millis() - updi_mode_end) > 500) || ((millis() - updi_mode_start) > 60000)) {
       updi_mode = false;
+      baudrate = -1;
       return;
     }
 
@@ -161,10 +169,9 @@ void loop() {
       case JTAG2::CMND_SIGN_OFF:
         // Restore default baud rate before exiting
         JTAG2::PARAM_BAUD_RATE_VAL = JTAG2::baud_19200;
-        updi_mode = false;
-        updi_mode_end = millis();
       case JTAG2::CMND_LEAVE_PROGMODE:
         JTAG2::leave_progmode();
+        updi_mode_end = millis();
         break;
       case JTAG2::CMND_GET_SYNC:
       case JTAG2::CMND_GO:
