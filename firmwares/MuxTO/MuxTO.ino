@@ -137,8 +137,10 @@ void loop() {
       if (Serial.dtr() == 1) {
         baudrate = Serial.baud();
         Serial1.end();
-        Serial1.begin(baudrate, serial_mode);
-        serialNeedReconfiguration = false;
+        if (baudrate != 1200) {
+          Serial1.begin(baudrate, serial_mode);
+          serialNeedReconfiguration = false;
+        }
       }
     }
     return;
