@@ -19,9 +19,11 @@ DriverVer=06/14/2013,6.0.0.1
 
 [ATMEL] 
 %ATMEL_CDC%=Reader, USB\VID_03EB&PID_2145&MI_01
+%ARDUINO_NANO_EVERY_CDC%=Reader, USB\VID_2341&PID_0058
 
 [ATMEL.NTamd64]
 %ATMEL_CDC%=DriverInstall, USB\VID_03EB&PID_2145&MI_01 
+%ARDUINO_NANO_EVERY_CDC%=Reader, USB\VID_2341&PID_0058
 
 
 ;----------------------------------------------------------
@@ -86,5 +88,6 @@ ServiceBinary=%12%\usbser.sys
 [Strings] 
 ATMEL = "Atmel Corp." 
 ATMEL_CDC = "mEDBG Virtual COM Port"
+ARDUINO_NANO_EVERY_CDC = "Arduino NANO Every"
 Serial.SvcDesc = "USB Serial emulation driver" 
 
