@@ -163,8 +163,8 @@ const uint8_t PROGMEM digital_pin_to_port[] = {
   PD, // 17 PD0/AI0
   PF, // 18 PF2/AI12
   PF, // 19 PF3/AI13
-  PD, // 20 PD5/AI5
-  PD, // 21 PD4/AI4
+  PD, // 20 PD4/AI4
+  PD, // 21 PD5/AI5
   PA, // 22 PA2/TWI_SDA
   PA, // 23 PA3/TWI_SCL
   PB, // 24 PB5/USART3_Rx
@@ -193,8 +193,8 @@ const uint8_t PROGMEM digital_pin_to_bit_position[] = {
   PIN0_bp,  // 17 PD0/AI0
   PIN2_bp,  // 18 PF2/AI12
   PIN3_bp,  // 19 PF3/AI13
-  PIN5_bp,  // 20 PD5/AI5
-  PIN4_bp,  // 21 PD4/AI4
+  PIN4_bp,  // 20 PD4/AI4
+  PIN5_bp,  // 21 PD5/AI5
   PIN2_bp,  // 22 PA2/TWI_SDA
   PIN3_bp,  // 23 PA3/TWI_SCL
   PIN5_bp,  // 24 PB5/USART3_Rx
@@ -223,8 +223,8 @@ const uint8_t PROGMEM digital_pin_to_bit_mask[] = {
   PIN0_bm,  // 17 PD0/AI0
   PIN2_bm,  // 18 PF2/AI12
   PIN3_bm,  // 19 PF3/AI13
-  PIN5_bm,  // 20 PD5/AI5
-  PIN4_bm,  // 21 PD4/AI4
+  PIN4_bm,  // 20 PD4/AI4
+  PIN5_bm,  // 21 PD5/AI5
   PIN2_bm,  // 22 PA2/TWI_SDA
   PIN3_bm,  // 23 PA3/TWI_SCL
   PIN5_bm,  // 24 PB5/USART3_Rx
@@ -252,8 +252,8 @@ const uint8_t PROGMEM digital_pin_to_timer[] = {
   NOT_ON_TIMER,  // 17 PD0/AI0
   NOT_ON_TIMER,  // 18 PF2/AI12
   NOT_ON_TIMER,  // 19 PF3/AI13
-  NOT_ON_TIMER,  // 20 PD5/AI5
-  NOT_ON_TIMER,  // 21 PD4/AI4
+  NOT_ON_TIMER,  // 20 PD4/AI4
+  NOT_ON_TIMER,  // 21 PD5/AI5
   NOT_ON_TIMER,  // 22 PA2/TWI_SDA
   NOT_ON_TIMER,  // 23 PA3/TWI_SCL
   NOT_ON_TIMER,  // 24 PB5/USART3_Rx
@@ -267,8 +267,8 @@ const uint8_t PROGMEM analog_pin_to_channel[] = {
   0,
   12,
   13,
-  5,
-  4
+  4,
+  5
 };
 
 #endif
