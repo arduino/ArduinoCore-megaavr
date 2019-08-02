@@ -149,7 +149,7 @@ void UartClass::begin(unsigned long baud, uint16_t config)
 
     int8_t sigrow_val = SIGROW.OSC16ERR5V;
     baud_setting *= (1024 + sigrow_val);
-    baud_setting /= (1024 - abs(sigrow_val));
+    baud_setting /= 1024;
 
     // assign the baud_setting, a.k.a. BAUD (USART Baud Rate Register)
     (*_hwserial_module).BAUD = (int16_t) baud_setting;
