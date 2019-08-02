@@ -119,6 +119,22 @@ void UartClass::_tx_data_empty_irq(void)
     }
 }
 
+// To invoke data empty "interrupt" via a call, use this method
+void UartClass::_tx_data_empty_soft(void) {
+    if ( (!(SREG & CPU_I_bm)) || (!((*_hwserial_module).CTRLA & USART_DREIE_bm)) ) {
+	// Interrupts are disabled either globally or for data register empty,
+	// so we'll have to poll the "data register empty" flag ourselves.
+	// If it is set, pretend an interrupt has happened and call the handler
+	//to free up space for us.
+
+	// Invoke interrupt handler only if conditions data register is empty
+	if ((*_hwserial_module).STATUS & USART_DREIF_bm) {
+	    _tx_data_empty_irq();
+	}
+    }
+    // In case interrupts are enabled, the interrupt routine will be invoked by itself
+}
+
 // Public Methods //////////////////////////////////////////////////////////////
 
 void UartClass::begin(unsigned long baud, uint16_t config)
@@ -251,9 +267,7 @@ void UartClass::flush()
 
         // If interrupts are globally disabled or the and DR empty interrupt is disabled,
         // poll the "data register empty" interrupt flag to prevent deadlock
-        if ( (!(SREG & CPU_I_bm)) || (!((*_hwserial_module).CTRLA & USART_DREIE_bm)) ) {
-            _tx_data_empty_irq();
-        }
+	_tx_data_empty_soft();
     }
     // If we get here, nothing is queued anymore (DREIE is disabled) and
     // the hardware finished transmission (TXCIF is set).
@@ -292,18 +306,9 @@ size_t UartClass::write(uint8_t c)
     tx_buffer_index_t i = (_tx_buffer_head + 1) % SERIAL_TX_BUFFER_SIZE;
 
     //If the output buffer is full, there's nothing for it other than to
-    //wait for the interrupt handler to empty it a bit
+    //wait for the interrupt handler to empty it a bit (or emulate interrupts)
     while (i == _tx_buffer_tail) {
-        if ( ( !(SREG & CPU_I_bm) ) || ( !((*_hwserial_module).CTRLA & USART_DREIE_bm) ) ) {
-            // Interrupts are disabled either globally or for data register empty,
-            // so we'll have to poll the "data register empty" flag ourselves.
-            // If it is set, pretend an interrupt has happened and call the handler
-            //to free up space for us.
-
-            _tx_data_empty_irq();
-        } else {
-            // nop, the interrupt handler will free up space for us
-        }
+	_tx_data_empty_soft();
     }
 
     _tx_buffer[_tx_buffer_head] = c;
