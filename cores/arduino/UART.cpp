@@ -88,7 +88,6 @@ void serialEventRun(void)
 void UartClass::_tx_data_empty_irq(void)
 {
     // Check if tx buffer already empty.
-    // This interrupt-handler can be called "manually" from flush();
     if (_tx_buffer_head == _tx_buffer_tail) {
         // Buffer empty, so disable "data register empty" interrupt
         (*_hwserial_module).CTRLA &= (~USART_DREIE_bm);
