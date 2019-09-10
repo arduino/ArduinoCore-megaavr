@@ -16,7 +16,7 @@
   Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 */
 
-#include "NANO_Compat.h"
+#include "NANO_compat.h"
 
 #ifdef AVR_NANO_4809_328MODE
 

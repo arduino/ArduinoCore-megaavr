@@ -143,6 +143,9 @@ bool isDoubleBondedActive(uint8_t pin);
 #ifdef UNO_WIFI_REV2_328MODE
 #include <UNO_compat.h>
 #endif
+#ifdef AVR_NANO_4809_328MODE
+#include <NANO_compat.h>
+#endif
 #if defined(HAVE_HWSERIAL0) && defined(HAVE_CDCSERIAL)
 #error "Targets with both UART0 and CDC serial not supported"
 #endif
