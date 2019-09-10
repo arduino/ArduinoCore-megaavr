@@ -38,9 +38,9 @@ enum baud_rate {
 // *** Parameter Values ***
 constexpr uint8_t PARAM_HW_VER_M_VAL			= 0x01;
 constexpr uint8_t PARAM_HW_VER_S_VAL			= 0x01;
-constexpr uint8_t PARAM_FW_VER_M_MIN_VAL		= 0x00;
-constexpr uint8_t PARAM_FW_VER_M_MAJ_VAL		= 0x06;
-constexpr uint8_t PARAM_FW_VER_S_MIN_VAL		= 0x00;
+constexpr uint8_t PARAM_FW_VER_M_MIN_VAL		= 0x07;
+constexpr uint8_t PARAM_FW_VER_M_MAJ_VAL		= 0x01;
+constexpr uint8_t PARAM_FW_VER_S_MIN_VAL		= 0x07;
 constexpr uint8_t PARAM_FW_VER_S_MAJ_VAL		= 0x06;
 extern uint8_t PARAM_EMU_MODE_VAL;
 extern baud_rate PARAM_BAUD_RATE_VAL;
