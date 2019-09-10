@@ -19,11 +19,11 @@
 #define CATCH_CONFIG_MAIN
 #include <catch2/catch.hpp>
 
-#include "../../arduino/NANO_Compat.h"
+#include "../../arduino/NANO_compat.h"
 
 /*****************************************************************************/
 
-SCENARIO("Testing Arduino Nano 4809 DDRB compatibility class", "NANO_Compat::DDRBClass") {
+SCENARIO("Testing Arduino Nano 4809 DDRB compatibility class", "NANO_compat::DDRBClass") {
   PORT_t portb, porte;
 
   DDRBClass DDRB(&portb, &porte);
@@ -63,7 +63,7 @@ SCENARIO("Testing Arduino Nano 4809 DDRB compatibility class", "NANO_Compat::DDR
 
 /*****************************************************************************/
 
-SCENARIO("Testing Arduino Nano 4809 PORTB compatibility class", "NANO_Compat::PORTBClass") {
+SCENARIO("Testing Arduino Nano 4809 PORTB compatibility class", "NANO_compat::PORTBClass") {
   PORT_t portb, porte;
 
   PORTBClass PORTB(&portb, &porte);
@@ -103,7 +103,7 @@ SCENARIO("Testing Arduino Nano 4809 PORTB compatibility class", "NANO_Compat::PO
 
 /*****************************************************************************/
 
-SCENARIO("Testing Arduino Nano 4809 DDRC compatibility class", "NANO_Compat::DDRCClass") {
+SCENARIO("Testing Arduino Nano 4809 DDRC compatibility class", "NANO_compat::DDRCClass") {
   PORT_t porta, portd;
 
   DDRCClass DDRC(&porta, &portd);
@@ -149,7 +149,7 @@ SCENARIO("Testing Arduino Nano 4809 DDRC compatibility class", "NANO_Compat::DDR
 
 /*****************************************************************************/
 
-SCENARIO("Testing Arduino Nano 4809 PORTC compatibility class", "NANO_Compat::PORTCClass") {
+SCENARIO("Testing Arduino Nano 4809 PORTC compatibility class", "NANO_compat::PORTCClass") {
   PORT_t porta, portd;
 
   PORTCClass PORTC(&porta, &portd);
@@ -195,7 +195,7 @@ SCENARIO("Testing Arduino Nano 4809 PORTC compatibility class", "NANO_Compat::PO
 
 /*****************************************************************************/
 
-SCENARIO("Testing Arduino Nano 4809 DDRD compatibility class", "NANO_Compat::DDRDClass") {
+SCENARIO("Testing Arduino Nano 4809 DDRD compatibility class", "NANO_compat::DDRDClass") {
   PORT_t porta, portb, portc, portf;
 
   DDRDClass DDRD(&porta, &portb, &portc, &portf);
@@ -245,7 +245,7 @@ SCENARIO("Testing Arduino Nano 4809 DDRD compatibility class", "NANO_Compat::DDR
 
 /*****************************************************************************/
 
-SCENARIO("Testing Arduino Nano 4809 PORTD compatibility class", "NANO_Compat::PORTDClass") {
+SCENARIO("Testing Arduino Nano 4809 PORTD compatibility class", "NANO_compat::PORTDClass") {
   PORT_t porta, portb, portc, portf;
 
   PORTDClass PORTD(&porta, &portb, &portc, &portf);

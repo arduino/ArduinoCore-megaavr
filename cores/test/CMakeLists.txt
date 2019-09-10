@@ -25,7 +25,7 @@ set(TEST_TARGET testArduinoCore-megaavr)
 
 set(TEST_SRCS
   src/test_main.cpp
-  ../arduino/NANO_Compat.cpp
+  ../arduino/NANO_compat.cpp
 )
 
 ##########################################################################
