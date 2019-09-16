@@ -142,7 +142,7 @@ static const uint8_t A7 = PIN_A7;
 
 //
 
-const uint8_t PROGMEM digital_pin_to_port[] = {
+const uint8_t digital_pin_to_port[] = {
   PC, // 0 PC5/USART1_Rx
   PC, // 1 PC4/USART1_Tx
   PA, // 2 PA0
@@ -172,7 +172,7 @@ const uint8_t PROGMEM digital_pin_to_port[] = {
 };
 
 /* Use this for accessing PINnCTRL register */
-const uint8_t PROGMEM digital_pin_to_bit_position[] = {
+const uint8_t digital_pin_to_bit_position[] = {
   PIN5_bp,  // 0 PC5/USART1_Rx
   PIN4_bp,  // 1 PC4/USART1_Tx
   PIN0_bp,  // 2 PA0
@@ -202,7 +202,7 @@ const uint8_t PROGMEM digital_pin_to_bit_position[] = {
 };
 
 /* Use this for accessing PINnCTRL register */
-const uint8_t PROGMEM digital_pin_to_bit_mask[] = {
+const uint8_t digital_pin_to_bit_mask[] = {
   PIN5_bm,  // 0 PC5/USART1_Rx
   PIN4_bm,  // 1 PC4/USART1_Tx
   PIN0_bm,  // 2 PA0
@@ -231,7 +231,7 @@ const uint8_t PROGMEM digital_pin_to_bit_mask[] = {
   PIN4_bm,  // 25 PB4/USART3_Tx
 };
 
-const uint8_t PROGMEM digital_pin_to_timer[] = {
+const uint8_t digital_pin_to_timer[] = {
   NOT_ON_TIMER,  // 0 PC5/USART1_Rx
   NOT_ON_TIMER,  // 1 PC4/USART1_Tx
   NOT_ON_TIMER,  // 2 PA0
@@ -260,7 +260,7 @@ const uint8_t PROGMEM digital_pin_to_timer[] = {
   NOT_ON_TIMER,  // 25 PB4/USART3_Tx
 };
 
-const uint8_t PROGMEM analog_pin_to_channel[] = {
+const uint8_t analog_pin_to_channel[] = {
   3,
   2,
   1,
@@ -274,7 +274,7 @@ const uint8_t PROGMEM analog_pin_to_channel[] = {
 #endif
 
 extern const uint8_t analog_pin_to_channel[];
-#define digitalPinToAnalogInput(p)  ((p < ANALOG_INPUT_OFFSET) ? pgm_read_byte(analog_pin_to_channel + p) : pgm_read_byte(analog_pin_to_channel + p - ANALOG_INPUT_OFFSET) )
+#define digitalPinToAnalogInput(p)  ((p < ANALOG_INPUT_OFFSET) ? pgm_read_byte(analog_pin_to_channel + p) : analog_pin_to_channel[p - ANALOG_INPUT_OFFSET] )
 
 // These serial port names are intended to allow libraries and architecture-neutral
 // sketches to automatically default to the correct port name for a particular type
