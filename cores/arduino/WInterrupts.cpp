@@ -32,9 +32,10 @@
 
 #include "wiring_private.h"
 
-static volatile voidFuncPtr intFunc[EXTERNAL_NUM_INTERRUPTS];
+static volatile voidFuncPtrParam intFunc[EXTERNAL_NUM_INTERRUPTS];
+static void* args[EXTERNAL_NUM_INTERRUPTS];
 
-void attachInterrupt(uint8_t pin, void (*userFunc)(void), PinStatus mode) {
+void attachInterruptParam(pin_size_t pin, void (*userFunc)(void*), PinStatus mode, void* params) {
 
   /* Get bit position and check pin validity */
   uint8_t bit_pos = digitalPinToBitPosition(pin);
@@ -46,24 +47,27 @@ void attachInterrupt(uint8_t pin, void (*userFunc)(void), PinStatus mode) {
   /* Check interrupt number and apply function pointer to correct array index */
   if(interruptNum < EXTERNAL_NUM_INTERRUPTS) {
     intFunc[interruptNum] = userFunc;
+    args[interruptNum] = params;
 
     // Configure the interrupt mode (trigger on low input, any change, rising
     // edge, or falling edge).  The mode constants were chosen to correspond
     // to the configuration bits in the hardware register, so we simply apply
     // the setting in the pin control register
 
+	int isc_mode;
+
     switch (mode) {
       case CHANGE:
-        mode = PORT_ISC_BOTHEDGES_gc;
+        isc_mode = PORT_ISC_BOTHEDGES_gc;
         break;
       case FALLING:
-        mode = PORT_ISC_FALLING_gc;
+        isc_mode = PORT_ISC_FALLING_gc;
         break;
       case RISING:
-        mode = PORT_ISC_RISING_gc;
+        isc_mode = PORT_ISC_RISING_gc;
         break;
       case LOW:
-        mode = PORT_ISC_LEVEL_gc;
+        isc_mode = PORT_ISC_LEVEL_gc;
         break;
       default:
         // AVR doesn't support level triggered interrupts
@@ -80,8 +84,12 @@ void attachInterrupt(uint8_t pin, void (*userFunc)(void), PinStatus mode) {
     *pin_ctrl_reg &= ~(PORT_ISC_gm);
 
     /* Apply ISC setting */
-    *pin_ctrl_reg |= mode;
+    *pin_ctrl_reg |= isc_mode;
   }
+}
+
+void attachInterrupt(uint8_t pin, void (*userFunc)(void), PinStatus mode) {
+  attachInterruptParam(pin, (voidFuncPtrParam)userFunc, mode, NULL);
 }
 
 void detachInterrupt(uint8_t pin) {
@@ -127,7 +135,7 @@ static void port_interrupt_handler(uint8_t port) {
       if(intFunc[interrupt_num] != 0){
 
         /* Call function */
-        intFunc[interrupt_num]();
+        intFunc[interrupt_num](args[interrupt_num]);
       }
     }
     bit_pos++;
