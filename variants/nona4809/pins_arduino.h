@@ -273,7 +273,6 @@ const uint8_t analog_pin_to_channel[] = {
 
 #endif
 
-extern const uint8_t analog_pin_to_channel[];
 #define digitalPinToAnalogInput(p)  ((p < ANALOG_INPUT_OFFSET) ? analog_pin_to_channel[p] : analog_pin_to_channel[p - ANALOG_INPUT_OFFSET] )
 
 // These serial port names are intended to allow libraries and architecture-neutral
