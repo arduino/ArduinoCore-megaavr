@@ -38,6 +38,7 @@ uint16_t fract_inc;
 
 // whole number of microseconds per timer tick
 
+volatile uint8_t timer_counter = 0;
 volatile uint32_t timer_overflow_count = 0;
 volatile uint32_t timer_millis = 0;
 static uint16_t timer_fract = 0;
@@ -85,22 +86,28 @@ ISR(TCB3_INT_vect)
 ISR(TCB0_INT_vect)
 #endif
 {
-	// copy these to local variables so they can be stored in registers
-	// (volatile variables must be read from memory on every access)
-	uint32_t m = timer_millis;
-	uint16_t f = timer_fract;
+	uint8_t c = timer_counter;
+	if (c % 32 == 0) {
+		// copy these to local variables so they can be stored in registers
+		// (volatile variables must be read from memory on every access)
+		uint32_t m = timer_millis;
+		uint16_t f = timer_fract;
 
-	m += millis_inc;
-	f += fract_inc;
-	if (f >= FRACT_MAX) {
+		m += millis_inc;
+		f += fract_inc;
+		if (f >= FRACT_MAX) {
 
-		f -= FRACT_MAX;
-		m += 1;
+			f -= FRACT_MAX;
+			m += 1;
+		}
+
+		timer_fract = f;
+		timer_millis = m;
+		timer_overflow_count++;
 	}
-
-	timer_fract = f;
-	timer_millis = m;
-	timer_overflow_count++;
+	
+	c++;
+	timer_counter = c;
 
 	/* Clear flag */
 	_timer->INTFLAGS = TCB_CAPT_bm;
@@ -396,8 +403,8 @@ void init()
 	/* Enable timer interrupt */
 	_timer->INTCTRL |= TCB_CAPT_bm;
 
-	/* Clock selection -> same as TCA (F_CPU/64 -- 250kHz) */
-	_timer->CTRLA = TCB_CLKSEL_CLKTCA_gc;
+	/* Clock selection -> F_CPU / 2, then we only run the ISR every 32 interrupts. (F_CPU/2/32 = 250kHz) */
+	_timer->CTRLA = TCB_CLKSEL_CLKDIV2_gc;
 
 	/* Enable & start */
 	_timer->CTRLA |= TCB_ENABLE_bm;	/* Keep this last before enabling interrupts to ensure tracking as accurate as possible */
