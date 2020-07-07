@@ -23,7 +23,6 @@
 */
 
 #include "wiring_private.h"
-#include "pins_arduino.h"
 #include "Arduino.h"
 
 uint8_t analog_reference = DEFAULT;

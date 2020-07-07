@@ -24,8 +24,6 @@
 #define SPI_IMODE_EXTINT 1
 #define SPI_IMODE_GLOBAL 2
 
-const SPISettings DEFAULT_SPI_SETTINGS = SPISettings();
-
 SPIClass::SPIClass(uint8_t uc_pinMISO, uint8_t uc_pinSCK, uint8_t uc_pinMOSI, uint8_t uc_pinSS, uint8_t uc_mux)
 {
   initialized = false;
@@ -66,7 +64,7 @@ void SPIClass::init()
   initialized = true;
 }
 
-void SPIClass::config(SPISettings settings)
+void SPIClass::config(SPISettingsMegaAVR settings)
 {
   SPI0.CTRLA = settings.ctrla;
   SPI0.CTRLB = settings.ctrlb;
@@ -173,7 +171,7 @@ void SPIClass::reattachMaskedInterrupts() {
   }
 }
 
-void SPIClass::beginTransaction(SPISettings settings)
+void SPIClass::beginTransaction(SPISettingsMegaAVR settings)
 {
   if (interruptMode != SPI_IMODE_NONE)
   {
