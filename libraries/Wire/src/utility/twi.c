@@ -175,8 +175,11 @@ uint8_t TWI_MasterReady(void)
  *  Sets the baud rate used by TWI Master.
  *
  *  \param frequency				    The required baud.
+ *  
+ *  \retval 0 If baud set correctly
+ *  \retval 1 If baud not set due to being too high. > 1MHz
  */
-void TWI_MasterSetBaud(uint32_t frequency){
+uint8_t TWI_MasterSetBaud(uint32_t frequency){
 
 //		Formula is: BAUD = ((F_CLKPER/frequency) - F_CLKPER*T_RISE - 10)/2;
 //		Where T_RISE varies depending on operating frequency...
@@ -184,26 +187,23 @@ void TWI_MasterSetBaud(uint32_t frequency){
 
 	uint16_t t_rise;
 	
-	if(frequency < 200000){
-		frequency = 100000;
+	if(frequency <= 100000){
 		t_rise = 1000;
 		
-	} else if (frequency < 800000){
-		frequency = 400000;
+	} else if (frequency <= 400000){
 		t_rise = 300;	
 
-	} else if (frequency < 1200000){
-		frequency = 1000000;
+	} else if (frequency <= 1000000){
 		t_rise = 120;
 		
 	} else {
-		frequency = 100000;
-		t_rise = 1000;
+	        return 1;
 	}
 	
 	uint32_t baud = ((F_CPU_CORRECTED/frequency) - (((F_CPU_CORRECTED*t_rise)/1000)/1000)/1000 - 10)/2;
 	TWI0.MBAUD = (uint8_t)baud;
 
+	return 0;
 }
 
 /*! \brief TWI write transaction.
