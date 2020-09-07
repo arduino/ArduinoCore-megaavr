@@ -6,12 +6,31 @@ jobs:
   compile-test:
     runs-on: ubuntu-latest
 
+    env:
+      # libraries to install for all boards
+      UNIVERSAL_LIBRARIES: "MFRC522"
+      # sketch paths to compile (recursive) for all boards
+      UNIVERSAL_SKETCH_PATHS: '"extras/examples" "libraries/Wire" "libraries/SPI" "libraries/SoftwareSerial" "libraries/EEPROM"'
+
     strategy:
+      fail-fast: false
+
       matrix:
-        fqbn: [
-          "arduino:megaavr:uno2018",
-          "arduino:megaavr:nona4809"
+        board: [
+          {"fqbn": "arduino:megaavr:uno2018", "type": "unoWiFiRev2"},
+          {"fqbn": "arduino:megaavr:nona4809", "type": "nanoEvery"}
         ]
+
+        # make board type-specific customizations to the matrix jobs
+        include:
+          # Uno WiFi Rev2
+          - board:
+              type: "unoWiFiRev2"
+            additional-sketch-paths: "/github/home/Arduino/libraries/Adafruit_FONA_Library/examples/FONAtest"
+          # Nano Every
+          - board:
+              type: "nanoEvery"
+            additional-sketch-paths: "/github/home/Arduino/libraries/Adafruit_FONA_Library/examples/FONAtest"
 
     steps:
       - name: Checkout repository
@@ -31,12 +50,18 @@ jobs:
         uses: actions/checkout@v2
         with:
           repository: adafruit/WiFiNINA
-          path: libraries/WiFiNINA      
+          path: adafruit/WiFiNINA
+
+      - name: Checkout Basic examples
+        uses: actions/checkout@v2
+        with:
+          repository: arduino/arduino-examples
+          path: extras/examples
 
       - name: Compile examples
         uses: arduino/actions/libraries/compile-examples@master
         with:
-          fqbn: ${{ matrix.fqbn }}
+          fqbn: ${{ matrix.board.fqbn }}
           libraries: |
             - name: Adafruit IO Arduino
             - name: Adafruit MQTT Library
@@ -49,6 +74,6 @@ jobs:
             # Overwrite the Board Manager installation with the local platform
             - source-path: "./"
               name: "arduino:megaavr"
-          sketch-paths: "/github/home/Arduino/libraries/Adafruit_FONA_Library/examples/FONAtest"
-          enable-size-deltas-report: 'true'
+          sketch-paths: "${{ env.UNIVERSAL_SKETCH_PATHS }} ${{ matrix.additional-sketch-paths }}"
+          enable-size-deltas-report: 'false'
           verbose: 'true'
