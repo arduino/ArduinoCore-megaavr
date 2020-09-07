@@ -50,13 +50,5 @@ jobs:
             - source-path: "./"
               name: "arduino:megaavr"
           sketch-paths: "/github/home/Arduino/libraries/Adafruit_FONA_Library/examples/FONAtest"
-          size-report-sketch: 'FONAtest'
           enable-size-deltas-report: 'true'
           verbose: 'true'
-
-      - name: Save memory usage change report as artifact
-        if: github.event_name == 'pull_request'
-        uses: actions/upload-artifact@v1
-        with:
-          name: 'size-deltas-reports'
-          path: 'size-deltas-reports'
