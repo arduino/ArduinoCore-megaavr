@@ -9,8 +9,8 @@ jobs:
     strategy:
       matrix:
         fqbn: [
-          "arduino:megaavr:uno2018" #,
-          #"arduino:megaavr:nona4809"
+          "arduino:megaavr:uno2018",
+          "arduino:megaavr:nona4809"
         ]
 
     steps:
