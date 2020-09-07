@@ -8,7 +8,7 @@ jobs:
 
     env:
       # libraries to install for all boards
-      UNIVERSAL_LIBRARIES: "MFRC522"
+      UNIVERSAL_LIBRARIES: '"MFRC522" "Servo"'
       # sketch paths to compile (recursive) for all boards
       UNIVERSAL_SKETCH_PATHS: '"extras/examples" "libraries/Wire" "libraries/SPI" "libraries/SoftwareSerial" "libraries/EEPROM"'
 
@@ -56,7 +56,10 @@ jobs:
         uses: actions/checkout@v2
         with:
           repository: arduino/arduino-examples
-          path: extras/examples
+          path: extras
+
+      - name: Delete incompatible examples
+        run: rm -r "$GITHUB_WORKSPACE/extras/examples/09.USB" && rm -r "$GITHUB_WORKSPACE/extras/examples/10.StarterKit_BasicKit/p11_CrystalBall" && rm -r "$GITHUB_WORKSPACE/extras/examples/10.StarterKit_BasicKit/p13_TouchSensorLamp"
 
       - name: Compile examples
         uses: arduino/actions/libraries/compile-examples@master
@@ -68,6 +71,7 @@ jobs:
             - name: ArduinoHttpClient
             - name: Adafruit FONA Library
             - name: MegunoLink
+            - name: Servo
           platforms: |
             # Use Board Manager to install the latest release of Arduino megaAVR Boards to get the toolchain
             - name: "arduino:megaavr"
