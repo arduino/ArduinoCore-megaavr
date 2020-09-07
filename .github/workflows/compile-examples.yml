@@ -10,7 +10,20 @@ jobs:
       # libraries to install for all boards
       UNIVERSAL_LIBRARIES: '"MFRC522" "Servo" "LiquidCrystal"'
       # sketch paths to compile (recursive) for all boards
-      UNIVERSAL_SKETCH_PATHS: '"extras/examples" "libraries/Wire" "libraries/SPI" "libraries/SoftwareSerial" "libraries/EEPROM" "~/Arduino/libraries/Servo/examples" "~/Arduino/libraries/LiquidCrystal/examples" "~/Arduino/libraries/MFRC522/examples" "~/Arduino/libraries/Ethernet/examples" "~/Arduino/libraries/Arduino_LSM9DS1/examples" "~/Arduino/libraries/SD/examples" "~/Arduino/libraries/Arduino_JSON/examples" "~/Arduino/libraries/WiFi/examples"'
+      UNIVERSAL_SKETCH_PATHS: |
+        - extras/examples
+        - libraries/Wire
+        - libraries/SPI
+        - libraries/SoftwareSerial
+        - libraries/EEPROM
+        - ~/Arduino/libraries/Servo/examples
+        - ~/Arduino/libraries/LiquidCrystal/examples
+        - ~/Arduino/libraries/MFRC522/examples
+        - ~/Arduino/libraries/Ethernet/examples
+        - ~/Arduino/libraries/Arduino_LSM9DS1/examples
+        - ~/Arduino/libraries/SD/examples
+        - ~/Arduino/libraries/Arduino_JSON/examples
+        - ~/Arduino/libraries/WiFi/examples
 
     strategy:
       fail-fast: false
