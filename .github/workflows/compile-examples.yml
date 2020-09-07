@@ -8,9 +8,9 @@ jobs:
 
     env:
       # libraries to install for all boards
-      UNIVERSAL_LIBRARIES: '"MFRC522" "Servo"'
+      UNIVERSAL_LIBRARIES: '"MFRC522" "Servo" "LiquidCrystal"'
       # sketch paths to compile (recursive) for all boards
-      UNIVERSAL_SKETCH_PATHS: '"extras/examples" "libraries/Wire" "libraries/SPI" "libraries/SoftwareSerial" "libraries/EEPROM"'
+      UNIVERSAL_SKETCH_PATHS: '"extras/examples" "libraries/Wire" "libraries/SPI" "libraries/SoftwareSerial" "libraries/EEPROM" "~/Arduino/libraries/Servo/examples" "~/Arduino/libraries/LiquidCrystal/examples" "~/Arduino/libraries/MFRC522/examples" "~/Arduino/libraries/Ethernet/examples" "~/Arduino/libraries/Arduino_LSM9DS1/examples" "~/Arduino/libraries/SD/examples" "~/Arduino/libraries/Arduino_JSON/examples" "~/Arduino/libraries/WiFi/examples"'
 
     strategy:
       fail-fast: false
@@ -72,6 +72,32 @@ jobs:
             - name: Adafruit FONA Library
             - name: MegunoLink
             - name: Servo
+            - name: LiquidCrystal
+            - name: MFRC522
+            - name: Ethernet
+            - name: ArduinoBearSSL
+            - name: Arduino_LSM9DS1
+            - name: ArduinoHttpClient
+            - name: NTPClient
+            - name: TFT
+            - name: ArduinoMqttClient
+            - name: Arduino_CRC32
+            - name: Arduino_LSM6DS3
+            - name: Stepper
+            - name: SD
+            - name: Arduino_JSON
+            - name: Arduino_HTS221
+            - name: Firmata
+            - name: ArduinoCloudThing
+            - name: Arduino_DebugUtils
+            - name: Arduino_LPS22HB
+            - name: ArduinoIoTCloudBearSSL
+            - name: ArduinoDMX
+            - name: ArduinoRS485
+            - name: Arduino_OAuth
+            - name: WiFi
+            - name: Bridge
+            - name: Temboo
           platforms: |
             # Use Board Manager to install the latest release of Arduino megaAVR Boards to get the toolchain
             - name: "arduino:megaavr"
