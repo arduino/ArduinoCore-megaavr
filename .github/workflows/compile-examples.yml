@@ -21,17 +21,6 @@ jobs:
           {"fqbn": "arduino:megaavr:nona4809", "type": "nanoEvery"}
         ]
 
-        # make board type-specific customizations to the matrix jobs
-        include:
-          # Uno WiFi Rev2
-          - board:
-              type: "unoWiFiRev2"
-            additional-sketch-paths: "/github/home/Arduino/libraries/Adafruit_FONA_Library/examples/FONAtest"
-          # Nano Every
-          - board:
-              type: "nanoEvery"
-            additional-sketch-paths: "/github/home/Arduino/libraries/Adafruit_FONA_Library/examples/FONAtest"
-
     steps:
       - name: Checkout repository
         uses: actions/checkout@v2
@@ -104,7 +93,7 @@ jobs:
             # Overwrite the Board Manager installation with the local platform
             - source-path: "./"
               name: "arduino:megaavr"
-          sketch-paths: "${{ env.UNIVERSAL_SKETCH_PATHS }} ${{ matrix.additional-sketch-paths }}"
+          sketch-paths: "${{ env.UNIVERSAL_SKETCH_PATHS }}"
           enable-size-deltas-report: 'true'
           verbose: 'true'
 
