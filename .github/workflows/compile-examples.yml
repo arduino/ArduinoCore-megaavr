@@ -34,21 +34,14 @@ jobs:
           path: libraries/WiFiNINA      
 
       - name: Compile examples
-        uses: per1234/actions/libraries/compile-examples@9acb47abcea28afced4d549585b347668eb03eac
+        uses: arduino/actions/libraries/compile-examples@master
         with:
           fqbn: ${{ matrix.fqbn }}
           libraries: |
             - name: Adafruit IO Arduino
-              version: 3.6.0
             - name: Adafruit MQTT Library
-              version: 1.0.3
             - name: ArduinoHttpClient
-              version: 0.4.0
             - name: Adafruit FONA Library
-              version: 1.3.6
-            # Don't use library manager WiFiNINA
-            #  - name: WiFiNINA
-            #  version: 1.4.0
             - name: MegunoLink
           platforms: |
             # Use Board Manager to install the latest release of Arduino megaAVR Boards to get the toolchain
