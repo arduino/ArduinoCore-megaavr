@@ -68,7 +68,13 @@ jobs:
           path: extras
 
       - name: Delete incompatible examples
-        run: rm -r "$GITHUB_WORKSPACE/extras/examples/09.USB" && rm -r "$GITHUB_WORKSPACE/extras/examples/10.StarterKit_BasicKit/p11_CrystalBall" && rm -r "$GITHUB_WORKSPACE/extras/examples/10.StarterKit_BasicKit/p13_TouchSensorLamp"
+        run: |
+          # These boards do not support native USB
+          rm -r "$GITHUB_WORKSPACE/extras/examples/09.USB"
+          # The next command can be removed after the core integration with ArduinoCore-API
+          rm -r "$GITHUB_WORKSPACE/extras/examples/10.StarterKit_BasicKit/p11_CrystalBall"
+          # CapacitiveSensor library does not support megaAVR core yet
+          rm -r "$GITHUB_WORKSPACE/extras/examples/10.StarterKit_BasicKit/p13_TouchSensorLamp"
 
       - name: Compile examples
         uses: arduino/actions/libraries/compile-examples@master
