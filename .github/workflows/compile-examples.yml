@@ -23,8 +23,6 @@ jobs:
     runs-on: ubuntu-latest
 
     env:
-      # libraries to install for all boards
-      UNIVERSAL_LIBRARIES: '"MFRC522" "Servo" "LiquidCrystal"'
       # sketch paths to compile (recursive) for all boards
       UNIVERSAL_SKETCH_PATHS: |
         - extras/examples
@@ -39,16 +37,15 @@ jobs:
         - ~/Arduino/libraries/Arduino_LSM9DS1/examples
         - ~/Arduino/libraries/SD/examples
         - ~/Arduino/libraries/Arduino_JSON/examples
-        - ~/Arduino/libraries/WiFi/examples
 
     strategy:
       fail-fast: false
 
       matrix:
-        board: [
-          {"fqbn": "arduino:megaavr:uno2018", "type": "unoWiFiRev2"},
-          {"fqbn": "arduino:megaavr:nona4809", "type": "nanoEvery"}
-        ]
+        fqbn:
+          - "arduino:megaavr:uno2018:mode=on"
+          - "arduino:megaavr:uno2018:mode=off"
+          - "arduino:megaavr:nona4809"
 
     steps:
       - name: Checkout repository
@@ -64,12 +61,6 @@ jobs:
       - name: Install ArduinoCore-API
         run: mv "$GITHUB_WORKSPACE/extras/ArduinoCore-API/api" "$GITHUB_WORKSPACE/cores/arduino"
 
-      - name: Checkout Adafruit WiFiNINA
-        uses: actions/checkout@v2
-        with:
-          repository: adafruit/WiFiNINA
-          path: adafruit/WiFiNINA
-
       - name: Checkout Basic examples
         uses: actions/checkout@v2
         with:
@@ -82,7 +73,7 @@ jobs:
       - name: Compile examples
         uses: arduino/actions/libraries/compile-examples@master
         with:
-          fqbn: ${{ matrix.board.fqbn }}
+          fqbn: ${{ matrix.fqbn }}
           libraries: |
             - name: Adafruit IO Arduino
             - name: Adafruit MQTT Library
@@ -106,16 +97,12 @@ jobs:
             - name: Arduino_JSON
             - name: Arduino_HTS221
             - name: Firmata
-            - name: ArduinoCloudThing
             - name: Arduino_DebugUtils
             - name: Arduino_LPS22HB
             - name: ArduinoIoTCloudBearSSL
             - name: ArduinoDMX
             - name: ArduinoRS485
             - name: Arduino_OAuth
-            - name: WiFi
-            - name: Bridge
-            - name: Temboo
           platforms: |
             # Use Board Manager to install the latest release of Arduino megaAVR Boards to get the toolchain
             - name: "arduino:megaavr"
