@@ -109,6 +109,7 @@ jobs:
             - name: ArduinoDMX
             - name: ArduinoRS485
             - name: Arduino_OAuth
+            - name: WiFiNINA
           platforms: |
             # Use Board Manager to install the latest release of Arduino megaAVR Boards to get the toolchain
             - name: "arduino:megaavr"
