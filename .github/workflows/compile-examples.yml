@@ -1,6 +1,22 @@
 name: Compile Examples
 
-on: [pull_request, push]
+on:
+  pull_request:
+    paths:
+      - ".github/workflows/compile-examples.yml"
+      - "cores/**"
+      - "libraries/**"
+      - "variants/**"
+      - "boards.txt"
+      - "platform.txt"
+  push:
+    paths:
+      - ".github/workflows/compile-examples.yml"
+      - "cores/**"
+      - "libraries/**"
+      - "variants/**"
+      - "boards.txt"
+      - "platform.txt"
 
 jobs:
   compile-test:
