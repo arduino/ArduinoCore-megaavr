@@ -37,6 +37,24 @@ jobs:
         - ~/Arduino/libraries/Arduino_LSM9DS1/examples
         - ~/Arduino/libraries/SD/examples
         - ~/Arduino/libraries/Arduino_JSON/examples
+        - ~/Arduino/libraries/Adafruit_IO_Arduino/examples
+        - ~/Arduino/libraries/Adafruit_MQTT_Library/examples
+        - ~/Arduino/libraries/ArduinoHttpClient/examples
+        - ~/Arduino/libraries/ArduinoBearSSL/examples
+        - ~/Arduino/libraries/NTPClient/examples
+        - ~/Arduino/libraries/TFT/examples
+        - ~/Arduino/libraries/ArduinoMqttClient/examples
+        - ~/Arduino/libraries/Arduino_CRC32/examples
+        - ~/Arduino/libraries/Arduino_LSM6DS3/examples
+        - ~/Arduino/libraries/Stepper/examples
+        - ~/Arduino/libraries/Arduino_HTS221/examples
+        - ~/Arduino/libraries/Firmata/examples
+        - ~/Arduino/libraries/Arduino_DebugUtils/examples
+        - ~/Arduino/libraries/Arduino_LPS22HB/examples
+        - ~/Arduino/libraries/ArduinoDMX/examples
+        - ~/Arduino/libraries/ArduinoRS485/examples
+        - ~/Arduino/libraries/Arduino_OAuth/examples
+
     strategy:
       fail-fast: false
 
@@ -95,15 +113,12 @@ jobs:
             - name: Adafruit IO Arduino
             - name: Adafruit MQTT Library
             - name: ArduinoHttpClient
-            - name: Adafruit FONA Library
-            - name: MegunoLink
             - name: Servo
             - name: LiquidCrystal
             - name: MFRC522
             - name: Ethernet
             - name: ArduinoBearSSL
             - name: Arduino_LSM9DS1
-            - name: ArduinoHttpClient
             - name: NTPClient
             - name: TFT
             - name: ArduinoMqttClient
@@ -116,7 +131,6 @@ jobs:
             - name: Firmata
             - name: Arduino_DebugUtils
             - name: Arduino_LPS22HB
-            - name: ArduinoIoTCloudBearSSL
             - name: ArduinoDMX
             - name: ArduinoRS485
             - name: Arduino_OAuth
