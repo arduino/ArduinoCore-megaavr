@@ -37,15 +37,27 @@ jobs:
         - ~/Arduino/libraries/Arduino_LSM9DS1/examples
         - ~/Arduino/libraries/SD/examples
         - ~/Arduino/libraries/Arduino_JSON/examples
-
     strategy:
       fail-fast: false
 
       matrix:
-        fqbn:
-          - "arduino:megaavr:uno2018:mode=on"
-          - "arduino:megaavr:uno2018:mode=off"
-          - "arduino:megaavr:nona4809"
+        board: [
+          {"fqbn": "arduino:megaavr:uno2018:mode=on", "type": "UnoWiFiRev2"},
+          {"fqbn": "arduino:megaavr:uno2018:mode=off", "type": "UnoWiFiRev2"},
+          {"fqbn": "arduino:megaavr:nona4809", "type": "NanoEvery"}
+        ]
+
+        # make board type-specific customizations to the matrix jobs
+        include:
+          # Uno WiFi Rev2
+          - board:
+              type: "UnoWiFiRev2"
+            additional-sketch-paths: |
+              - ~/Arduino/libraries/WiFiNINA/examples
+          # Nano Every
+          - board:
+              type: "NanoEvery"
+            additional-sketch-paths: ''
 
     steps:
       - name: Checkout repository
@@ -75,11 +87,10 @@ jobs:
           rm -r "$GITHUB_WORKSPACE/extras/examples/10.StarterKit_BasicKit/p11_CrystalBall"
           # CapacitiveSensor library does not support megaAVR core yet
           rm -r "$GITHUB_WORKSPACE/extras/examples/10.StarterKit_BasicKit/p13_TouchSensorLamp"
-
       - name: Compile examples
         uses: arduino/actions/libraries/compile-examples@master
         with:
-          fqbn: ${{ matrix.fqbn }}
+          fqbn: ${{ matrix.board.fqbn }}
           libraries: |
             - name: Adafruit IO Arduino
             - name: Adafruit MQTT Library
@@ -116,8 +127,10 @@ jobs:
             # Overwrite the Board Manager installation with the local platform
             - source-path: "./"
               name: "arduino:megaavr"
-          sketch-paths: "${{ env.UNIVERSAL_SKETCH_PATHS }}"
-          enable-size-deltas-report: 'true'
+          sketch-paths: |
+            ${{ env.UNIVERSAL_SKETCH_PATHS }}
+            ${{ matrix.additional-sketch-paths }}
+          enable-deltas-report: 'true'
           verbose: 'true'
 
       - name: Save memory usage change report as artifact
