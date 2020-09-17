@@ -26,9 +26,6 @@
 #include <avr/io.h>
 #include <avr/interrupt.h>
 
-#undef F
-#define F(str) (const __FlashStringHelper*)(str)
-
 #ifdef __cplusplus
 extern "C"{
 #endif
