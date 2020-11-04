@@ -110,7 +110,7 @@ jobs:
           rm -r "$GITHUB_WORKSPACE/extras/examples/10.StarterKit_BasicKit/p13_TouchSensorLamp"
 
       - name: Compile examples
-        uses: arduino/compile-sketches@main
+        uses: giulcioffi/compile-sketches@CheckAgainstDatabase
         with:
           fqbn: ${{ matrix.board.fqbn }}
           libraries: |
@@ -145,10 +145,11 @@ jobs:
             ${{ env.UNIVERSAL_SKETCH_PATHS }}
             ${{ matrix.additional-sketch-paths }}
           enable-deltas-report: 'true'
+          allow-failures: 'true'
           verbose: 'true'
 
       - name: Save memory usage change report as artifact
         uses: actions/upload-artifact@v2
         with:
-          name: size-deltas-reports
-          path: size-deltas-reports
+          name: sketches-reports
+          path: sketches-reports
