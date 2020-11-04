@@ -20,19 +20,15 @@
 #ifndef Arduino_h
 #define Arduino_h
 
-#ifdef __PGMSPACE_H_
-#undef __PGMSPACE_H_
-#endif
-
 #include "api/deprecated-avr-comp/avr/pgmspace.h"
 #include <avr/io.h>
 #include <avr/interrupt.h>
   
 #include "api/ArduinoAPI.h"
-/*
+
 #undef F
-#define F(str) (str)
-*/
+#define F(str) (const __FlashStringHelper*)(str)
+
 #ifdef __cplusplus
 extern "C"{
 #endif
