@@ -36,7 +36,6 @@
  */
 #define F_CPU_RESET (16E6/6)
 
-#include "api/deprecated-avr-comp/avr/pgmspace.h"
 #include <avr/io.h>
 #include <assert.h>
 #include <stdbool.h>
