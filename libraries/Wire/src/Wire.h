@@ -23,6 +23,7 @@
 #define TwoWire_h
 
 #include <Arduino.h>
+#include <api/HardwareI2C.h>
 
 #define BUFFER_LENGTH 128
 
