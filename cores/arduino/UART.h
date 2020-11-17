@@ -168,11 +168,14 @@ class UartClass : public HardwareSerial
     using Print::write; // pull in write(str) and write(buf, size) from Print
     explicit operator bool() { return true; }
 
+    void bind(UartClass& ser) {bound = &ser; }
+
     // Interrupt handlers - Not intended to be called externally
     inline void _rx_complete_irq(void);
     void _tx_data_empty_irq(void);
   private:
     void _poll_tx_data_empty(void);
+    UartClass* bound = NULL;
 };
 
 #if defined(HWSERIAL0)

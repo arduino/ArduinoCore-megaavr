@@ -66,6 +66,9 @@ void UartClass::_rx_complete_irq(void)
       _rx_buffer[_rx_buffer_head] = c;
       _rx_buffer_head = i;
     }
+    if (bound != NULL) {
+      bound->write(c);
+    }
   } else {
     // Parity error, read byte but discard it
     (*_hwserial_module).RXDATAL;
