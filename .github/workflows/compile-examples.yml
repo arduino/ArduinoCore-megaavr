@@ -1,0 +1,152 @@
+name: Compile Examples
+
+on:
+  pull_request:
+    paths:
+      - ".github/workflows/compile-examples.yml"
+      - "cores/**"
+      - "libraries/**"
+      - "variants/**"
+      - "boards.txt"
+      - "platform.txt"
+  push:
+    paths:
+      - ".github/workflows/compile-examples.yml"
+      - "cores/**"
+      - "libraries/**"
+      - "variants/**"
+      - "boards.txt"
+      - "platform.txt"
+
+jobs:
+  compile-test:
+    runs-on: ubuntu-latest
+
+    env:
+      # sketch paths to compile (recursive) for all boards
+      UNIVERSAL_SKETCH_PATHS: |
+        - extras/examples
+        - libraries/Wire
+        - libraries/SPI
+        - libraries/SoftwareSerial
+        - libraries/EEPROM
+        - ~/Arduino/libraries/Servo/examples
+        - ~/Arduino/libraries/LiquidCrystal/examples
+        - ~/Arduino/libraries/MFRC522/examples
+        - ~/Arduino/libraries/Ethernet/examples
+        - ~/Arduino/libraries/Adafruit_MQTT_Library/examples/mqtt_ethernet
+        - ~/Arduino/libraries/ArduinoBearSSL/examples/SHA1
+        - ~/Arduino/libraries/ArduinoBearSSL/examples/SHA256
+        - ~/Arduino/libraries/Arduino_LSM9DS1/examples
+        - ~/Arduino/libraries/SD/examples
+        - ~/Arduino/libraries/Arduino_JSON/examples
+        - ~/Arduino/libraries/TFT/examples/Arduino/TFTBitmapLogo
+        - ~/Arduino/libraries/TFT/examples/Arduino/TFTColorPicker
+        - ~/Arduino/libraries/TFT/examples/Arduino/TFTDisplayText
+        - ~/Arduino/libraries/TFT/examples/Arduino/TFTEtchASketch
+        - ~/Arduino/libraries/TFT/examples/Arduino/TFTGraph
+        - ~/Arduino/libraries/TFT/examples/Arduino/TFTPong
+        - ~/Arduino/libraries/Arduino_CRC32/examples
+        - ~/Arduino/libraries/Arduino_LSM6DS3/examples
+        - ~/Arduino/libraries/Stepper/examples
+        - ~/Arduino/libraries/Arduino_HTS221/examples
+        - ~/Arduino/libraries/Arduino_DebugUtils/examples
+        - ~/Arduino/libraries/Arduino_LPS22HB/examples
+        - ~/Arduino/libraries/ArduinoDMX/examples
+        - ~/Arduino/libraries/ArduinoRS485/examples
+
+    strategy:
+      fail-fast: false
+
+      matrix:
+        board: [
+          {"fqbn": "arduino:megaavr:uno2018:mode=on", "type": "UnoWiFiRev2"},
+          {"fqbn": "arduino:megaavr:uno2018:mode=off", "type": "UnoWiFiRev2"},
+          {"fqbn": "arduino:megaavr:nona4809", "type": "NanoEvery"}
+        ]
+
+        # make board type-specific customizations to the matrix jobs
+        include:
+          # Uno WiFi Rev2
+          - board:
+              type: "UnoWiFiRev2"
+            additional-sketch-paths: |
+              - ~/Arduino/libraries/WiFiNINA/examples
+              - ~/Arduino/libraries/ArduinoMqttClient/examples
+              - ~/Arduino/libraries/Arduino_OAuth/examples/Tweeter
+          # Nano Every
+          - board:
+              type: "NanoEvery"
+            additional-sketch-paths:
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      # The source files are in a subfolder of the ArduinoCore-API repository, so it's not possible to clone it directly to the final destination in the core
+      - name: Checkout ArduinoCore-API
+        uses: actions/checkout@v2
+        with:
+          repository: arduino/ArduinoCore-API
+          path: extras/ArduinoCore-API
+
+      - name: Install ArduinoCore-API
+        run: mv "$GITHUB_WORKSPACE/extras/ArduinoCore-API/api" "$GITHUB_WORKSPACE/cores/arduino"
+
+      - name: Checkout Basic examples
+        uses: actions/checkout@v2
+        with:
+          repository: arduino/arduino-examples
+          path: extras
+
+      - name: Delete incompatible examples
+        run: |
+          # These boards do not support native USB
+          rm -r "$GITHUB_WORKSPACE/extras/examples/09.USB"
+          # The next command can be removed after the core integration with ArduinoCore-API
+          rm -r "$GITHUB_WORKSPACE/extras/examples/10.StarterKit_BasicKit/p11_CrystalBall"
+          # CapacitiveSensor library does not support megaAVR core yet
+          rm -r "$GITHUB_WORKSPACE/extras/examples/10.StarterKit_BasicKit/p13_TouchSensorLamp"
+      - name: Compile examples
+        uses: arduino/actions/libraries/compile-examples@master
+        with:
+          fqbn: ${{ matrix.board.fqbn }}
+          libraries: |
+            - name: Adafruit MQTT Library
+            - name: Servo
+            - name: LiquidCrystal
+            - name: MFRC522
+            - name: Ethernet
+            - name: ArduinoBearSSL
+            - name: Arduino_LSM9DS1
+            - name: TFT
+            - name: ArduinoMqttClient
+            - name: Arduino_CRC32
+            - name: Arduino_LSM6DS3
+            - name: Stepper
+            - name: SD
+            - name: Arduino_JSON
+            - name: Arduino_HTS221
+            - name: Arduino_DebugUtils
+            - name: Arduino_LPS22HB
+            - name: ArduinoDMX
+            - name: ArduinoRS485
+            - name: Arduino_OAuth
+            - name: WiFiNINA
+          platforms: |
+            # Use Board Manager to install the latest release of Arduino megaAVR Boards to get the toolchain
+            - name: "arduino:megaavr"
+            # Overwrite the Board Manager installation with the local platform
+            - source-path: "./"
+              name: "arduino:megaavr"
+          sketch-paths: |
+            ${{ env.UNIVERSAL_SKETCH_PATHS }}
+            ${{ matrix.additional-sketch-paths }}
+          enable-deltas-report: 'true'
+          verbose: 'true'
+
+      - name: Save memory usage change report as artifact
+        uses: actions/upload-artifact@v1
+        with:
+          name: size-deltas-reports
+          path: size-deltas-reports
