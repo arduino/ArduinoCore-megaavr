@@ -27,6 +27,17 @@
 #include <avr/interrupt.h>
 
 #ifdef __cplusplus
+
+#undef F
+
+// C++11 declaration
+template <typename T1>
+auto F(T1&& A)
+  -> const arduino::__FlashStringHelper*
+{
+return (const arduino::__FlashStringHelper*)A;
+}
+
 extern "C"{
 #endif
 
