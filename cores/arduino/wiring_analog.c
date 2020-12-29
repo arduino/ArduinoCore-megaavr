@@ -178,8 +178,8 @@ void analogWrite(uint8_t pin, int val)
 				// (16-bit read/write operation are non-atomic and use a temporary register)
 				savedSREG = SREG;		
 				cli();							
-				timer_B->CCMPL = timer_B->CCMPL;	// copy CCMPL into temporary register
-				timer_B->CCMPH = val;				// set CCMPH value + copy temporary register content into CCMPL
+				timer_B->CCMPL = timer_B->CCMPL;  // copy CCMPL into temporary register
+				timer_B->CCMPH = val;             // set CCMPH value + copy temporary register content into CCMPL
 				SREG = savedSREG;				
 
 				/* Enable Timer Output	*/
