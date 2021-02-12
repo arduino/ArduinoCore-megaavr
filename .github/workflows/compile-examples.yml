@@ -110,6 +110,7 @@ jobs:
       - name: Compile examples
         uses: arduino/actions/libraries/compile-examples@master
         with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
           fqbn: ${{ matrix.board.fqbn }}
           libraries: |
             - name: Adafruit MQTT Library
