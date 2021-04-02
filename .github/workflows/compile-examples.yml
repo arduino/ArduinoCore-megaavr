@@ -54,6 +54,7 @@ jobs:
         - ~/Arduino/libraries/Arduino_LPS22HB/examples
         - ~/Arduino/libraries/ArduinoDMX/examples
         - ~/Arduino/libraries/ArduinoRS485/examples
+      SKETCHES_REPORTS_PATH: sketches-reports
 
     strategy:
       fail-fast: false
@@ -108,7 +109,7 @@ jobs:
           # CapacitiveSensor library does not support megaAVR core yet
           rm -r "$GITHUB_WORKSPACE/extras/examples/10.StarterKit_BasicKit/p13_TouchSensorLamp"
       - name: Compile examples
-        uses: arduino/actions/libraries/compile-examples@master
+        uses: arduino/compile-sketches@v1
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           fqbn: ${{ matrix.board.fqbn }}
@@ -147,7 +148,7 @@ jobs:
           verbose: 'true'
 
       - name: Save memory usage change report as artifact
-        uses: actions/upload-artifact@v1
+        uses: actions/upload-artifact@v2
         with:
-          name: size-deltas-reports
-          path: size-deltas-reports
+          path: ${{ env.SKETCHES_REPORTS_PATH }}
+          name: ${{ env.SKETCHES_REPORTS_PATH }}
