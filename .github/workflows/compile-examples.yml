@@ -145,7 +145,6 @@ jobs:
             ${{ env.UNIVERSAL_SKETCH_PATHS }}
             ${{ matrix.additional-sketch-paths }}
           enable-deltas-report: 'true'
-          verbose: 'true'
           sketches-report-path: ${{ env.SKETCHES_REPORTS_PATH }}
 
       - name: Save memory usage change report as artifact
