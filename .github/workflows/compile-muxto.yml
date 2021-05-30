@@ -1,0 +1,103 @@
+name: Compile MuxTO
+
+# See: https://docs.github.com/en/free-pro-team@latest/actions/reference/events-that-trigger-workflows
+on:
+  push:
+    paths:
+      - ".github/workflows/compile-muxto.yml"
+      - "firmwares/MuxTO/**"
+  pull_request:
+    paths:
+      - ".github/workflows/compile-muxto.yml"
+      - "firmwares/MuxTO/**"
+  schedule:
+    # Run every Tuesday at 8 AM UTC to catch breakage caused by changes to external resources (libraries, platforms).
+    - cron: "0 8 * * TUE"
+  workflow_dispatch:
+  repository_dispatch:
+
+env:
+  BINARY_FILENAME: MuxTO.ino.bin
+  BINARY_ARTIFACT_NAME: MuxTO
+
+jobs:
+  build:
+    name: Build firmware
+    runs-on: ubuntu-latest
+
+    strategy:
+      fail-fast: false
+
+      matrix:
+        board:
+          - fqbn: arduino:samd:muxto:float=default,config=enabled,clock=internal_usb,timer=timer_732Hz,bootloader=4kb,serial=two_uart,usb=cdc
+            platforms: |
+              # Install MattairTech_Arduino:samd via Boards Manager for the toolchain
+              - name: MattairTech_Arduino:samd
+                source-url: https://www.mattairtech.com/software/arduino/package_MattairTech_index.json
+                # This needs to match with the version of MattairTech_Arduino:samd the Arduino fork is based on in order to get the right tool versions
+                version: 1.6.17
+              # Install the platform with MuxTO support
+              - name: arduino:samd
+                source-url: https://github.com/arduino/ArduinoCore-samd.git
+                version: muxto
+
+    steps:
+      - name: Set environment variables
+        run: |
+          # See: https://docs.github.com/en/actions/reference/workflow-commands-for-github-actions#setting-an-environment-variable
+          echo "BINARY_OUTPUT_PATH=${{ runner.temp }}/output" >> "$GITHUB_ENV"
+          echo "SKETCHES_REPORTS_PATH=${{ runner.temp }}/sketches-reports" >> "$GITHUB_ENV"
+
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Compile firmware
+        uses: arduino/compile-sketches@v1
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          fqbn: ${{ matrix.board.fqbn }}
+          platforms: ${{ matrix.board.platforms }}
+          libraries: |
+            -
+          sketch-paths: |
+            - firmwares/MuxTO
+          cli-compile-flags: |
+            - --output-dir=${{ env.BINARY_OUTPUT_PATH }}
+          enable-deltas-report: true
+          sketches-report-path: ${{ env.SKETCHES_REPORTS_PATH }}
+
+      - name: Save firmware binary as workflow artifact
+        uses: actions/upload-artifact@v2
+        with:
+          if-no-files-found: error
+          path: ${{ env.BINARY_OUTPUT_PATH }}/${{ env.BINARY_FILENAME }}
+          name: ${{ env.BINARY_ARTIFACT_NAME }}
+
+      - name: Save sketches report as workflow artifact
+        uses: actions/upload-artifact@v2
+        with:
+          if-no-files-found: error
+          path: ${{ env.SKETCHES_REPORTS_PATH }}
+          name: sketches-reports
+
+  size:
+    name: Check firmware size
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download binary artifact
+        uses: actions/download-artifact@v2
+        with:
+          name: ${{ env.BINARY_ARTIFACT_NAME }}
+
+      # The normal size check done by Arduino CLI is not working correctly, so it's necessary to check the size directly
+      - name: Check firmware binary size
+        run: |
+          BINARY_SIZE="$(stat --printf="%s" "${{ github.workspace }}/${{ env.BINARY_FILENAME }}")"
+          MAX_BINARY_SIZE=$((12 * 1024))
+          echo "File size: ${BINARY_SIZE}/${MAX_BINARY_SIZE} B"
+          if [[ $BINARY_SIZE -gt $MAX_BINARY_SIZE ]]; then
+            echo "::error::Binary size of $BINARY_SIZE B exceeds the available memory ($MAX_BINARY_SIZE B)"
+            exit 1
+          fi
