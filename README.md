@@ -1,5 +1,7 @@
 # Arduino Core for ATMEGA4809 CPU
 
+[![Compile MuxTO status](https://github.com/arduino/ArduinoCore-megaavr/actions/workflows/compile-muxto.yml/badge.svg)](https://github.com/arduino/ArduinoCore-megaavr/actions/workflows/compile-muxto.yml)
+
 This repository contains the source code and configuration files of the Arduino Core
 for Microchip's ATMEGA4809 processor (used on the Arduino Uno WiFi Rev2 boards).
 
