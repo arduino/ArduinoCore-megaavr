@@ -3,4 +3,5 @@ medbg.communication=usb
 medbg.protocol=xplainedmini_updi
 medbg.program.protocol=xplainedmini_updi
 medbg.program.tool=avrdude
+medbg.program.tool.default=avrdude
 medbg.program.extra_params=-Pusb

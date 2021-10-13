@@ -6,8 +6,13 @@ uno2018.name=Arduino Uno WiFi Rev2
 
 uno2018.vid.0=0x03eb
 uno2018.pid.0=0x2145
+uno2018.upload_port.0.vid=0x03eb
+uno2018.upload_port.0.pid=0x2145
+uno2018.upload_port.1.board=uno2018
 
 uno2018.upload.tool=avrdude
+uno2018.upload.tool.default=avrdude
+uno2018.upload.tool.network=arduino_ota
 uno2018.upload.protocol=xplainedmini_updi
 uno2018.upload.maximum_size=48640
 uno2018.upload.maximum_data_size=6144
@@ -25,6 +30,7 @@ uno2018.build.extra_flags={build.328emulation} -DMILLIS_USE_TIMERB3
 #uno2018.build.extra_flags=-B{runtime.tools.atpack.path}/gcc/dev/{build.mcu}
 
 uno2018.bootloader.tool=avrdude
+uno2018.bootloader.tool.default=avrdude
 uno2018.bootloader.file=atmega4809_uart_bl.hex
 uno2018.bootloader.SYSCFG0=0xC9
 uno2018.bootloader.BOOTEND=0x02
@@ -43,8 +49,13 @@ nona4809.name=Arduino Nano Every
 
 nona4809.vid.0=0x2341
 nona4809.pid.0=0x0058
+nona4809.upload_port.0.vid=0x2341
+nona4809.upload_port.0.pid=0x0058
+nona4809.upload_port.1.board=nona4809
 
 nona4809.upload.tool=avrdude
+nona4809.upload.tool.default=avrdude
+nona4809.upload.tool.network=arduino_ota
 nona4809.upload.protocol=jtag2updi
 nona4809.upload.maximum_size=49152
 nona4809.upload.maximum_data_size=6144
@@ -62,6 +73,7 @@ nona4809.build.extra_flags={build.328emulation} -DMILLIS_USE_TIMERB3 -DNO_EXTERN
 #nona4809.build.extra_flags=-B{runtime.tools.atpack.path}/gcc/dev/{build.mcu}
 
 nona4809.bootloader.tool=avrdude
+nona4809.bootloader.tool.default=avrdude
 nona4809.bootloader.file=atmega4809_uart_bl.hex
 nona4809.bootloader.SYSCFG0=0xC9
 nona4809.bootloader.BOOTEND=0x00
