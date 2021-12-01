@@ -87,7 +87,7 @@ nona4809.menu.mode.off=None (ATMEGA4809)
 nona4809.menu.mode.off.build.328emulation=
 
 ## Allow users to try out their Nano Every at 20Mhz. 
-## experiental - may (or may not) have incompabilities wr.r.t other features of megaCore.
+## experiental - may (or may not) have incompabilities wr.r.t other features of megaavr core.
 menu.clock=Clock Speed
 nona4809.menu.clock.16internal=16MHz (default)
 nona4809.menu.clock.16internal.build.f_cpu=16000000L
