@@ -106,7 +106,7 @@ static void turnOffPWM(uint8_t pin)
 		// check, if TCA is set to Port B (default megaavr-PWM ports)
 		// see variants/nona4809/variant.c line 13
 		if (!(PORTMUX_TCAROUTEA == PORTMUX_TCA0_PORTB_gc))
-			return;
+			break;
 		/* Bit position will give output channel */
 		bit_pos = digitalPinToBitPosition(pin);
 
@@ -120,12 +120,12 @@ static void turnOffPWM(uint8_t pin)
 		// check, if TCB0 is set to alternate mode PF4 (Pin D6) (default megaavr-PWM)
 		// see variants/nona4809/variant.c line 31
 		if ((pin == 6) && ((PORTMUX_TCBROUTEA & PORTMUX_TCB0_bm) != PORTMUX_TCB0_bm))
-			return;
+			break;
 	case TIMERB1:
 		// check, if TCB1 is set to alternate mode PF5 (Pin D3) (default megaavr-PWM)
 		// see variants/nona4809/variant.c line 36
 		if ((pin == 3) && ((PORTMUX_TCBROUTEA & PORTMUX_TCB1_bm) != PORTMUX_TCB1_bm))
-			return;
+			break;
 	case TIMERB2:
 	case TIMERB3:
 
