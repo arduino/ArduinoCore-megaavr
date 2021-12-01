@@ -86,4 +86,13 @@ nona4809.menu.mode.on.build.328emulation=-DAVR_NANO_4809_328MODE
 nona4809.menu.mode.off=None (ATMEGA4809)
 nona4809.menu.mode.off.build.328emulation=
 
+## Allow users to try out their Nano Every at 20Mhz. 
+## experiental - may (or may not) have incompabilities wr.r.t other features of megaCore.
+menu.clock=Clock Speed
+nona4809.menu.clock.16internal=16MHz (default)
+nona4809.menu.clock.16internal.build.f_cpu=16000000L
+nona4809.menu.clock.16internal.bootloader.OSCCFG=0x01
+nona4809.menu.clock.20internal=20MHz (experimental)
+nona4809.menu.clock.20internal.build.f_cpu=20000000L
+nona4809.menu.clock.20internal.bootloader.OSCCFG=0x02
 ##############################################################
