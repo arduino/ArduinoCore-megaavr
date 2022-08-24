@@ -37,6 +37,8 @@ jobs:
                 source-url: https://www.mattairtech.com/software/arduino/package_MattairTech_index.json
                 # This needs to match with the version of MattairTech_Arduino:samd the Arduino fork is based on in order to get the right tool versions
                 version: 1.6.17
+              # Install officila samd version for compiler support
+              - name: arduino:samd
               # Install the platform with MuxTO support
               - name: arduino:samd
                 source-url: https://github.com/arduino/ArduinoCore-samd.git
