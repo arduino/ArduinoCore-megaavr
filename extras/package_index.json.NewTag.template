@@ -23,7 +23,7 @@
           },
           "boards": [
             {
-              "name": "Arduino Uno WiFi Rev2"
+              "name": "Arduino UNO WiFi Rev2"
             },
             {
               "name": "Arduino Nano Every"
