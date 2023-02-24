@@ -2,7 +2,7 @@
 
 ##############################################################
 
-uno2018.name=Arduino Uno WiFi Rev2
+uno2018.name=Arduino UNO WiFi Rev2
 
 uno2018.vid.0=0x03eb
 uno2018.pid.0=0x2145
