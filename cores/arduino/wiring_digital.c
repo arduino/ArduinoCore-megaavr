@@ -145,22 +145,19 @@ void digitalWrite(uint8_t pin, PinStatus val)
 	/* Get port */
 	PORT_t *port = digitalPinToPortStruct(pin);
 
-	/* Output direction */
-	if(port->DIR & bit_mask){
+	/* Set output to value */
+	if (val == LOW) { /* If LOW */
+		port->OUTCLR = bit_mask;
 
-		/* Set output to value */
-		if (val == LOW) { /* If LOW */
-			port->OUTCLR = bit_mask;
-
-		} else if (val == CHANGE) { /* If TOGGLE */
-			port->OUTTGL = bit_mask;
-									/* If HIGH OR  > TOGGLE  */
-		} else {
-			port->OUTSET = bit_mask;
-		}
+	} else if (val == CHANGE) { /* If TOGGLE */
+		port->OUTTGL = bit_mask;
+								/* If HIGH OR  > TOGGLE  */
+	} else {
+		port->OUTSET = bit_mask;
+	}
 
 	/* Input direction */
-	} else {
+	if(port->DIR & bit_mask){
 		/* Old implementation has side effect when pin set as input -
 		pull up is enabled if this function is called.
 		Should we purposely implement this side effect?
