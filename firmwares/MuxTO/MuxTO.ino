@@ -52,9 +52,13 @@ void setup() {
 }
 
 //#define DEBUG;
+#define FIX_DEVICE_UNRECOGNIZED_ON_REBOOT
 
 //long blink_timer = 0;
 //long blink_delay = 1000;
+
+extern volatile uint32_t _usbConfiguration;
+volatile bool once = true;
 
 void loop() {
 
@@ -62,6 +66,20 @@ void loop() {
   if (millis() - blink_timer > blink_delay) {
     SYS::toggleLED();
     blink_timer = millis();
+  }
+#endif
+
+#ifdef FIX_DEVICE_UNRECOGNIZED_ON_REBOOT
+  if (_usbConfiguration) {
+    if (once) {
+      // Will handle it manually
+      USB->DEVICE.INTENCLR.bit.EORST = 1;
+      once = false;
+    }
+    if (USB->DEVICE.INTFLAG.bit.EORST) {
+      // Second reset, may happen on PC reboot
+      NVIC_SystemReset();
+    }
   }
 #endif
 
