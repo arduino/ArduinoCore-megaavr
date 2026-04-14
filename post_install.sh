@@ -14,15 +14,31 @@ SUBSYSTEMS=="usb", ATTRS{idVendor}=="2341", ATTRS{idProduct}=="0058", MODE:="066
 EOF
 }
 
-if [ "$EUID" -ne 0 ]
-  then echo "Please run as root"
-  exit
-fi
+OS="$(uname -s)"
+case "$OS" in
+Linux*)
+  if [ "$EUID" -ne 0 ]; then
+    if [ -e "${PWD}/post_install.sh" ]; then
+      echo
+      echo "You might need to configure permissions for uploading."
+      echo "To do so, run the following command from the terminal:"
+      echo "sudo \"${PWD}/post_install.sh\""
+      echo
+    else
+      # Script was executed from another path. It is assumed this will only occur when user is executing script directly.
+      # So it is not necessary to provide the command line.
+      echo "Please run as root"
+    fi
 
-megaAVR_rules > /etc/udev/rules.d/60-arduino-megaAVR.rules
+    exit
+  fi
 
-# reload udev rules
-echo "Reload rules..."
-udevadm control --reload-rules
-udevadm trigger
+  megaAVR_rules > /etc/udev/rules.d/60-arduino-megaAVR.rules
 
+  # reload udev rules
+  echo "Reload rules..."
+  udevadm control --reload-rules
+  udevadm trigger
+
+  ;;
+esac
