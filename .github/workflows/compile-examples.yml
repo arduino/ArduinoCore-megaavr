@@ -147,8 +147,16 @@ jobs:
           enable-deltas-report: 'true'
           sketches-report-path: ${{ env.SKETCHES_REPORTS_PATH }}
 
+      # Generate unique artifact name without colon
+      - name: Generate artifact name
+        env:
+          FQBN: ${{ matrix.board.fqbn }}
+        id: artifact-namer
+        run: |
+          ARTIFACT_NAME="${{ env.SKETCHES_REPORTS_PATH }}-${FQBN//:/_}"
+          echo "name=$ARTIFACT_NAME" >> "$GITHUB_OUTPUT"
       - name: Save memory usage change report as artifact
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v4
         with:
           path: ${{ env.SKETCHES_REPORTS_PATH }}
-          name: ${{ env.SKETCHES_REPORTS_PATH }}
+          name: ${{ steps.artifact-namer.outputs.name }}

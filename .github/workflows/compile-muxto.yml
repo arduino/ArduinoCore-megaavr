@@ -32,17 +32,19 @@ jobs:
         board:
           - fqbn: arduino:samd:muxto:float=default,config=enabled,clock=internal_usb,timer=timer_732Hz,bootloader=4kb,serial=two_uart,usb=cdc
             platforms: |
-              # Install MattairTech_Arduino:samd via Boards Manager for the toolchain
-              - name: MattairTech_Arduino:samd
-                source-url: https://www.mattairtech.com/software/arduino/package_MattairTech_index.json
-                # This needs to match with the version of MattairTech_Arduino:samd the Arduino fork is based on in order to get the right tool versions
-                version: 1.6.17
+              # Install Fab_SAM_Arduino:samd via Boards Manager for the toolchain
+              - name: Fab_SAM_Arduino:samd
+                source-url: https://raw.githubusercontent.com/qbolsee/ArduinoCore-fab-sam/master/json/package_Fab_SAM_index.json
+                # Originally, we installed MattairTech_Arduino:samd@1.6.17 to get the right tool versions because the Arduino fork is based on it.
+                # However, MattairTech_Arduino:samd is no longer available.
+                # So we use its successor, Fab_SAM_Arduino:samd, and modify the Arduino fork to work with 1.12.0
+                version: 1.12.0
               # Install officila samd version for compiler support
               - name: arduino:samd
               # Install the platform with MuxTO support
               - name: arduino:samd
-                source-url: https://github.com/arduino/ArduinoCore-samd.git
-                version: muxto
+                source-url: https://github.com/pazeshun/ArduinoCore-samd.git
+                version: muxto-fab-sam
 
     steps:
       - name: Set environment variables
@@ -70,14 +72,14 @@ jobs:
           sketches-report-path: ${{ env.SKETCHES_REPORTS_PATH }}
 
       - name: Save firmware binary as workflow artifact
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v4
         with:
           if-no-files-found: error
           path: ${{ env.BINARY_OUTPUT_PATH }}/${{ env.BINARY_FILENAME }}
           name: ${{ env.BINARY_ARTIFACT_NAME }}
 
       - name: Save sketches report as workflow artifact
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v4
         with:
           if-no-files-found: error
           path: ${{ env.SKETCHES_REPORTS_PATH }}
@@ -89,7 +91,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Download binary artifact
-        uses: actions/download-artifact@v2
+        uses: actions/download-artifact@v4
         with:
           name: ${{ env.BINARY_ARTIFACT_NAME }}
 
