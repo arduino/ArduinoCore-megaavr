@@ -75,7 +75,7 @@ void TWI_Flush(void);
 void TWI_Disable(void);
 TWI_BUSSTATE_t TWI_MasterState(void);
 uint8_t TWI_MasterReady(void);
-void TWI_MasterSetBaud(uint32_t frequency);
+uint8_t TWI_MasterSetBaud(uint32_t frequency);
 uint8_t TWI_MasterWrite(uint8_t slave_address,
                      uint8_t *write_data,
                      uint8_t bytes_to_write,
