@@ -14,15 +14,11 @@ Just open the "Boards Manager" and install the package called:
 
 ## Support
 
-There is a dedicated section of the Arduino Forum for general discussion and project assistance:
-
-http://forum.arduino.cc/index.php?board=126.0
+There is a dedicated section of the Arduino [Forum for general discussion and project assistance](http://forum.arduino.cc/index.php?board=126.0).
 
 ## Bugs or Issues
 
-If you find a bug you can submit an issue here on github:
-
-https://github.com/arduino/ArduinoCore-megaavr/issues
+If you find a bug you can submit an issue [here](https://github.com/arduino/ArduinoCore-megaavr/issues).
 
 Before posting a new issue, please check if the same problem has been already reported by someone else
 to avoid duplicates.
@@ -30,7 +26,7 @@ to avoid duplicates.
 ## Contributions
 
 Contributions are always welcome. The preferred way to receive code cotribution is by submitting a 
-Pull Request on github.
+Pull Request [here](https://github.com/lukasb1b/ArduinoCore-megaavr/pulls).
 
 ## Developing
 
