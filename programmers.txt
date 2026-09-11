@@ -5,3 +5,52 @@ medbg.program.protocol=xplainedmini_updi
 medbg.program.tool=avrdude
 medbg.program.tool.default=avrdude
 medbg.program.extra_params=-Pusb
+
+cusiositynano.name=Curiosity Nano
+cusiositynano.communication=usb
+cusiositynano.protocol=pkobn_updi
+cusiositynano.program.protocol=pkobn_updi
+cusiositynano.program.tool=avrdude
+cusiositynano.program.extra_params=
+
+pickit5_updi.name=PICkit5 UPDI
+pickit5_updi.communication=usb
+pickit5_updi.protocol=pickit5_updi
+pickit5_updi.program.protocol=pickit5_updi
+pickit5_updi.program.tool=avrdude
+pickit5_updi.program.extra_params=
+
+pickit4_updi.name=PICkit4 UPDI
+pickit4_updi.communication=usb
+pickit4_updi.protocol=pickit4_updi
+pickit4_updi.program.protocol=pickit4_updi
+pickit4_updi.program.tool=avrdude
+pickit4_updi.program.extra_params=
+
+snap_updi.name=MPLAB SNAP UPDI
+snap_updi.communication=usb
+snap_updi.protocol=snap_updi
+snap_updi.program.protocol=snap_updi
+snap_updi.program.tool=avrdude
+snap_updi.program.extra_params=
+
+atmelice_updi.name=Atmel-ICE UPDI
+atmelice_updi.communication=usb
+atmelice_updi.protocol=atmelice_updi
+atmelice_updi.program.protocol=atmelice_updi
+atmelice_updi.program.tool=avrdude
+atmelice_updi.program.extra_params=
+
+jtagice3_updi.name=JTAGICE3 UPDI
+jtagice3_updi.communication=usb
+jtagice3_updi.protocol=jtag3updi
+jtagice3_updi.program.protocol=jtag3updi
+jtagice3_updi.program.tool=avrdude
+jtagice3_updi.program.extra_params=
+
+atmel_powerdebugger_updi.name=Power Debugger UPDI
+atmel_powerdebugger_updi.communication=usb
+atmel_powerdebugger_updi.protocol=powerdebugger_updi
+atmel_powerdebugger_updi.program.protocol=powerdebugger_updi
+atmel_powerdebugger_updi.program.tool=avrdude
+atmel_powerdebugger_updi.program.extra_params=
