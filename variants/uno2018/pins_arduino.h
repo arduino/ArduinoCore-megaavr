@@ -149,7 +149,7 @@ static const uint8_t A5 = PIN_A5;
 //   (9~) PB0   4|                                                             |33  PE3 (8)
 //  (10~) PB1   5|                                                             |32  PE2 (13)
 //   (5~) PB2   6|                                                             |31  PE1 (12)
-//        PB3   7|                          48pin QFN                          |30  PE0 (11~)
+//        PB3   7|                          48pin QFN                          |30  PE0 (11)
 //   (Tx) PB4   8|                                                             |29  GND
 //   (Rx) PB5   9|                                                             |28  AVDD
 //        PC0  10|                                                             |27  PD7 (VREF)
