@@ -95,8 +95,8 @@ static const uint8_t SCL = PIN_WIRE_SCL;
 #define PIN_A3   (17) // AIN0
 #define PIN_A4   (18) // PF2 / AIN12
 #define PIN_A5   (19) // PF3 / AIN13
-#define PIN_A6   (20) // AIN5
-#define PIN_A7   (21) // AIN4
+#define PIN_A6   (20) // AIN4
+#define PIN_A7   (21) // AIN5
 
 static const uint8_t A0 = PIN_A0;
 static const uint8_t A1 = PIN_A1;
@@ -117,28 +117,30 @@ static const uint8_t A7 = PIN_A7;
 
 // ATMEGA4809 / ARDUINO
 //
-//                     (SCL)(SDA) (7)  (2)                 (R)  (3~) (6~)
+//                     (SCL)(SDA) (7)  (2)                 (R)  (3~) (6~) (A5)
 //                 PA4  PA3  PA2  PA1  PA0  GND  VDD  UPDI PF6  PF5  PF4  PF3
 //
 //                  48   47   46   45   44   43   42   41   40   39   38   37
 //              + ____ ____ ____ ____ ____ ____ ____ ____ ____ ____ ____ ____ +
-//        PA5   1|                                                             |36  PF2
+//        PA5   1|                                                             |36  PF2 (A4)
 //        PA6   2|                                                             |35  PF1 (TOSC2)
 //        PA7   3|                                                             |34  PF0 (TOSC1)
 //   (9~) PB0   4|                                                             |33  PE3 (8)
 //  (10~) PB1   5|                                                             |32  PE2 (13)
 //   (5~) PB2   6|                                                             |31  PE1 (12)
-//        PB3   7|                          48pin QFN                          |30  PE0 (11~)
+//        PB3   7|                          48pin QFN                          |30  PE0 (11)
 //   (Tx) PB4   8|                                                             |29  GND
 //   (Rx) PB5   9|                                                             |28  AVDD
 //        PC0  10|                                                             |27  PD7 (VREF)
 //        PC1  11|                                                             |26  PD6
-//        PC2  12|                                                             |25  PD5 (A5)
+//        PC2  12|                                                             |25  PD5 (A7)
 //               + ____ ____ ____ ____ ____ ____ ____ ____ ____ ____ ____ ____ +
 //                  13   14   15   16   17   18   19   20   21   22   23   24
 //
 //                  PC3  VDD  GND  PC4  PC5  PC6  PC7  PD0  PD1  PD2  PD3  PD4
-//                                 (1)  (0)  (4)       (A0) (A1) (A2) (A3) (A4)
+//                                 (1)  (0)  (4)       (A3) (A2) (A1) (A0) (A6)
+//
+// Note: On Nano Every, PA2 and PF2 are double-bonded to A4 (SDA); PA3 and PF3 are double-bonded to A5 (SCL).
 
 //
 
