@@ -112,6 +112,3 @@ FORCE_INLINE bool isDoubleBondedActive(uint8_t pin) {
 
   return false;
 }
-
-void initVariant() {
-}
